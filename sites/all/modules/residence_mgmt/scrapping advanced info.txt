@@ -1,0 +1,422 @@
+var links = []; carte.getSVGDocument().querySelectorAll('a').forEach((e, i) => { links[links.length] = { title: e.querySelector('title').textContent, link: e.getAttribute('xlink:href')}; });
+
+https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/26/0
+
+[
+    {
+        "title": "Recherche dans l'annuaire du Val-d'Oise (95)",
+        "link": "/[SERVICE]/95/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Val-de-Marne (94)",
+        "link": "/[SERVICE]/94/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Seine-Saint-Denis (93)",
+        "link": "/[SERVICE]/93/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Hauts-de-Seine (92)",
+        "link": "/[SERVICE]/92/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Essonne (91)",
+        "link": "/[SERVICE]/91/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Territoire de Belfort (90)",
+        "link": "/[SERVICE]/90/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Yonne (89)",
+        "link": "/[SERVICE]/89/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Vosges (88)",
+        "link": "/[SERVICE]/88/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Haute-Vienne (87)",
+        "link": "/[SERVICE]/87/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Vienne (86)",
+        "link": "/[SERVICE]/86/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Vendée (85)",
+        "link": "/[SERVICE]/85/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Vaucluse (84)",
+        "link": "/[SERVICE]/84/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Var (83)",
+        "link": "/[SERVICE]/83/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Tarn-et-Garonne (82)",
+        "link": "/[SERVICE]/82/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Tarn (81)",
+        "link": "/[SERVICE]/81/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Somme (80)",
+        "link": "/[SERVICE]/80/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Deux-Sèvres (79)",
+        "link": "/[SERVICE]/79/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Yvelines (78)",
+        "link": "/[SERVICE]/78/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Seine-et-Marne (77)",
+        "link": "/[SERVICE]/77/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Seine-Maritime (76)",
+        "link": "/[SERVICE]/76/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Haute-Savoie (74)",
+        "link": "/[SERVICE]/74/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Savoie (73)",
+        "link": "/[SERVICE]/73/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Sarthe (72)",
+        "link": "/[SERVICE]/72/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Saône-et-Loire (71)",
+        "link": "/[SERVICE]/71/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Haute-Saône (70)",
+        "link": "/[SERVICE]/70/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Rhône (69)",
+        "link": "/[SERVICE]/69/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Haut-Rhin (68)",
+        "link": "/[SERVICE]/68/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Bas-Rhin (67)",
+        "link": "/[SERVICE]/67/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Pyrénées-Orientales (66)",
+        "link": "/[SERVICE]/66/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Hautes-Pyrénées (65)",
+        "link": "/[SERVICE]/65/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Pyrénées-Atlantiques (64)",
+        "link": "/[SERVICE]/64/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Puy-de-Dôme (63)",
+        "link": "/[SERVICE]/63/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Pas-de-Calais (62)",
+        "link": "/[SERVICE]/62/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Orne (61)",
+        "link": "/[SERVICE]/61/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Oise (60)",
+        "link": "/[SERVICE]/60/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Nord (59)",
+        "link": "/[SERVICE]/59/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Nièvre (58)",
+        "link": "/[SERVICE]/58/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Moselle (57)",
+        "link": "/[SERVICE]/57/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Morbihan (56)",
+        "link": "/[SERVICE]/56/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Meuse (55)",
+        "link": "/[SERVICE]/55/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Meurthe-et-Moselle (54)",
+        "link": "/[SERVICE]/54/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Mayenne (53)",
+        "link": "/[SERVICE]/53/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Haute-Marne (52)",
+        "link": "/[SERVICE]/52/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Marne (51)",
+        "link": "/[SERVICE]/51/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Manche (50)",
+        "link": "/[SERVICE]/50/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Maine-et-Loire (49)",
+        "link": "/[SERVICE]/49/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Lozère (48)",
+        "link": "/[SERVICE]/48/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Lot-et-Garonne (47)",
+        "link": "/[SERVICE]/47/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Lot (46)",
+        "link": "/[SERVICE]/46/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Loiret (45)",
+        "link": "/[SERVICE]/45/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Loire-Atlantique (44)",
+        "link": "/[SERVICE]/44/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Haute-Loire (43)",
+        "link": "/[SERVICE]/43/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Loire (42)",
+        "link": "/[SERVICE]/42/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Loir-et-Cher (41)",
+        "link": "/[SERVICE]/41/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Landes (40)",
+        "link": "/[SERVICE]/40/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Jura (39)",
+        "link": "/[SERVICE]/39/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Isère (38)",
+        "link": "/[SERVICE]/38/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Indre-et-Loire (37)",
+        "link": "/[SERVICE]/37/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Indre (36)",
+        "link": "/[SERVICE]/36/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Ille-et-Vilaine (35)",
+        "link": "/[SERVICE]/35/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Hérault (34)",
+        "link": "/[SERVICE]/34/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Gironde (33)",
+        "link": "/[SERVICE]/33/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Gers (32)",
+        "link": "/[SERVICE]/32/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Haute-Garonne (31)",
+        "link": "/[SERVICE]/31/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Gard (30)",
+        "link": "/[SERVICE]/30/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Finistère (29)",
+        "link": "/[SERVICE]/29/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Eure-et-Loir (28)",
+        "link": "/[SERVICE]/28/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Eure (27)",
+        "link": "/[SERVICE]/27/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Drôme (26)",
+        "link": "/[SERVICE]/26/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Doubs (25)",
+        "link": "/[SERVICE]/25/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Dordogne (24)",
+        "link": "/[SERVICE]/24/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Creuse (23)",
+        "link": "/[SERVICE]/23/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Côtes-d'Armor (22)",
+        "link": "/[SERVICE]/22/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Côte-d'Or (21)",
+        "link": "/[SERVICE]/21/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Haute-Corse (2B)",
+        "link": "/[SERVICE]/2B/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Corse-du-Sud (2A)",
+        "link": "/[SERVICE]/2A/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Corrèze (19)",
+        "link": "/[SERVICE]/19/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Cher (18)",
+        "link": "/[SERVICE]/18/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Charente-Maritime (17)",
+        "link": "/[SERVICE]/17/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Charente (16)",
+        "link": "/[SERVICE]/16/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Cantal (15)",
+        "link": "/[SERVICE]/15/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Calvados (14)",
+        "link": "/[SERVICE]/14/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Bouches-du-Rhône (13)",
+        "link": "/[SERVICE]/13/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Aveyron (12)",
+        "link": "/[SERVICE]/12/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Aude (11)",
+        "link": "/[SERVICE]/11/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Aube (10)",
+        "link": "/[SERVICE]/10/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Ariège (09)",
+        "link": "/[SERVICE]/09/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Ardennes (08)",
+        "link": "/[SERVICE]/08/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Ardèche (07)",
+        "link": "/[SERVICE]/07/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Alpes-Maritimes (06)",
+        "link": "/[SERVICE]/06/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Hautes-Alpes (05)",
+        "link": "/[SERVICE]/05/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Alpes-de-Haute-Provence (04)",
+        "link": "/[SERVICE]/04/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Allier (03)",
+        "link": "/[SERVICE]/03/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Aisne (02)",
+        "link": "/[SERVICE]/02/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de l'Ain (01)",
+        "link": "/[SERVICE]/01/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Paris (75)",
+        "link": "/[SERVICE]/75/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire du Val-de-Marne (94)",
+        "link": "/[SERVICE]/94/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Seine-Saint-Denis (93)",
+        "link": "/[SERVICE]/93/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire des Hauts-de-Seine (92)",
+        "link": "/[SERVICE]/92/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de La Réunion (974)",
+        "link": "/[SERVICE]/974/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Martinique (972)",
+        "link": "/[SERVICE]/972/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Guyane (973)",
+        "link": "/[SERVICE]/973/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de la Guadeloupe (971)",
+        "link": "/[SERVICE]/971/0"
+    },
+    {
+        "title": "Recherche dans l'annuaire de Mayotte (976)",
+        "link": "/[SERVICE]/976/0"
+    }
+]

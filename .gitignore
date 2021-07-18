@@ -1,0 +1,38 @@
+# Ignore configuration files that may contain sensitive information.
+sites/*/settings*.php
+
+# Ignore paths that contain user-generated content.
+sites/*/files
+sites/*/private
+
+# Ignore everything
+
+# But not these files...
+!app.silverpricing.fr
+!app2.silverpricing.fr
+data.silverpricing.fr
+
+app.silverpricing.fr/1.tgz
+app2.silverpricing.fr/1.tgz
+
+
+residence.silverpricing.fr
+residences.silverpricing.fr
+dev
+
+**/logs
+**/old
+
+**/vendor
+**/z
+
+
+**/*.sql
+
+
+
+**/*.log
+**/*.zip
+**/*.tar
+**/*.tgz
+**/*.list

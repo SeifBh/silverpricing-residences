@@ -1,0 +1,16 @@
+{
+    "name": "electro/residence_mgmt",
+    "repositories": [
+        {
+          "type": "git",
+          "url": "https://github.com/location-iq/locationiq-php-client.git"
+        }
+    ],
+    "require": {
+        "imangazaliev/didom": "^1.14",
+        "location-iq/locationiq-php-client": "*@dev",
+        "phpoffice/phpspreadsheet": "^1.9",
+        "mikehaertl/phpwkhtmltopdf": "^2.4",
+        "peppeocchi/php-cron-scheduler": "^3.1"
+    }
+}

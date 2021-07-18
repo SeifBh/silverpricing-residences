@@ -1,0 +1,30 @@
+<a href='?se=NA'>Lister tous les ehpads sans tarifs</a> - <a href='/listResidenceLinks'>Lister tous les ehpads</a><span class=hidethen> - Veuillez patienter durant le chargement de toutes les données (0 résultats .. ) </span>    
+    <table class='res2chlist tw100' border=1><thead><tr><th></th><th>edit res</th><th>rid</th><th>finess</th><th>cp</th><th>city</th><th>title</th><th>gest.</th><th>groupe.</th><th>statut.</th><th>email</th><th>web</th><th>tarif cs</th><th>changed</th><th>tarifs</th><th>action</th></tr></thead><tbody></tbody></table><script>defer(function(){ jQuery('.res2chlist').DataTable( {
+    "language": {url:frenchDataTables}
+    ,"searching": true,"lengthChange": true,"paging": true,"info": false, "pageLength": 100
+    ,"order":[[3,"asc"]]
+    ,"columnDefs": [
+         {"searchable": false, "targets": [0,1,2,11,12,13,14,15] }
+        ,{"orderable": false,   'targets': [0,1,2,11,12,13,14,15] }
+        //,{ "type": 'natural-nohtml', targets: [3,4,5,6,7,8,9,10] }
+        ]//
+    ,initComplete: function () {
+        this.api().columns([4,8,9]).every( function () {
+            var column = this;
+//$(column.footer()).empty();
+//cl('column initcomplete',this);
+var select = $('<select><option value="">Tous</option></select>');
+column.data().unique().sort().each(function(d,j){if(!d)return;/*var d2=d;if(!d)d='All';*/select.append( '<option value="'+d+'">'+d+'</option>' )} );
+            select
+                .appendTo($(column.header()))
+                //.appendTo($(column.footer()))//.empty()
+                .on( 'change', function () {
+                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                    column.search( val ? '^'+val+'$' : '', true, false ).draw();
+                } );
+        } );
+    }
+});
+    $('.hidethen').hide();
+},function(){return(typeof window['jQuery']=='function' && typeof window['jQuery'].fn.DataTable=='function')});
+</script>
