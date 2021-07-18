@@ -1698,16 +1698,23 @@ function residence_mgmt_get_residence_details($residenceId = null,$limit=10) {
 
     $residenceRanking = getRankingOfResidence( $residenceId, ["CONCURRENCE_DIRECTE", "DEPARTEMENT"]);
 
-    if(field_isehpa["und"][0]["value"]) {
-        $sameStatut=$residence->field_isehpa['und'][0]['value'];
+    if($residence->field_isehpa['und'][0]['value'] && !$residence->field_isra['und'][0]['value']) {
 
-    }else{
-        $sameStatut=$residence->field_isra['und'][0]['value'];
+        $sameStatut="ISEHPA";
+
     }
+    if(!$residence->field_isehpa['und'][0]['value'] && $residence->field_isra['und'][0]['value']) {
+
+        $sameStatut="ISRA";
+
+    }
+
+
 
 //$sameStatut=$residence->field_statut['und'][0]['value'];
 
     $clo=getResidencesProchesByStatus( $residenceId, [$sameStatut], $limit,1);
+
     $clo2=getResidencesProchesByStatus( $residenceId, [], $limit,1);
 
     $residencesConcurrentes['direct'] = getResidencesProchesByStatus( $residenceId,[$sameStatut],$limit,0,1,$clo);

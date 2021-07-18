@@ -1607,7 +1607,6 @@ function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 1
 
         $a=1;
     }
-
     if($clo) {
 
         if(!is_array($clo))$clo=explode(',',$clo);
@@ -1617,7 +1616,6 @@ function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 1
         foreach($distances as $km=>$rids){foreach($rids as $rid){$r2dist[$rid]=$km;}}
         $a=2;
     }else{
-
 
         #retrouver lequels sont les plus proches si non fournis
         $clo = getClosests($residenceNid);#sans limites, as a list
@@ -1634,7 +1632,7 @@ function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 1
             }
         }
 
-        $clo1=explode(',',$clo);
+        $clo1=explode(',',$clo,500);
 
 
         $clo2 = array_slice($clo1, 0, $limit);
@@ -1644,25 +1642,43 @@ function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 1
 
         if (!$statuses) {
 
+
             $clo=explode(',',$clo);
+
+
 
         }else{#filtrer
 
 
             //ehpa
-               if($statuses[0]){
+               if($statuses[0] == "ISEHPA"){
 
 
 
-                   $s = "select entity_id from field_data_field_isehpa where field_isehpa_value = 0 and entity_id in($clo) ORDER BY FIELD(entity_id,$clo)";# limit $limit on limite ensuite
+$s = "
+select eh.entity_id
+from field_data_field_isehpa eh,field_data_field_isra ra 
+where eh.entity_id = ra.entity_id
+and eh.field_isehpa_value = 1
+and ra.field_isra_value = 0";
+
+
 
 
                }
                //ra
                else{
 
+                   $s = "
+select ra.entity_id 
+from field_data_field_isehpa eh,field_data_field_isra ra 
+where eh.entity_id = ra.entity_id
+and eh.field_isehpa_value = 0
+and ra.field_isra_value = 1
+and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
 
-                   $s = "select entity_id from field_data_field_isra where field_isra_value = 1 and entity_id in($clo) ORDER BY FIELD(entity_id,$clo)";# limit $limit on limite ensuite
+
+//$s = "select entity_id from field_data_field_isra where field_isra_value = 1 and entity_id in($clo) ORDER BY FIELD(entity_id,$clo)";# limit $limit on limite ensuite
 
                }
 
@@ -1680,7 +1696,7 @@ ORDER BY FIELD(eh.entity_id,$clo) limit 10";*/
             $dist=$clo=[];
             $x = Alptech\Wip\fun::sql($s);
 
-            
+
 
             foreach ($x as $t) {$dist[$t['entity_id']]=$r2dist[$t['entity_id']];continue;$clo[] = $t['entity_id'];}
             $a=1;

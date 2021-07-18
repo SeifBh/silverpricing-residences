@@ -34,11 +34,15 @@ if(isset($residence->field_images['und'][0])){foreach($residence->field_images["
 }}
 
 
-if(field_isehpa["und"][0]["value"]) {
-    $defaultResType=field_isehpa["und"][0]["value"];
+if($residence->field_isehpa['und'][0]['value'] && !$residence->field_isra['und'][0]['value']) {
 
-}else{
-    $defaultResType=field_isra["und"][0]["value"];
+    $defaultResType="ISEHPA";
+
+}
+if(!$residence->field_isehpa['und'][0]['value'] && $residence->field_isra['und'][0]['value']) {
+
+    $defaultResType="ISRA";
+
 }
 
 
@@ -76,7 +80,7 @@ if($images){?>
                     }
                     ?>
                     <?php echo $residence->title; ?>
-                    <?php  if ($defaultResType){print "RA";}else{print "EHPA";}  ?>
+                    <?php  if ($defaultResType == "ISRA"){print "RA";}else{print "EHPA";}  ?>
                 </h3>
 
                 <nav aria-label="breadcrumb">
@@ -913,7 +917,7 @@ endif; ?>
                             <td class="text-left">
                                 <?php echo create_link($residenceConcurrent->title, "/residence/$residenceConcurrent->nid" , residence_mgmt_user_plan_has_access("PAGE_DETAIL_RESIDENCE_CONCURRENTE")); ?>
                             </td>
-                            <td class="text-center"><?php  if (!$typeRes){print "RA";}else{print "EHPA";}   ?></td>
+                            <td class="text-center"><?php  if ($defaultResType == "ISRA"){print "RA";}else{print "EHPA";}   ?></td>
                             <td class="text-center"><?php print $residenceConcurrent->field_location_locality ?></td>
                             <td class="text-center"><?php print round($residenceConcurrent->distance) ?></td>
                             <td class="text-center"><?php print $residenceConcurrent->field_pr_prixmin_value ?></td>
@@ -1045,7 +1049,7 @@ endif; ?>
                                 <td class="text-left">
                                     <?php echo create_link($residenceConcurrent->title, "/residence/$residenceConcurrent->nid" , residence_mgmt_user_plan_has_access("PAGE_DETAIL_RESIDENCE_CONCURRENTE")); ?>
                                 </td>
-                                <td class="text-center"><?php  if (!$typeRes){print "RA";}else{print "EHPA";}   ?></td>
+                                <td class="text-center"><?php if ($defaultResType == "ISRA"){print "RA";}else{print "EHPA";}   ?></td>
                                 <td class="text-center"><?php print $residenceConcurrent->field_location_locality ?></td>
                                 <td class="text-center"><?php print round($residenceConcurrent->distance) ?></td>
                                 <td class="text-center"><?php print $residenceConcurrent->field_pr_prixmin_value ?></td>
