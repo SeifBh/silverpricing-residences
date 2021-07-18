@@ -80,7 +80,7 @@ if($images){?>
                     }
                     ?>
                     <?php echo $residence->title; ?>
-                    <?php  if ($defaultResType == "ISRA"){print "RA";}else{print "EHPA";}  ?>
+                    <?php  if ($defaultResType == "ISRA"){print "RA";}else{print "EHPA";} ?>
                 </h3>
 
                 <nav aria-label="breadcrumb">
@@ -167,13 +167,13 @@ if($images){?>
                             <td class="tx-semibold">PrixMin</td>
                             <td>: <?php echo $cs; ?> €</td>
                             <td class="tx-semibold">Prix F1</td>
-                            <td>: <?php echo $chambre->field_pr_prixf1['und'][0]['value']; ?> €</td>
+                            <td>: <?php if($chambre->field_pr_prixf1['und'][0]['value'] != null){echo $chambre->field_pr_prixf1['und'][0]['value'];}else{echo "NA";} ?> €</td>
                         </tr>
                         <tr>
                             <td class="tx-semibold">Prix F1 Bis</td>
-                            <td>: <?php echo $chambre->field_pr_prixf1bis['und'][0]['value']; ?> €</td>
+                            <td>: <?php if($chambre->field_pr_prixf1bis['und'][0]['value'] != null){echo $chambre->field_pr_prixf1bis['und'][0]['value'];}else{echo "NA";} ?> €</td>
                             <td class="tx-semibold">Prix F2</td>
-                            <td>: <?php echo $chambre->field_pr_prixf2['und'][0]['value']; ?> €</td>
+                            <td>: <?php if($chambre->field_pr_prixf2['und'][0]['value'] != null){echo $chambre->field_pr_prixf2['und'][0]['value'];}else{echo "NA";} ?> €</td>
                         </tr>
                         </tbody>
                     </table>
@@ -825,7 +825,7 @@ endif; ?>
 
         <div class="card mg-t-15 mg-b-15">
             <div class="card-header d-sm-flex align-items-start justify-content-between">
-                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">Concurrence directe - 10 Résidences les plus proches*</h6>
+                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences de même type</h6>
             </div>
             <div class="card-body pd-y-15 pd-x-10">
 
@@ -960,7 +960,7 @@ endif; ?>
 
         <div class="card mg-t-15 mg-b-15">
             <div class="card-header d-sm-flex align-items-start justify-content-between">
-                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences les plus proches*</h6>
+                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences de type diff.</h6>
             </div>
             <div class="card-body pd-y-15 pd-x-10">
                 <div class="row">
@@ -1044,12 +1044,25 @@ endif; ?>
                                 $typeRes = $residenceConcurrent->field_isra_value;
                             }
 
+
+                            if($residenceConcurrent->field_isehpa_value && !$residenceConcurrent->field_isra_value) {
+
+                                $defaultResTypeRes="ISEHPA";
+
+                            }
+                            if(!$residenceConcurrent->field_isehpa_value && $residenceConcurrent->field_isra_value) {
+
+                                $defaultResTypeRes="ISRA";
+
+                            }
+
+
                             ?>
                             <tr class="_r<?php echo $i.$s?>">
                                 <td class="text-left">
                                     <?php echo create_link($residenceConcurrent->title, "/residence/$residenceConcurrent->nid" , residence_mgmt_user_plan_has_access("PAGE_DETAIL_RESIDENCE_CONCURRENTE")); ?>
                                 </td>
-                                <td class="text-center"><?php if ($defaultResType == "ISRA"){print "RA";}else{print "EHPA";}   ?></td>
+                                <td class="text-center"><?php if ($defaultResTypeRes == "ISRA"){print "RA";}else{print "EHPA";}   ?></td>
                                 <td class="text-center"><?php print $residenceConcurrent->field_location_locality ?></td>
                                 <td class="text-center"><?php print round($residenceConcurrent->distance) ?></td>
                                 <td class="text-center"><?php print $residenceConcurrent->field_pr_prixmin_value ?></td>

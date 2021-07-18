@@ -1632,7 +1632,7 @@ function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 1
             }
         }
 
-        $clo1=explode(',',$clo,500);
+        $clo1=explode(',',$clo);
 
 
         $clo2 = array_slice($clo1, 0, $limit);
@@ -1686,11 +1686,11 @@ and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
 
         /*    $s = "
 select eh.entity_id as eh, ra.entity_id as ra ,pr.field_pr_prixmin_value as field_pr_prixmin_value
-from field_data_field_isehpa  eh , field_data_field_isra ra , field_data_field_pr_prixmin pr 
+from field_data_field_isehpa  eh , field_data_field_isra ra , field_data_field_pr_prixmin pr
 where eh.entity_id = ra.entity_id
 and pr.field_pr_prixmin_value IS NOT NULL
 
-and eh.entity_id in($clo) 
+and eh.entity_id in($clo)
 ORDER BY FIELD(eh.entity_id,$clo) limit 10";*/
 
             $dist=$clo=[];
@@ -1739,17 +1739,37 @@ ORDER BY FIELD(eh.entity_id,$clo) limit 10";*/
     }
 #dans quel ordre sont-elles présentées ?
 #$residenceConcurrent->field_capacite['und'][0]['value'];
-
-
-    $sql="SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
+    if (!$statuses) {
+        $sql="SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
 FROM node n
 -- INNER JOIN distance_indexation di ON di.secondary_nid = n.nid and di.primary_nid = $residenceNid
 -- and s.field_statut_value IN ('') -- déjà triée sur le volet
 INNER JOIN field_data_field_location l ON l.entity_id = n.nid
 INNER JOIN field_data_field_residence_id rc ON rc.field_residence_id_value = n.nid
 INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id ".
-        (($excludeNa)?"  and cs.field_pr_prixmin_value IS NOT NULL":'')
-        . "
+            (($excludeNa)?"  and cs.field_pr_prixmin_value IS NOT NULL":'')
+            . "
+INNER JOIN field_data_field_isehpa eh ON eh.entity_id = n.nid
+INNER JOIN field_data_field_isra er ON er.entity_id = n.nid
+INNER JOIN field_data_field_latitude lat ON lat.entity_id = n.nid
+INNER JOIN field_data_field_longitude lng ON lng.entity_id = n.nid
+left JOIN field_data_field_capacite cap ON cap.entity_id = n.nid
+
+left JOIN field_data_field_groupe g on g.entity_id = n.nid
+left JOIN taxonomy_term_data grp on g.field_groupe_tid = grp.tid
+left JOIN field_data_field_logo logo on logo.entity_id  = grp.tid
+
+WHERE n.type = 'residence' and (er.field_isra_value <> 0 OR eh.field_isehpa_value <> 0) and n.nid<>$residenceNid and n.nid in(".implode(',',$clo).") order by FIELD(n.nid,".implode(',',$clo).") limit $limit";
+    }else{
+        $sql="SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
+FROM node n
+-- INNER JOIN distance_indexation di ON di.secondary_nid = n.nid and di.primary_nid = $residenceNid
+-- and s.field_statut_value IN ('') -- déjà triée sur le volet
+INNER JOIN field_data_field_location l ON l.entity_id = n.nid
+INNER JOIN field_data_field_residence_id rc ON rc.field_residence_id_value = n.nid
+INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id ".
+            (($excludeNa)?"  and cs.field_pr_prixmin_value IS NOT NULL":'')
+            . "
 INNER JOIN field_data_field_isehpa eh ON eh.entity_id = n.nid
 INNER JOIN field_data_field_isra er ON er.entity_id = n.nid
 INNER JOIN field_data_field_latitude lat ON lat.entity_id = n.nid
@@ -1761,6 +1781,9 @@ left JOIN taxonomy_term_data grp on g.field_groupe_tid = grp.tid
 left JOIN field_data_field_logo logo on logo.entity_id  = grp.tid
 
 WHERE n.type = 'residence' and n.nid<>$residenceNid and n.nid in(".implode(',',$clo).") order by FIELD(n.nid,".implode(',',$clo).") limit $limit";
+    }
+
+
     $_ENV['stop']=__line__.__file__;
     $residences = Alptech\Wip\fun::sql($sql);#,'mysql','utf'
 

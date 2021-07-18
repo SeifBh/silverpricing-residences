@@ -1717,6 +1717,7 @@ function residence_mgmt_get_residence_details($residenceId = null,$limit=10) {
 
     $clo2=getResidencesProchesByStatus( $residenceId, [], $limit,1);
 
+  
     $residencesConcurrentes['direct'] = getResidencesProchesByStatus( $residenceId,[$sameStatut],$limit,0,1,$clo);
 #indirect : liste bcp plus longue ici
     $residencesConcurrentes['indirect'] = getResidencesProchesByStatus( $residenceId, [], $limit,0,1,$clo2,'indirect-nostatus');
