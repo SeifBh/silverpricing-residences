@@ -1,4 +1,7 @@
 # Ignore configuration files that may contain sensitive information.
+**/*.tgz.1
+1.tgz
+1.tgz.1
 sites/*/settings*.php
 
 # Ignore paths that contain user-generated content.
