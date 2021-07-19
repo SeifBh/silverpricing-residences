@@ -2143,7 +2143,7 @@ function residence_mgmt_recherche_silverex()
     $currentMenu = "recherche-silverex";
     $residences = $healthOrganizations = array();
     $requete_statistiques = null;
-#$categories = json_decode(getRequest( BASE_API_URL . "/api/health-organizations/categories/list" ));$s=(object)['code_categorie'=>-1,'lib_categorie'=>'Etablissements prescripteurs'];array_unshift($categories,$s);
+
     $categories = fun::sql('select distinct(code_categorie),lib_categorie from silverpricing_data_db.health_organizations', 'larav');
     $s = ['code_categorie' => -1, 'lib_categorie' => 'Etablissements prescripteurs'];
     array_unshift($categories, $s);
@@ -2452,11 +2452,11 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
 
 function get_requete_statistique($residences = array(), $name = '')
 {
+
     $requete_statistique = array(
         "Nbre de maisons" => 0,
-        "Privé" => 0,
-        "Associatif" => 0,
-        "Public" => 0,
+        "EHPA" => 0,
+        "RA" => 0,
         "Tarif moyen" => 0,
         "Tarif médian" => 0,
         "Tarif plus bas" => 0,
@@ -2467,15 +2467,22 @@ function get_requete_statistique($residences = array(), $name = '')
     $requete_statistique['Nbre de maisons'] = count($residences);
     /* STATUT */
     foreach ($residences as $residence) {
-        if (!empty($residence->field_statut_value)) {
-            $requete_statistique[$residence->field_statut_value]++;
+        if ($residence->field_isehpa_value == 1 && $residence->field_isehpa_value == 0) {
+
+            $requete_statistique["EHPA"]++;
+        }
+        else  if ($residence->field_isehpa_value == 0 && $residence->field_isra_value == 1) {
+
+
+            $requete_statistique["RA"]++;
         }
     }
+
     /* TARIF */
     $custom_liste_tarif = array();
     foreach ($residences as $residence) {
-        if (!empty($residence->field_tarif_chambre_simple_value)) {
-            $custom_liste_tarif[] = $residence->field_tarif_chambre_simple_value;
+        if (!empty($residence->field_pr_prixmin_value)) {
+            $custom_liste_tarif[] = $residence->field_pr_prixmin_value;
         }
     }
 

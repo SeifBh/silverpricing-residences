@@ -62,7 +62,7 @@ function historyCheck(el){
                         </div>
 
                         <div class="form-group col-md-12">
-                            <?php $statuses = array('Privé', 'Public', 'Associatif'); ?>
+                            <?php $statuses = array('EHPA', 'RA'); ?>
                             <select id="statut" name="statut" class="form-control form-control-sm">
                                 <option value="aucun">Statut</option>
                                 <?php foreach( $statuses as $status ): ?>
@@ -75,16 +75,7 @@ function historyCheck(el){
                             <input type="number" class="form-control form-control-sm" id="perimetre" name="perimetre" placeholder="Périmetre" min="1" value="<?php echo (!empty($_POST['perimetre'])) ? $_POST['perimetre'] : 5 ?>"/>
                         </div>
 
-                        <div class="form-group col-md-12">
-                            <select id="categories" name="categories[]" multiple class="form-control form-control-sm">
-                                <?php foreach($categories as $category):
-#établissement prescripteur => display as maisonnettes
-#puis afficher les prescripteurs attachés à un établissement
-                                    ?>
-                                    <option value="<?php echo $category->code_categorie; ?>" <?php echo ( in_array($category->code_categorie, $_POST['categories']) ) ? "selected":""; ?>><?php echo $category->lib_categorie; ?></option>
-                                <?php endforeach; ?>
-                            <select>
-                        </div>
+
 
                         <div class="form-group col-md-12">
                             <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Rechercher</button>
@@ -156,8 +147,8 @@ function historyCheck(el){
                                 <td><?php echo $residence->field_location_locality; ?></td>
                                 <td><?php echo $residence->name; ?></td>
                                 <td><?php echo round($residence->distance, 2); ?> KM</td>
-                                <td><?php echo $residence->field_statut_value; ?></td>
-                                <td><?php echo $residence->field_tarif_chambre_simple_value; ?> €</td>
+                                <td><?php echo $residence->field_type_value; ?></td>
+                                <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>

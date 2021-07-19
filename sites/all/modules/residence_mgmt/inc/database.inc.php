@@ -717,19 +717,65 @@ if(0){
 }
 
 function getResidencesConcurrentesOnAddress($latitude, $longitude, $perimetre = 5, $statut = null) {
+/*
+                if($statuses[0] == "ISEHPA"){
+
+
+
+$s = "
+select eh.entity_id
+from field_data_field_isehpa eh,field_data_field_isra ra
+where eh.entity_id = ra.entity_id
+and eh.field_isehpa_value = 1
+and ra.field_isra_value = 0";
+
+
+
+
+               }
+               //ra
+               else{
+
+                   $s = "
+select ra.entity_id
+from field_data_field_isehpa eh,field_data_field_isra ra
+where eh.entity_id = ra.entity_id
+and eh.field_isehpa_value = 0
+and ra.field_isra_value = 1
+and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
+
+
+//$s = "select entity_id from field_data_field_isra where field_isra_value = 1 and entity_id in($clo) ORDER BY FIELD(entity_id,$clo)";# limit $limit on limite ensuite
+
+               }
+ */
+
+
+
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
-    if( $statut != null ) {
-        $query->join('field_data_field_statut', 's', 's.entity_id = n.nid and s.field_statut_value = :statut', array(':statut'=> $statut));
-    } else {
-        $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
-    }
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+    $query->isNotNull('cs.field_pr_prixmin_value');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
     $query->join('field_data_field_capacite', 'cap', 'cap.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+    $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id', array());
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
     $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
 
@@ -743,14 +789,17 @@ function getResidencesConcurrentesOnAddress($latitude, $longitude, $perimetre = 
     $query->join('field_data_field_logo', 'grp_logo', 'grp_logo.entity_id = grp_term.tid', array());
 
     $query->fields('n', array('nid', 'title'));
-    $query->fields('s', array('field_statut_value'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
     $query->fields('cap', array('field_capacite_value'));
-    $query->fields('cs', array('field_tarif_chambre_simple_value'));
+    $query->fields('cs', array('field_pr_prixmin_value'));
     $query->fields('g', array('field_gestionnaire_value'));
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('lng', array('field_longitude_value'));
     $query->fields('t', array('name'));
+
+    $query->fields('eh', array('field_isehpa_value'));
+    $query->fields('er', array('field_isra_value'));
+
 
     $query->fields('grp_term', array('name'));
     $query->fields('grp_logo', array('field_logo_fid'));
