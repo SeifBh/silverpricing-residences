@@ -1568,7 +1568,22 @@ function residence_mgmt_get_groupes()
     $query->join('taxonomy_term_data', 't', 't.tid = g.field_groupe_tid', array());
     $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = g.field_groupe_tid', array());
     $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
-    $query->join('field_data_field_pr_prixmin', 'tarif', 'tarif.entity_id = rc.entity_id ', array());
+    $query->join('field_data_field_pr_prixmin', 'tarif', 'tarif.entity_id = rc.entity_id  and tarif.field_pr_prixmin_value IS NOT NULL', array());
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('field_type_value', 'notEhpad', '=');
+    $query->isNotNull('tarif.field_pr_prixmin_value');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
     $query->groupBy('g.field_groupe_tid');
     $query->addField('logo', 'field_logo_fid', 'field_logo_fid');
     $query->addField('t', 'name', 'name');
@@ -2593,6 +2608,7 @@ function residence_mgmt_get_history($historyId)
     $account = user_load($user->uid);
     $history = node_load($historyId);
     $historyBody = json_decode($history->body['und'][0]['value']);
+
     include_once __DIR__ . "/templates/history_view-search.php";
     $content = ob_get_clean();
     include_once __DIR__ . "/templates/layouts/default.php";
