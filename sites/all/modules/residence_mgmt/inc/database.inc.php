@@ -56,18 +56,19 @@ function findResidenceByDepartment($departmentId) {
 }
 
 function findResidencesByGroup( $groupId ) {
+    
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
     $query->join('field_data_field_groupe', 'grp', 'grp.entity_id = n.nid and grp.field_groupe_tid = :groupId', array( ':groupId' => $groupId ));
-    $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
+    $query->join('field_data_field_type', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
     $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
     $query->join('field_data_field_capacite', 'capacite', 'capacite.entity_id =  n.nid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 't', 't.entity_id = rc.entity_id', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = rc.entity_id', array());
 
 #$query->leftjoin('taxonomy_term_data', 'grpt', 'grp.field_groupe_tid = grpt.tid',[]);$query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grpt.tid',[]);$query->fields('logo',['field_logo_fid']);
     $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.field_groupe_tid',[]);$query->fields('logo',['field_logo_fid']);
@@ -78,8 +79,7 @@ function findResidencesByGroup( $groupId ) {
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('lng', array('field_longitude_value'));
-    $query->fields('s', array('field_statut_value'));
-    $query->fields('t', array('field_tarif_chambre_simple_value'));
+    $query->fields('t', array('field_pr_prixmin_value'));
     $query->fields('capacite', array('field_capacite_value'));
 
     $residences = fetchAll($query);

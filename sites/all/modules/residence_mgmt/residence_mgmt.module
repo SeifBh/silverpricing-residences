@@ -1567,28 +1567,37 @@ function residence_mgmt_get_groupes()
     $query->join('field_data_field_groupe', 'g', 'g.entity_id = n.nid', array());
     $query->join('taxonomy_term_data', 't', 't.tid = g.field_groupe_tid', array());
     $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = g.field_groupe_tid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 'tarif', 'tarif.entity_id = rc.entity_id and tarif.field_tarif_chambre_simple_value != :tarif', array(':tarif' => 'NA'));
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+    $query->join('field_data_field_pr_prixmin', 'tarif', 'tarif.entity_id = rc.entity_id ', array());
     $query->groupBy('g.field_groupe_tid');
     $query->addField('logo', 'field_logo_fid', 'field_logo_fid');
-    $query->addField('t', 'tid', 'tid');
     $query->addField('t', 'name', 'name');
+    $query->addField('t', 'tid', 'tid');
+
     $query->addExpression('COUNT(nid)', 'count');
     $query->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
-    // $query->addExpression("GROUP_CONCAT(tarif.field_tarif_chambre_simple_value SEPARATOR ',')", 'tarifs');
-    $query->where('t.name NOT IN (:names)', array(':names' => array('Default', 'Indépendant')));
     $query->orderBy("count", "DESC");
+
+
+    /*
+
+
+        // $query->addExpression("GROUP_CONCAT(tarif.field_tarif_chambre_simple_value SEPARATOR ',')", 'tarifs');
+        $query->where('t.name NOT IN (:names)', array( ':names' => array('Default', 'Indépendant') ));
+        */
+    $query->fields('n', array('nid'));
     $groupes = fetchAll($query);
 
-    foreach ($groupes as $key => $groupe) {
+
+    foreach( $groupes as $key => $groupe ) {
 
         // START
         $residences = findResidencesByGroup($groupe->tid);
 
         $groupeTarifs = [];
-        foreach ($residences as $r) {
-            if (!empty($r->field_tarif_chambre_simple_value) && $r->field_tarif_chambre_simple_value != "NA") {
-                $groupeTarifs[] = $r->field_tarif_chambre_simple_value;
+        foreach( $residences as $r ) {
+            if( !empty($r->field_pr_prixmin_value) &&  $r->field_pr_prixmin_value != null) {
+                $groupeTarifs[] = $r->field_pr_prixmin_value;
             }
         }
         // END
@@ -1598,7 +1607,6 @@ function residence_mgmt_get_groupes()
         $groupes[$key]->tarif_moyen = round(moyen($groupeTarifs), 2);
         $groupes[$key]->tarif_median = round(median($groupeTarifs), 2);
     }
-
     ob_start();
 
     include_once __DIR__ . "/templates/groupes.php";
@@ -1606,6 +1614,7 @@ function residence_mgmt_get_groupes()
     $content = ob_get_clean();
 
     include_once __DIR__ . "/templates/layouts/default.php";
+
 
 }
 
