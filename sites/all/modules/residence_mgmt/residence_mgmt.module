@@ -908,6 +908,17 @@ function residence_mgmt_dashboard() {
     $query->condition('field_type_value','notEhpad','=');
     $query->isNotNull('b.field_pr_prixmin_value');
 
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value',0,'<>');
+    $db_or->condition('field_isra_value',0,'<>');
+    $query->condition($db_or);
+
+
     $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
     $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
@@ -1171,6 +1182,17 @@ function residence_mgmt_get_quick_win() {
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
     $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
 
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value',0,'<>');
+    $db_or->condition('field_isra_value',0,'<>');
+    $query->condition($db_or);
+    
 
     $query->leftJoin('field_data_field_residence_id', 'k','k.field_residence_id_value = n.nid', array());
     $query->leftJoin('field_data_field_pr_prixmin', 'b', 'b.entity_id = k.entity_id', array());
@@ -1717,7 +1739,7 @@ function residence_mgmt_get_residence_details($residenceId = null,$limit=10) {
 
     $clo2=getResidencesProchesByStatus( $residenceId, [], $limit,1);
 
-  
+
     $residencesConcurrentes['direct'] = getResidencesProchesByStatus( $residenceId,[$sameStatut],$limit,0,1,$clo);
 #indirect : liste bcp plus longue ici
     $residencesConcurrentes['indirect'] = getResidencesProchesByStatus( $residenceId, [], $limit,0,1,$clo2,'indirect-nostatus');
