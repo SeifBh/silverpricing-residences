@@ -4,7 +4,7 @@
         <div class="col-lg-12 col-xl-12 mg-t-10">
             <div class="card ht-lg-100p">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">Carte de France</h6>
+                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">Carte de France 2.0</h6>
                 </div><!-- card-header -->
                 <div class="card-body pd-0 map-wrapper">
                     <div class="row">

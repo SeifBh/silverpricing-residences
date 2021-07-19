@@ -1329,18 +1329,39 @@ function residence_mgmt_departements() {
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+    $query->distinct();
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
     $query->join('taxonomy_term_data', 't', 't.tid = d.field_departement_tid', array());
     $query->leftjoin('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
-    $query->leftjoin('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->leftjoin('field_data_field_tarif_chambre_simple', 'tarif', 'tarif.entity_id = rc.entity_id and tarif.field_tarif_chambre_simple_value != :tarif', array( ':tarif' => 'NA' ));
+    $query->leftjoin('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+
+    $query->leftjoin('field_data_field_pr_prixmin', 'tarif', 'tarif.entity_id = rc.entity_id ', array( ));
+
+
+    $query->condition('ty.field_type_value','notEhpad','=');
+    $query->isNotNull('tarif.field_pr_prixmin_value');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value',0,'<>');
+    $db_or->condition('field_isra_value',0,'<>');
+    $query->condition($db_or);
+
+
+
     $query->groupBy('d.field_departement_tid');
     $query->addField('t', 'tid', 'tid');
     $query->addField('t', 'name', 'name');
     $query->addExpression('count(nid)', 'count');
-    $query->addExpression('GROUP_CONCAT(tarif.field_tarif_chambre_simple_value)', 'tarifs');
+    $query->addExpression('GROUP_CONCAT(tarif.field_pr_prixmin_value)', 'tarifs');
     $query->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
     $departements = fetchAll($query);
+
 
     foreach( $departements as $departement ) {
         $departement->number = substr($departement->name, 0, stripos($departement->name, " - "));
@@ -1348,7 +1369,11 @@ function residence_mgmt_departements() {
 
     foreach( $departements as $key => $departement ) {
         $departementTarifs = explode(",", $departement->tarifs);
+
         $departements[$key]->tarif_min = min($departementTarifs);
+
+
+
         $departements[$key]->tarif_max = max($departementTarifs);
         $departements[$key]->tarif_moyen = round(moyen($departementTarifs), 2);
         $departements[$key]->tarif_median = median($departementTarifs);
