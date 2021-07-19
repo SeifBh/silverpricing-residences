@@ -2198,23 +2198,35 @@ function get_statistique_globale($departementId = null, $ajax = false) {
     );
 
     db_query('SET SESSION group_concat_max_len = 20000000');
-    $a=fun::sql("select count(*)as roww,s.field_statut_value as pkid from node n inner join field_data_field_statut s on s.entity_id = n.nid inner join field_data_field_departement d on d.entity_id = n.nid and d
-  .field_departement_tid   = $departementId
+    $a=fun::sql("
+select count(*)as roww,s.field_type_value as pkid 
+from node n 
+inner join field_data_field_type s on s.entity_id = n.nid 
+inner join field_data_field_departement d on d.entity_id = n.nid 
+and d.field_departement_tid   = $departementId
 inner join field_data_field_capacite c on c.entity_id = n.nid
-inner join field_data_field_residence rc on rc.field_residence_target_id = n.nid
-inner join field_data_field_tarif_chambre_simple tarif on tarif.entity_id = rc.entity_id and tarif.field_tarif_chambre_simple_value != 'NA'
+inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.nid
+inner join field_data_field_pr_prixmin on tarif.entity_id = rc.entity_id and tarif.field_pr_prixmin_value IS NOT NULL
 where n.type='residence'
-group by s.field_statut_value",'mysql','utf8');#better as utf8 :)
+group by s.field_type_value",'mysql','utf8');
 
-    $b=fun::sql("select n.nid as pkid,tarif.field_tarif_chambre_simple_value,field_capacite_value from node n inner join field_data_field_statut s on s.entity_id = n.nid inner join field_data_field_departement d on d.entity_id = n.nid and d
-  .field_departement_tid   = $departementId
+
+    #better as utf8 :)
+
+    $b=fun::sql("
+select n.nid as pkid,tarif.field_pr_prixmin_value,field_capacite_value 
+from node n 
+inner join field_data_field_type s on s.entity_id = n.nid 
+inner join field_data_field_departement d on d.entity_id = n.nid and d.field_departement_tid   = $departementId
 inner join field_data_field_capacite c on c.entity_id = n.nid
-inner join field_data_field_residence rc on rc.field_residence_target_id = n.nid
-inner join field_data_field_tarif_chambre_simple tarif on tarif.entity_id = rc.entity_id and tarif.field_tarif_chambre_simple_value != 'NA'
+inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.nid
+inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id and tarif.field_pr_prixmin_value IS NOT NULL
 where n.type='residence'",'mysql','utf8');#better as utf8 :)
+
+    #better as utf8 :)
     $residenceTarifs=[];$cap=0;
     foreach($b as $t){
-        $residenceTarifs[]=$t['field_tarif_chambre_simple_value'];
+        $residenceTarifs[]=$t['field_pr_prixmin_value'];
         $cap+=$t['field_capacite_value'];
     }
     $c=1;
@@ -2228,59 +2240,36 @@ where n.type='residence'",'mysql','utf8');#better as utf8 :)
     $statistique_globale["Tarif moyen"] = round(moyen($residenceTarifs), 2);
     $statistique_globale["Tarif médian"] = round(median($residenceTarifs), 2);
     $statistique_globale["Tarif plus bas"] = min($residenceTarifs);
+
     $statistique_globale["Tarif plus haut"] = max($residenceTarifs);
     if( $ajax ) { $statistique_globale['Nbre de lits'] = $cap; }
     if(0){
         $query = db_select('node', 'n');
         $query->condition('n.type', "residence", '=');
-        $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
+        $query->join('field_data_field_type', 's', 's.entity_id = n.nid', array());
         $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array( ':departementId' => $departementId ));
         $query->join('taxonomy_term_data', 't', 't.tid = d.field_departement_tid', array());
         $query->leftjoin('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
-        $query->leftjoin('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-        $query->leftjoin('field_data_field_tarif_chambre_simple', 'tarif', 'tarif.entity_id = rc.entity_id and tarif.field_tarif_chambre_simple_value != :tarif', array( ':tarif' => 'NA' ));
+        $query->leftjoin('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+        $query->leftjoin('field_data_field_pr_prixmin', 'tarif', 'tarif.entity_id = rc.entity_id and tarif.field_pr_prixmin_value IS NOT NULL', array( ));
 
 
         $query2=clone($query);  $query3=clone($query);
-        $query3->groupBy('s.field_statut_value');
-        $query3->addField('s', 'field_statut_value');
+        $query3->groupBy('s.field_type_value');
+        $query3->addField('s', 'field_type_value');
         $query3->addExpression('count(nid)', 'count');
 
         # $query3->addExpression('group_by(s.field_statut_value)', 'statuses');
 
         $a = $query3->execute()->fetch();
 
-        $query2->addExpression('GROUP_CONCAT(s.field_statut_value)', 'statuses');
-        $query2->addExpression('GROUP_CONCAT(tarif.field_tarif_chambre_simple_value)', 'tarifs');
+        $query2->addExpression('GROUP_CONCAT(s.field_type_value)', 'statuses');
+        $query2->addExpression('GROUP_CONCAT(tarif.field_pr_prixmin_value)', 'tarifs');
         $query2->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
         $query2->addExpression('count(nid)', 'count');
         $query2->groupBy('d.field_departement_tid');
         $residences = $query2->execute()->fetch();
-        /*
-        SELECT count(nid) AS count
-        FROM
-        {node} n
-        INNER JOIN {field_data_field_statut} s ON s.entity_id = n.nid
-        INNER JOIN {field_data_field_departement} d ON d.entity_id = n.nid and d.field_departement_tid = :departementId
-        INNER JOIN {taxonomy_term_data} t ON t.tid = d.field_departement_tid
-        LEFT OUTER JOIN {field_data_field_capacite} c ON c.entity_id = n.nid
-        LEFT OUTER JOIN {field_data_field_residence} rc ON rc.field_residence_target_id = n.nid
-        LEFT OUTER JOIN {field_data_field_tarif_chambre_simple} tarif ON tarif.entity_id = rc.entity_id and tarif.field_tarif_chambre_simple_value != :tarif
-        WHERE  (n.type = :db_condition_placeholder_0)
-        GROUP BY d.field_departement_tid
 
-        SELECT count(nid) AS count
-        FROM
-        {node} n
-        INNER JOIN {field_data_field_statut} s ON s.entity_id = n.nid
-        INNER JOIN {field_data_field_departement} d ON d.entity_id = n.nid and d.field_departement_tid = :departementId
-        INNER JOIN {taxonomy_term_data} t ON t.tid = d.field_departement_tid
-        LEFT OUTER JOIN {field_data_field_capacite} c ON c.entity_id = n.nid
-        LEFT OUTER JOIN {field_data_field_residence} rc ON rc.field_residence_target_id = n.nid
-        LEFT OUTER JOIN {field_data_field_tarif_chambre_simple} tarif ON tarif.entity_id = rc.entity_id and tarif.field_tarif_chambre_simple_value != :tarif
-        WHERE  (n.type = :db_condition_placeholder_0)
-        GROUP BY s.field_statut_value
-         */
 
 
         /* NOMBRE DE MAISONS */
@@ -2304,22 +2293,7 @@ where n.type='residence'",'mysql','utf8');#better as utf8 :)
 
 
     }
-    /* TARIF */
 
-
-    // /* NOMBRE DE LITS */
-    // $query = db_select('node', 'n');
-    // $query->condition('n.type', "residence", '=');
-    // $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
-    // $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array( ':departementId' => $departementId ));
-    // $query->join('taxonomy_term_data', 't', 't.tid = d.field_departement_tid', array());
-    // $query->leftjoin('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
-    // $query->groupBy('d.field_departement_tid');
-    // $query->fields('t', array('name'));
-    // $query->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
-    // $capaciteTotale = $query->execute()->fetch();
-
-    // $statistique_globale['Nombre lits'] = $capaciteTotale->nombre_lits;
 
     return $statistique_globale;
 
