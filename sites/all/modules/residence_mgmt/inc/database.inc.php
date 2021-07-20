@@ -834,43 +834,53 @@ function getAllDepartmentsRelatedToResidences($groupes, $residenceIds) {
 function findResidencesByUserAccess($groupes, $residenceIds, $departement = null) {
 
     $groupes = ( count($groupes) >= 1 ) ? $groupes : null;
+
     $residenceIds = ( count($residenceIds) >= 1 ) ? $residenceIds : null;
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+    $query->isNotNull('cs.field_pr_prixmin_value');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
     $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
     $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+    $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id', array());
 
     if( $departement != null ) {
         $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array( ':departementId' => $departement ));
     }
 
-    // LEFT JOIN / NOMBRE TOTAL DE CHAMBRES
-    // $query->leftjoin('field_data_field_nombre_cs_entre_de_gamme', 'nombre_cs_entre_de_gamme', 'nombre_cs_entre_de_gamme.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_standard', 'nombre_cs_standard', 'nombre_cs_standard.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_superieur', 'nombre_cs_superieur', 'nombre_cs_superieur.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_luxe', 'nombre_cs_luxe', 'nombre_cs_luxe.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_alzheimer', 'nombre_cs_alzheimer', 'nombre_cs_alzheimer.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_aide_sociale', 'nombre_cs_aide_sociale', 'nombre_cs_aide_sociale.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cd_standard', 'nombre_cd_standard', 'nombre_cd_standard.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cd_aide_sociale', 'nombre_cd_aide_sociale', 'nombre_cd_aide_sociale.entity_id = rc.entity_id', array());
-
+    $query->fields('gr', array());
     $query->fields('n', array('nid', 'title'));
     $query->fields('s', array('field_statut_value'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
-    $query->fields('cs', array('field_tarif_chambre_simple_value'));
+    $query->fields('cs', array('field_pr_prixmin_value'));
     $query->fields('g', array('field_gestionnaire_value'));
     $query->fields('c', array('field_capacite_value'));
-    // $query->addExpression('nombre_cs_entre_de_gamme.field_nombre_cs_entre_de_gamme_value + nombre_cs_standard.field_nombre_cs_standard_value + nombre_cs_superieur.field_nombre_cs_superieur_value + nombre_cs_luxe.field_nombre_cs_luxe_value + nombre_cs_alzheimer.field_nombre_cs_alzheimer_value + nombre_cs_aide_sociale.field_nombre_cs_aide_sociale_value + nombre_cd_standard.field_nombre_cd_standard_value * 2 + nombre_cd_aide_sociale.field_nombre_cd_aide_sociale_value * 2', 'nombre_lits');
+
+    $query->fields('eh', array('field_isehpa_value'));
+    $query->fields('er', array('field_isra_value'));
 
     $query->where("n.nid IN (:residenceIds) or gr.field_groupe_tid IN (:groupes)", array( ':residenceIds' => $residenceIds, ':groupes' => $groupes ));
-    #$_ENV['stop']=__line__.__FILE__;
+
     $residences = fetchAll($query);
+
 
     return $residences;
 }

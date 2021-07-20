@@ -1548,6 +1548,7 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
         residence_mgmt_update_user_balance("DEPARTMENT_REQUEST", array(), $_POST, $response, $name);
     }
 
+
     ob_start();
     include_once __DIR__ . "/templates/departement.php";#aka departement
     $content = ob_get_clean();
@@ -2305,6 +2306,7 @@ function residence_mgmt_get_my_residences()
     foreach ($account->field_acces_residences['und'] as $residence) {
         $residenceIds[] = $residence['target_id'];
     }
+
 
     $residences = findResidencesByUserAccess($groupes, $residenceIds);
     // $departements = getAllDepartmentsRelatedToResidences($groupes, $residenceIds);
