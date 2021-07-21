@@ -1192,21 +1192,40 @@ function residence_mgmt_dashboard()
         $query->condition('n.type', "residence", '=');
         $query->condition('n.nid', $residenceIds, 'IN');
 
+        $query->condition('field_type_value', 'notEhpad', '=');
+        $query->isNotNull('cs.field_pr_prixmin_value');
+
+        $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+        $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+        $db_or = db_or();
+
+
+        $db_or->condition('field_isehpa_value', 0, '<>');
+        $db_or->condition('field_isra_value', 0, '<>');
+        $query->condition($db_or);
+
+
+
         $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
         $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
+        $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
         $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
         $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
         $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
         $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
         $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
-        $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+        $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
         $query->join('node', 'nc', 'nc.nid=rc.entity_id', []);
-        $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id', array());
+        $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id', array());
         $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
 
         $query->leftjoin('taxonomy_term_data', 'grp', 'gr.field_groupe_tid = grp.tid', array());
         $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid', array());
 
+        $query->fields('ty', array());
+        $query->fields('eh', array());
+        $query->fields('er', array());
         $query->fields('n', array('nid', 'title'));
         $query->fields('nc', ['changed']);#
         $query->fields('ff', array('field_finess_value'));
@@ -1214,7 +1233,7 @@ function residence_mgmt_dashboard()
         $query->fields('l', ['field_location_locality', 'field_location_postal_code']);
         $query->fields('lng', array('field_longitude_value'));
         $query->fields('lat', array('field_latitude_value'));
-        $query->fields('cs', array('field_tarif_chambre_simple_value'));
+        $query->fields('cs', array('field_pr_prixmin_value'));
         $query->fields('g', array('field_gestionnaire_value'));
         $query->fields('c', array('field_capacite_value'));
         $query->fields('logo', array('field_logo_fid'));
@@ -1224,8 +1243,9 @@ function residence_mgmt_dashboard()
         $query->fields('mgr', ['field_manager_value']);
 
         $residences = fetchAll($query);
-        foreach ($residences as &$t) {#
-            $t->ranking = getRankingOfResidence($t->nid, ["CONCURRENCE_DIRECTE", "DEPARTEMENT"]);
+       foreach ($residences as $t) {#
+
+            $t->ranking = 5;
             $a = 1;
         }
         unset($t);

@@ -77,7 +77,7 @@
                                         </td>
                                         <td><?php echo $maquette->name; ?></td>
                                         <td><?php echo $maquette->field_tarif_chambre_simple_value; ?> €</td>
-                                        <td><?php echo round(($maquette->field_cs_entree_de_gamme_tarif_value - $maquette->field_tarif_chambre_simple_value), 2); ?> €</td>
+                                        <td><?php echo round(($maquette->field_cs_entree_de_gamme_tarif_value - $maquette->field_pr_prixmin_value), 2); ?> €</td>
                                         <td><?php echo $maquette->field_tmh_value; ?> €</td>
                                         <td><?php echo date('d-m-Y', $maquette->created); ?></td>
                                     </tr>
@@ -225,7 +225,7 @@
                                         <td><?php echo $residence->field_manager_value; ?></td>
                                         <td><?php echo $residence->ranking['departement']; ?></td>
                                         <td><?php echo $residence->ranking['concurrence_directe']; ?></td>
-                                        <td><?php echo $residence->field_tarif_chambre_simple_value; ?> €</td>
+                                        <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
                                         <td><?php echo $residence->field_capacite_value; ?></td>
                                         <td><?php echo date('Y/m/d H:i:s',$residence->changed); #?></td>
                                     </tr>

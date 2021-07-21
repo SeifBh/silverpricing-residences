@@ -543,7 +543,6 @@ function getRankingOfResidence( $residenceNid, $rankingTypes = array() ) {
         $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
         $query->join('field_data_field_type', 's', 's.entity_id = n.nid', array());
 
-        $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
         $query->leftJoin('field_data_field_residence_id', 'k','k.field_residence_id_value = n.nid', array());
 
 
@@ -587,18 +586,18 @@ function getRankingOfResidence( $residenceNid, $rankingTypes = array() ) {
                 $query = db_select('distance_indexation', 'di');
                 $query->join('node', 'r', 'di.secondary_nid = r.nid', array());
                 $query->join('field_data_field_statut', 's', 's.entity_id = r.nid and s.field_statut_value = :statut', array(':statut'=> $rankedResidence->field_statut_value ));
-                $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = r.nid', array());
-                $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array( ':tarif' => 'NA' ));
+                $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = r.nid', array());
+                $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id ', array( ));
                 $query->fields('r', array('nid'));
-                $query->fields('cs', array('field_tarif_chambre_simple_value'));
+                $query->fields('cs', array('field_pr_prixmin_value'));
                 $query->fields('di', array('distance'));
                 $query->orderBy('distance', 'ASC');
                 $query->range(0, 10);
                 $residences = fetchAll($query);
-                $limit10a="SELECT r.nid AS nid, cs.field_tarif_chambre_simple_value AS field_tarif_chambre_simple_value, di.distance AS distance FROM distance_indexation di INNER JOIN node r ON di.secondary_nid = r.nid
-INNER JOIN field_data_field_statut s ON s.entity_id = r.nid and s.field_statut_value = 'Privé'
+                $limit10a="SELECT r.nid AS nid, cs.field_pr_prixmin_value AS field_pr_prixmin_value, di.distance AS distance FROM distance_indexation di INNER JOIN node r ON di.secondary_nid = r.nid
+INNER JOIN field_data_field_statut s ON s.entity_id = r.nid
 INNER JOIN field_data_field_residence rc ON rc.field_residence_target_id = r.nid
-INNER JOIN field_data_field_tarif_chambre_simple cs ON cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> 'NA'
+INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id 
 WHERE  (di.primary_nid = 40233) 
 ORDER BY distance ASC
 LIMIT 10 OFFSET 0";
