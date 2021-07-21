@@ -989,211 +989,19 @@ function residence_mgmt_dashboard()
     // } else {
 
 
-    /*
-    $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
-    $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id', array());
-    $query->fields('n', array('nid', 'title'));
-    $query->fields('cs', array('field_tarif_chambre_simple_value'));
-    $query->fields('c', array('field_capacite_value'));
-    $query->fields('lat', array('field_latitude_value'));
-    $query->fields('lng', array('field_longitude_value'));
-    $query->orderBy("cs.field_tarif_chambre_simple_value", "DESC");*/
 
 
-    $query = db_select('node', 'n');
-    $query->condition('n.type', "residence", '=');
-    $query->distinct();
-    $query->join('field_data_field_type', 't', 't.entity_id = n.nid', array());
-    $query->condition('field_type_value', 'notEhpad', '=');
-    $query->isNotNull('b.field_pr_prixmin_value');
-
-    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
-    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
-
-    $db_or = db_or();
 
 
-    $db_or->condition('field_isehpa_value', 0, '<>');
-    $db_or->condition('field_isra_value', 0, '<>');
-    $query->condition($db_or);
-
-
-    $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
-    $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
-    $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
-
-
-    $query->leftJoin('field_data_field_residence_id', 'k', 'k.field_residence_id_value = n.nid', array());
-    $query->leftJoin('field_data_field_pr_prixmin', 'b', 'b.entity_id = k.entity_id', array());
-
-
-    $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
-    $query->join('field_data_field_departement', 'dep', 'dep.entity_id = n.nid', array());
-    $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
-    $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-
-
-    $query->fields('n', array('nid', 'title'));
-    // bla
-    $query->fields('c', array('field_capacite_value'));
-    $query->fields('lat', array('field_latitude_value'));
-    $query->fields('lng', array('field_longitude_value'));
-    $query->fields('b', array('field_pr_prixmin_value'));
-
-    $query->fields('k', array('field_residence_id_value'));
-
-    $query->range(0, 55);
-    $quickWins = fetchAll($query);
-
-
-    foreach ($quickWins as $key => $r) {
-
-
-        $ranking = getRankingOfResidence($r->nid, ['CONCURRENCE_DIRECTE']);
-
-
-        $residencesConcurrentes = getResidencesProchesByStatus($r->nid, $statuses = [$r->field_statut_value], $limit = 10);
-
-
-        $a = 'has distance ?';
-        $residencesConcurrentesTarif = array_map(
-            function ($residenceConcurrente) {
-                return $residenceConcurrente->field_pr_prixmin_value;
-            },
-            $residencesConcurrentes
-        );
-
-
-        $tarifMoyenConcurrence = moyen($residencesConcurrentesTarif);
-        // FIELDS
-        $quickWins[$key]->tarif_concurrence_direct = round($tarifMoyenConcurrence, 2);
-        $quickWins[$key]->ranking_direct = $ranking['concurrence_directe'];
-        $quickWins[$key]->difference = round($quickWins[$key]->field_pr_prixmin_value - $quickWins[$key]->tarif_concurrence_direct, 2);#*-1
-    }
-    unset($r);
-    $quickWins = array_filter($quickWins);
-    // file_put_contents( DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file, json_encode($quickWins));q
-    // }
-
-    usort(
-        $quickWins,
-        function ($first, $second) {
-            return $second->ranking_direct - $first->ranking_direct;
-            return $second->difference - $first->difference;
-        }
-    );
-    #$quickWins = array_slice($quickWins, 0, 5, true);
-    $a = 1;
-    // varDebug($quickWins);
-    // exit();
-
-    // ALL MAQUETTES
-    //$maquettes = getMaquettesOfResidences( $residenceIds );
-
-    $maquettes = null;
-    // $cache_file = "all_maquettes_" . date('Y-m-d') . ".json";
-    // if( false && file_exists(DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file) ) {
-
-    //     $maquettes = file_get_contents( DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file);
-    //     $maquettes = json_decode($maquettes);
-
-    // } else {
-
-    $query = db_select('node', 'n');
-    $query->condition('n.type', "tmh_maquette", '=');
-    /* $query->leftjoin('field_data_field_residence', 'rt', 'rt.entity_id = n.nid and rt.bundle = \'tmh_maquette\'', array());
-     $query->leftjoin('field_data_field_cs_entree_de_gamme_tarif', 'mcs', 'mcs.entity_id = n.nid and mcs.bundle = \'tmh_maquette\'', array());
-     $query->leftjoin('field_data_field_tmh', 'tmh', 'tmh.entity_id = n.nid and rt.bundle = \'tmh_maquette\'', array());
-     $query->leftjoin('node', 'r', 'r.nid = rt.field_residence_target_id', array());
-     $query->leftjoin('field_data_field_departement', 'd', 'd.entity_id = r.nid', array());
-     $query->leftjoin('taxonomy_term_data', 't', 't.tid = d.field_departement_tid', array());
-     $query->leftjoin('field_data_field_residence', 'rc', 'rc.field_residence_target_id = r.nid and rc.bundle = \'chambre\'', array());
-     $query->leftjoin('field_data_field_tarif_chambre_simple', 'ch', 'ch.entity_id = rc.entity_id and ch.field_tarif_chambre_simple_value != :tarif', array(':tarif' => 'NA'));
-     $query->leftjoin('field_data_field_favoris', 'f', 'f.entity_id = n.nid', array());
-
-     $query->where('r.nid IN (:residenceIds)', array(':residenceIds' => $residenceIds));
-     $query->fields('r', array('nid', 'title'));
-     $query->fields('t', array('name'));
-     $query->fields('ch', array('field_tarif_chambre_simple_value'));
-     $query->fields('mcs', array('field_cs_entree_de_gamme_tarif_value'));
-     $query->fields('tmh', array('field_tmh_value'));
-     $query->fields('f', array('field_favoris_value'));*/
-    $query->fields('n', array());
-    $query->range(0, 50);
-    $maquettes = fetchAll($query);
-
-    // file_put_contents( DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file, json_encode($maquettes));
-
-    // }
-
-    // varDebug($maquettes);
-    // exit();
-
-    // QUERY FORM POST
-    if (!empty($_POST)) {
-
-        $query = db_select('node', 'n');
-        $query->condition('n.type', "residence", '=');
-        $query->condition('n.nid', $residenceIds, 'IN');
-        $query->fields('n', array('nid', 'title'));
-
-        if (isset($_POST['residence']) && !empty($_POST['residence'])) {
-            $query->condition('n.title', '%' . $_POST['residence'] . '%', 'LIKE');
-        }
-
-        if (isset($_POST['departements']) && !empty($_POST['departements'])) {
-            $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
-            $query->condition('d.field_departement_tid', $_POST['departements'], 'IN');
-        }
-
-        if (isset($_POST['gestionnaire']) && !empty($_POST['gestionnaire'])) {
-            $query->join('field_data_field_manager', 'mgr', 'd.entity_id = n.nid', array());
-            $query->condition('mgr.field_manager_value', '%' . $_POST['gestionnaire'] . '%', 'LIKE');
-        }
-
-        $residenceIds = $query->execute()->fetchCol('n.nid');
-
-    }
-
-    // STATISTIQUES
-    $dashboardStatistics = array("Tarif moyen" => 0, "Tarif médian" => 0, "Tarif plus bas" => 0, "Tarif plus haut" => 0,);
-
-    if (1 and '$residences->tarifs' and $residenceIds) {
-        $query = db_select('node', 'n');
-        $query->condition('n.type', "residence", '=');
-        $query->condition('n.nid', $residenceIds, 'IN');
-        $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
-        $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
-        $query->join('taxonomy_term_data', 't', 't.tid = d.field_departement_tid', array());
-        $query->leftjoin('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
-        $query->leftjoin('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-        $query->leftjoin('field_data_field_tarif_chambre_simple', 'tarif', 'tarif.entity_id = rc.entity_id and tarif.field_tarif_chambre_simple_value != :tarif', array(':tarif' => 'NA'));
-        $query->addExpression('count(nid)', 'count');
-        $query->addExpression('GROUP_CONCAT(s.field_statut_value)', 'statuses');
-        $query->addExpression('GROUP_CONCAT(tarif.field_tarif_chambre_simple_value)', 'tarifs');
-        $query->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
-        $residences = $query->execute()->fetch();
-    }
-    $a = 1;
-    /* TARIF */
-    $residenceTarifs = explode(",", $residences->tarifs);
-    $dashboardStatistics["Tarif moyen"] = round(moyen($residenceTarifs), 2);
-    $dashboardStatistics["Tarif plus bas"] = min($residenceTarifs);
-    $dashboardStatistics["Tarif plus haut"] = max($residenceTarifs);
-    $dashboardStatistics["Tarif médian"] = round(median($residenceTarifs), 2);
-
-    if ($residenceIds) {
-        // ALL RESIDENCES
-        $residences = [];
+    if($residenceIds) {
         $query = db_select('node', 'n');
         $query->condition('n.type', "residence", '=');
         $query->condition('n.nid', $residenceIds, 'IN');
 
+        $query->distinct();
+        $query->join('field_data_field_type', 't', 't.entity_id = n.nid', array());
         $query->condition('field_type_value', 'notEhpad', '=');
-        $query->isNotNull('cs.field_pr_prixmin_value');
+        $query->isNotNull('b.field_pr_prixmin_value');
 
         $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
         $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
@@ -1206,58 +1014,282 @@ function residence_mgmt_dashboard()
         $query->condition($db_or);
 
 
-
-        $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
-        $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
-        $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
-        $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
-        $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
-        $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
-        $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
-        $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
-        $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
-        $query->join('node', 'nc', 'nc.nid=rc.entity_id', []);
-        $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id', array());
         $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
+        $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
+        $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
 
-        $query->leftjoin('taxonomy_term_data', 'grp', 'gr.field_groupe_tid = grp.tid', array());
-        $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid', array());
 
-        $query->fields('ty', array());
-        $query->fields('eh', array());
-        $query->fields('er', array());
+        $query->leftJoin('field_data_field_residence_id', 'k', 'k.field_residence_id_value = n.nid', array());
+        $query->leftJoin('field_data_field_pr_prixmin', 'b', 'b.entity_id = k.entity_id', array());
+
+
+        $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
+        $query->join('field_data_field_departement', 'dep', 'dep.entity_id = n.nid', array());
+        $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
+        $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
+        $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+
+
         $query->fields('n', array('nid', 'title'));
-        $query->fields('nc', ['changed']);#
-        $query->fields('ff', array('field_finess_value'));
-        $query->fields('s', array('field_statut_value'));
-        $query->fields('l', ['field_location_locality', 'field_location_postal_code']);
-        $query->fields('lng', array('field_longitude_value'));
-        $query->fields('lat', array('field_latitude_value'));
-        $query->fields('cs', array('field_pr_prixmin_value'));
-        $query->fields('g', array('field_gestionnaire_value'));
+        // bla
         $query->fields('c', array('field_capacite_value'));
-        $query->fields('logo', array('field_logo_fid'));
+        $query->fields('lat', array('field_latitude_value'));
+        $query->fields('lng', array('field_longitude_value'));
+        $query->fields('b', array('field_pr_prixmin_value'));
 
-        #$query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
-        $query->leftjoin('field_data_field_manager', 'mgr', 'mgr.entity_id = n.nid', []);
-        $query->fields('mgr', ['field_manager_value']);
+        $query->fields('k', array('field_residence_id_value'));
+        $query->orderBy("b.field_pr_prixmin_value", "DESC");
 
-        $residences = fetchAll($query);
-       foreach ($residences as $t) {#
+        $query->range(0, 155);
+        $quickWins = fetchAll($query);
 
-            $t->ranking = 5;
-            $a = 1;
+
+        foreach ($quickWins as $key => $r) {
+
+
+            $ranking = getRankingOfResidence($r->nid, ['CONCURRENCE_DIRECTE']);
+
+
+            $residencesConcurrentes = getResidencesProchesByStatus($r->nid, $statuses = [$r->field_statut_value], $limit = 10);
+
+
+            $a = 'has distance ?';
+            $residencesConcurrentesTarif = array_map(
+                function ($residenceConcurrente) {
+                    return $residenceConcurrente->field_pr_prixmin_value;
+                },
+                $residencesConcurrentes
+            );
+
+
+            $tarifMoyenConcurrence = moyen($residencesConcurrentesTarif);
+            // FIELDS
+            $quickWins[$key]->tarif_concurrence_direct = round($tarifMoyenConcurrence, 2);
+            $quickWins[$key]->ranking_direct = $ranking['concurrence_directe'];
+            $quickWins[$key]->difference = round($quickWins[$key]->field_pr_prixmin_value - $quickWins[$key]->tarif_concurrence_direct, 2);#*-1
         }
-        unset($t);
+        unset($r);
+        $quickWins = array_filter($quickWins);
+        // file_put_contents( DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file, json_encode($quickWins));q
+        // }
+
+        usort(
+            $quickWins,
+            function ($first, $second) {
+                return $second->ranking_direct - $first->ranking_direct;
+                return $second->difference - $first->difference;
+            }
+        );
+        #$quickWins = array_slice($quickWins, 0, 5, true);
+        $a = 1;
+        // varDebug($quickWins);
+        // exit();
+
+        // ALL MAQUETTES
+        //$maquettes = getMaquettesOfResidences( $residenceIds );
+
+        $maquettes = null;
+        // $cache_file = "all_maquettes_" . date('Y-m-d') . ".json";
+        // if( false && file_exists(DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file) ) {
+
+        //     $maquettes = file_get_contents( DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file);
+        //     $maquettes = json_decode($maquettes);
+
+        // } else {
+
+        $query = db_select('node', 'n');
+        $query->condition('n.type', "tmh_maquette", '=');
+        /* $query->leftjoin('field_data_field_residence', 'rt', 'rt.entity_id = n.nid and rt.bundle = \'tmh_maquette\'', array());
+         $query->leftjoin('field_data_field_cs_entree_de_gamme_tarif', 'mcs', 'mcs.entity_id = n.nid and mcs.bundle = \'tmh_maquette\'', array());
+         $query->leftjoin('field_data_field_tmh', 'tmh', 'tmh.entity_id = n.nid and rt.bundle = \'tmh_maquette\'', array());
+         $query->leftjoin('node', 'r', 'r.nid = rt.field_residence_target_id', array());
+         $query->leftjoin('field_data_field_departement', 'd', 'd.entity_id = r.nid', array());
+         $query->leftjoin('taxonomy_term_data', 't', 't.tid = d.field_departement_tid', array());
+         $query->leftjoin('field_data_field_residence', 'rc', 'rc.field_residence_target_id = r.nid and rc.bundle = \'chambre\'', array());
+         $query->leftjoin('field_data_field_tarif_chambre_simple', 'ch', 'ch.entity_id = rc.entity_id and ch.field_tarif_chambre_simple_value != :tarif', array(':tarif' => 'NA'));
+         $query->leftjoin('field_data_field_favoris', 'f', 'f.entity_id = n.nid', array());
+
+         $query->where('r.nid IN (:residenceIds)', array(':residenceIds' => $residenceIds));
+         $query->fields('r', array('nid', 'title'));
+         $query->fields('t', array('name'));
+         $query->fields('ch', array('field_tarif_chambre_simple_value'));
+         $query->fields('mcs', array('field_cs_entree_de_gamme_tarif_value'));
+         $query->fields('tmh', array('field_tmh_value'));
+         $query->fields('f', array('field_favoris_value'));*/
+        $query->fields('n', array());
+        $query->range(0, 155);
+        $maquettes = fetchAll($query);
+
+        // file_put_contents( DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file, json_encode($maquettes));
+
+        // }
+
+        // varDebug($maquettes);
+        // exit();
+
+        // QUERY FORM POST
+        if (!empty($_POST)) {
+
+            $query = db_select('node', 'n');
+            $query->condition('n.type', "residence", '=');
+            $query->condition('n.nid', $residenceIds, 'IN');
+            $query->distinct();
+            $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+            $query->condition('ty.field_type_value', 'notEhpad', '=');
+            $query->isNotNull('tarif.field_pr_prixmin_value');
+
+            $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+            $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+            $db_or = db_or();
+            $query->leftjoin('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+            $query->leftjoin('field_data_field_pr_prixmin', 'tarif', 'tarif.entity_id = rc.entity_id', array());
+
+            $db_or->condition('field_isehpa_value', 0, '<>');
+            $db_or->condition('field_isra_value', 0, '<>');
+            $query->condition($db_or);
+            $query->fields('n', array('nid', 'title'));
+
+            if (isset($_POST['residence']) && !empty($_POST['residence'])) {
+                $query->condition('n.title', '%' . $_POST['residence'] . '%', 'LIKE');
+            }
+
+            if (isset($_POST['departements']) && !empty($_POST['departements'])) {
+                $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
+                $query->condition('d.field_departement_tid', $_POST['departements'], 'IN');
+            }
+
+            if (isset($_POST['gestionnaire']) && !empty($_POST['gestionnaire'])) {
+                $query->join('field_data_field_manager', 'mgr', 'd.entity_id = n.nid', array());
+                $query->condition('mgr.field_manager_value', '%' . $_POST['gestionnaire'] . '%', 'LIKE');
+            }
+
+            $residenceIds = $query->execute()->fetchCol('n.nid');
+
+        }
+
+        // STATISTIQUES
+        $dashboardStatistics = array("Tarif moyen" => 0, "Tarif médian" => 0, "Tarif plus bas" => 0, "Tarif plus haut" => 0,);
+
+        if (1 and '$residences->tarifs' and $residenceIds) {
+            $query = db_select('node', 'n');
+            $query->condition('n.type', "residence", '=');
+            $query->condition('n.nid', $residenceIds, 'IN');
+
+            $query->distinct();
+            $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+            $query->condition('ty.field_type_value', 'notEhpad', '=');
+            $query->isNotNull('tarif.field_pr_prixmin_value');
+
+            $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+            $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+            $db_or = db_or();
+
+
+            $db_or->condition('field_isehpa_value', 0, '<>');
+            $db_or->condition('field_isra_value', 0, '<>');
+            $query->condition($db_or);
+
+
+
+            //$query->join('field_data_field_type', 's', 's.entity_id = n.nid', array());
+            $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
+            $query->join('taxonomy_term_data', 't', 't.tid = d.field_departement_tid', array());
+            $query->leftjoin('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
+            $query->leftjoin('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+            $query->leftjoin('field_data_field_pr_prixmin', 'tarif', 'tarif.entity_id = rc.entity_id', array());
+            $query->addExpression('count(nid)', 'count');
+            //$query->addExpression('GROUP_CONCAT(s.field_statut_type)', 'statuses');
+            $query->addExpression('GROUP_CONCAT(tarif.field_pr_prixmin_value)', 'tarifs');
+            $query->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
+            $query->range(0, 155);
+
+            $residences = $query->execute()->fetch();
+        }
+        $a = 1;
+        /* TARIF */
+        $residenceTarifs = explode(",", $residences->tarifs);
+        $dashboardStatistics["Tarif moyen"] = round(moyen($residenceTarifs), 2);
+        $dashboardStatistics["Tarif plus bas"] = min($residenceTarifs);
+        $dashboardStatistics["Tarif plus haut"] = max($residenceTarifs);
+        $dashboardStatistics["Tarif médian"] = round(median($residenceTarifs), 2);
+
+        if ($residenceIds) {
+            // ALL RESIDENCES
+            $residences = [];
+            $query = db_select('node', 'n');
+            $query->condition('n.type', "residence", '=');
+            $query->condition('n.nid', $residenceIds, 'IN');
+
+            $query->condition('field_type_value', 'notEhpad', '=');
+            $query->isNotNull('cs.field_pr_prixmin_value');
+
+            $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+            $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+            $db_or = db_or();
+
+
+            $db_or->condition('field_isehpa_value', 0, '<>');
+            $db_or->condition('field_isra_value', 0, '<>');
+            $query->condition($db_or);
+
+
+
+            $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
+            $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
+            $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+            $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
+            $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
+            $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
+            $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
+            $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
+            $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+            $query->join('node', 'nc', 'nc.nid=rc.entity_id', []);
+            $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id', array());
+            $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
+
+            $query->leftjoin('taxonomy_term_data', 'grp', 'gr.field_groupe_tid = grp.tid', array());
+            $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid', array());
+
+            $query->fields('ty', array());
+            $query->fields('eh', array());
+            $query->fields('er', array());
+            $query->fields('n', array('nid', 'title'));
+            $query->fields('nc', ['changed']);#
+            $query->fields('ff', array('field_finess_value'));
+            $query->fields('s', array('field_statut_value'));
+            $query->fields('l', ['field_location_locality', 'field_location_postal_code']);
+            $query->fields('lng', array('field_longitude_value'));
+            $query->fields('lat', array('field_latitude_value'));
+            $query->fields('cs', array('field_pr_prixmin_value'));
+            $query->fields('g', array('field_gestionnaire_value'));
+            $query->fields('c', array('field_capacite_value'));
+            $query->fields('logo', array('field_logo_fid'));
+
+            #$query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
+            $query->leftjoin('field_data_field_manager', 'mgr', 'mgr.entity_id = n.nid', []);
+            $query->fields('mgr', ['field_manager_value']);
+            $query->range(0, 155);
+
+            $residences = fetchAll($query);
+            foreach ($residences as $t) {#
+
+                $t->ranking = getRankingOfResidence($t->nid, ["CONCURRENCE_DIRECTE", "DEPARTEMENT"]);
+                $a = 1;
+            }
+            unset($t);
+        }
+        $a = 1;
+        /*
+         +date màj +position département, + position concurrentielle
+
+        */
+        // DATA MAPS
+        $dataMarkers = $residences;
+
     }
-    $a = 1;
-    /*
-     +date màj +position département, + position concurrentielle
-
-    */
-    // DATA MAPS
-    $dataMarkers = $residences;
-
     // varDebug(count($dataMarkers));
     // varDebug(count($residences));
     // exit();
