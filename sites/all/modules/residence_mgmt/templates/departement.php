@@ -1,42 +1,3 @@
-<script>
-
-    window.onload = function() {
-        new Chart("chart", {
-            type: "bar",
-            data: {
-                labels: ["France", "Canada", "USA"],
-                datasets: [{
-                    data: [98.2, 97.7, 94.1],
-                    labels: ["Foo", "Bar", "Bla"],
-                }]
-            },
-            options: {
-                legend: false,
-                tooltips: false,
-                layout: {
-                    padding: 24
-                },
-                elements: {
-                    rectangle: {
-                        backgroundColor: "#cc55aa"
-                    }
-                },
-                plugins: {
-                    datalabels: {
-                        align: 'end',
-                        anchor: 'end',
-                        color: "#cc55aa",
-                        formatter: function(value, context) {
-                            return context.dataset.labels[context.dataIndex];
-                        }
-                    }
-                }
-            }
-        });
-
-    }
-
-</script>
 <div class="departement">
 <h3 class="mg-b-0 tx-spacing--1 text-uppercase"><?php echo $departement->name; ?></h3>
 <nav aria-label="breadcrumb">
@@ -158,21 +119,6 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-
-            <div class="card mg-t-10 mg-b-10">
-                <div class="card-header d-sm-flex align-items-start justify-content-between">
-                    <h5 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">TEST</h5>
-                </div>
-                <div class="card-body pd-y-15 pd-x-10">
-                    <canvas id="chart"  height="100"></canvas>
-
-                </div>
-            </div>
-
-        </div>
-    </div>
 
 
     <div class="row">

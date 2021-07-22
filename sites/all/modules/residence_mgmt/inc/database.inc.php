@@ -1477,9 +1477,9 @@ function getLatLngResidencesByDepartment( $departementId ) {
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array( ':departementId' => $departementId ));
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
     $query->innerjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid and t.field_tarif_chambre_simple_value != :tarif', array( ':tarif' => 'NA' ));
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid and t.field_pr_prixmin_value IS NOT NULL', array(  ));
 
     $query->leftjoin('field_data_field_capacite', 'cap', 'cap.entity_id = n.nid',[]);$query->fields('cap', ['field_capacite_value']);
     $query->leftjoin('field_data_field_groupe', 'g', 'g.entity_id = n.nid',[]);
@@ -1491,10 +1491,11 @@ function getLatLngResidencesByDepartment( $departementId ) {
     $query->fields('lng', array('field_longitude_value'));
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
-    $query->fields('t', array('field_tarif_chambre_simple_value'));
+    $query->fields('t', array('field_pr_prixmin_value'));
 
 
     $residences = fetchAll($query);
+
 
     return $residences;
 

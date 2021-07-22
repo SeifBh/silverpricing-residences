@@ -1544,6 +1544,7 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
     $currentMenu = "residences";
     $departementChartData = loadDepartementChartData($departementId);
     $dataMarkers = getLatLngResidencesByDepartment($departementId);
+  
     /* GLOBAL */
     $departement = taxonomy_term_load($departementId);
     $statistiques = get_data_bar_chart($departementId, $_POST);
@@ -2704,13 +2705,13 @@ function loadDepartementChartData($departementId = null)
     $query->condition('n.type', "residence", '=');
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array(':departementId' => $departementId));
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
     $query->innerjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid and t.field_tarif_chambre_simple_value != :tarif', array(':tarif' => 'NA'));
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid and t.field_pr_prixmin_value IS NOT NULL', array());
     $query->groupBy('l.field_location_locality');
     $query->addField('l', 'field_location_locality', 'ville');
     $query->addExpression('count(n.nid)', 'count');
-    $query->addExpression('SUM(t.field_tarif_chambre_simple_value)', 'totaltarif');
+    $query->addExpression('SUM(t.field_pr_prixmin_value)', 'totaltarif');
     $departementChartData = fetchAll($query);
 
     return $departementChartData;
