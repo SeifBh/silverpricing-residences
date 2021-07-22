@@ -147,7 +147,7 @@ function historyCheck(el){
                                 <td><?php echo $residence->field_location_locality; ?></td>
                                 <td><?php echo $residence->name; ?></td>
                                 <td><?php echo round($residence->distance, 2); ?> KM</td>
-                                <td><?php echo $residence->field_type_value; ?></td>
+                                <td><?php  if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0) {print "RA";}else{print "EHPA";} ?></td>
                                 <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
                             </tr>
                             <?php endforeach; ?>

@@ -1,4 +1,8 @@
-<?php /*
+<?php
+
+
+
+/*
  residence.silverpricing.fr
 
  Senioriales.xlsx => créer residence , dupliquer page import xls

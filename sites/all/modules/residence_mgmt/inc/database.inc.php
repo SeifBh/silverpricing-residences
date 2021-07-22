@@ -411,36 +411,28 @@ function addChambre($chambreData = null, $residence = null) {
 function updateChambre($entityId = null, $data) {
     $chambre = node_load($entityId);
 
+
     if( !empty($data) ) {
         // Tarifs
-        if($chambre->field_tarif_chambre_simple[LANGUAGE_NONE][0]['value'] != $data['tarif_chambre_simple']){
-            $k2v=[];
+        if($chambre->field_pr_prixmin[LANGUAGE_NONE][0]['value'] != $data['field_pr_prixmin']){
+
             $k2v['date']=$k2v['btime']=time();
-            $k2v['rid']=$chambre->field_residence['und'][0]['target_id'];
-            $k2v['cs_0']=$chambre->field_tarif_chambre_simple[LANGUAGE_NONE][0]['value'];
-            $k2v['cs_1']=$data['tarif_chambre_simple'];
+            $k2v['rid']=$chambre->field_residence_id['und'][0]['value'];
+            $k2v['cs_0']=$chambre->field_pr_prixmin[LANGUAGE_NONE][0]['value'];
+            $k2v['cs_1']=$data['field_pr_prixmin'];
             $sql='insert into z_variations '.Alptech\Wip\fun::insertValues($k2v);
             $insertId=Alptech\Wip\fun::sql($sql);#
             $b=1;
         }
-        $chambre->field_tarif_chambre_simple[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple'];
+        $chambre->field_pr_prixmin[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple'];
 
 
-        $chambre->field_tarif_chambre_double[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double'];
-        $chambre->field_tarif_chambre_simple_tempo[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple_temporaire'];
-        $chambre->field_tarif_chambre_double_tempo[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double_temporaire'];
-        $chambre->field_tarif_cs_aide_sociale[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple_aide_sociale'];
-        $chambre->field_tarif_cd_aide_sociale[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double_aide_sociale'];
+        $chambre->field_pr_prixf1[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double'];
+        $chambre->field_pr_prixf1bis[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple_temporaire'];
+        $chambre->field_pr_prixf2[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double_temporaire'];
 
-        // Nombre de chambres
-        $chambre->field_nombre_cs_entre_de_gamme[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_entree_de_gamme']);
-        $chambre->field_nombre_cs_standard[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_standard']);
-        $chambre->field_nombre_cs_superieur[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_superieur']);
-        $chambre->field_nombre_cs_luxe[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_luxe']);
-        $chambre->field_nombre_cs_alzheimer[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_alzheimer']);
-        $chambre->field_nombre_cs_aide_sociale[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_aide_sociale']);
-        $chambre->field_nombre_cd_standard[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cd_standard']);
-        $chambre->field_nombre_cd_aide_sociale[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cd_aide_sociale']);
+
+
 
         // Date de modification
         $chambre->field_date_de_modification[LANGUAGE_NONE][0]['value'] = date("Y-m-d H:i:s");
@@ -880,8 +872,7 @@ function findResidencesByUserAccess($groupes, $residenceIds, $departement = null
 
     $residences = fetchAll($query);
 
-    varDebug($residences);
-    exit();
+
     return $residences;
 }
 
@@ -1702,6 +1693,9 @@ function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 1
         $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array(':tarif' => 'NA'));
         $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
         $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
+        $query->join('field_data_field_statut', 's', 's.entity_id = n.nid ', array());
+        $query->fields('s', array('field_statut_value'));
+
         $query->fields('n', array('nid', 'title'));
         $query->fields('di', array('primary_nid', 'distance'));
         $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
@@ -1859,10 +1853,11 @@ ORDER BY FIELD(eh.entity_id,$clo) limit 10";*/
 #dans quel ordre sont-elles présentées ?
 #$residenceConcurrent->field_capacite['und'][0]['value'];
     if (!$statuses) {
-        $sql="SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
+        $sql="SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,s.field_statut_value AS field_statut_value,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
 FROM node n
 -- INNER JOIN distance_indexation di ON di.secondary_nid = n.nid and di.primary_nid = $residenceNid
 -- and s.field_statut_value IN ('') -- déjà triée sur le volet
+INNER JOIN field_data_field_statut s ON s.entity_id = n.nid
 INNER JOIN field_data_field_location l ON l.entity_id = n.nid
 INNER JOIN field_data_field_residence_id rc ON rc.field_residence_id_value = n.nid
 INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id ".
@@ -1880,10 +1875,11 @@ left JOIN field_data_field_logo logo on logo.entity_id  = grp.tid
 
 WHERE n.type = 'residence' and (er.field_isra_value <> 0 OR eh.field_isehpa_value <> 0) and n.nid<>$residenceNid and n.nid in(".implode(',',$clo).") order by FIELD(n.nid,".implode(',',$clo).") limit $limit";
     }else{
-        $sql="SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
+        $sql="SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid, s.field_statut_value AS field_statut_value, eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
 FROM node n
 -- INNER JOIN distance_indexation di ON di.secondary_nid = n.nid and di.primary_nid = $residenceNid
 -- and s.field_statut_value IN ('') -- déjà triée sur le volet
+INNER JOIN field_data_field_statut s ON s.entity_id = n.nid
 INNER JOIN field_data_field_location l ON l.entity_id = n.nid
 INNER JOIN field_data_field_residence_id rc ON rc.field_residence_id_value = n.nid
 INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id ".

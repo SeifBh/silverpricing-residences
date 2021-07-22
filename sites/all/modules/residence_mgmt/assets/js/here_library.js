@@ -273,10 +273,10 @@ function addMarkersAndSetViewBounds(hereMap, markers) {
   });
 
   group.addObjects(markersList);
-    /*
+    
       hereMap.map.getViewModel().setLookAtData({
         bounds: group.getBoundingBox()
-      });*/
+      });
 }
 
 

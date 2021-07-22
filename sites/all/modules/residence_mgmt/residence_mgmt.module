@@ -470,15 +470,16 @@ function residence_mgmt_node_presave($n)
 #/edit-residence/31459
 function updateAllRoomsUuid()
 {
+
     #select n.nid,u.field_uuid_value as uuid from node n left join field_data_field_uuid u on n.nid=u.entity_id where type='chambre' and u.field_uuid_value is not null -- sauvegardées : 20
-    $x = fun::sql("select n.nid from node n left join field_data_field_uuid u on n.nid=u.entity_id where type='chambre' and u.field_uuid_value is null");
+    $x = fun::sql("select n.nid from node n left join field_data_field_uuid u on n.nid=u.entity_id where type='prixresidences' and u.field_uuid_value is null");
     foreach ($x as $t) {
         $y = node_load($t['nid']);
         $y->field_uuid['und'][0]['value'] = uniqid();
         $saved = node_save($y);
         $a = 1;
     }
-    die(count($x) . 'chambres->UUID');
+    die(count($x) . 'prixresidences->UUID');
 }
 
 
@@ -603,6 +604,7 @@ function capretraite()
 
 function editChambreByUuid($uuid = null)
 {
+
     if (!$uuid) {
         fun::r404('nothing here');
     }
@@ -1973,6 +1975,7 @@ function residence_mgmt_get_residence_details($residenceId = null, $limit = 10)
     $residencesConcurrentes['direct'] = getResidencesProchesByStatus($residenceId, [$sameStatut], $limit, 0, 1, $clo);
 #indirect : liste bcp plus longue ici
     $residencesConcurrentes['indirect'] = getResidencesProchesByStatus($residenceId, [], $limit, 0, 1, $clo2, 'indirect-nostatus');
+
     foreach ($residencesConcurrentes as $concurrence => $residences) {
         foreach ($residences as $r) {
             $residencesConcurrentesTarif[$concurrence][$r->nid] = $r->field_pr_prixmin_value;
@@ -2401,8 +2404,8 @@ function residence_mgmt_edit_residence($residenceId = null)
         return;
     }
 
-    $query = db_select('field_data_field_residence', 'rc');
-    $query->condition('rc.field_residence_target_id', $residenceId, '=');
+    $query = db_select('field_data_field_residence_id', 'rc');
+    $query->condition('rc.field_residence_id_value', $residenceId, '=');
     $query->fields('rc', array('entity_id'));
     $result = fetchObject($query);
 
@@ -2412,7 +2415,7 @@ function residence_mgmt_edit_residence($residenceId = null)
         die();
 
     } else {
-        $chambre = entity_load('node', array($result->entity_id), array('type' => 'chambre'));
+        $chambre = entity_load('node', array($result->entity_id), array('type' => 'prixresidences'));
         $chambre = $chambre[$result->entity_id];
     }
 
