@@ -318,9 +318,44 @@ function listResidenceLinks($a = null)
     if (is_file($f) and filemtime($f) > $now - 3600) {
         $content = file_get_contents($f);
     } else {
-        $cond = "left join field_data_field_tarif_chambre_simple e on e.entity_id=a.entity_id";
-        if (isset($_GET['se'])) $cond = "inner join field_data_field_tarif_chambre_simple e on e.entity_id=a.entity_id and field_tarif_chambre_simple_value='NA'";
-        $x = fun::sql("select a.entity_id as cid,a.field_residence_target_id as rid,b.field_email_value as email,c.field_uuid_value as uuid,d.changed,e.field_tarif_chambre_simple_value as csTarif, f.field_location_locality as city,f.field_location_postal_code as cp,d.title,g.field_finess_value as finess,z.v as mailLockTime
+        $cond = "INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id  ";
+        if (isset($_GET['se'])) $cond = "INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id   and cs.field_pr_prixmin_value IS NOT NULL";
+
+        $x = fun::sql("
+        SELECT cs.entity_id as cid,n.nid AS nid,rc.field_residence_id_value as rid,b.field_email_value as email,n.changed, n.title AS title,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS cp, cs.field_pr_prixmin_value AS csTarif,fi.field_finess_value as finess, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid,z.v as mailLockTime
+         ,g.field_groupe_tid as groupeId,grp.name as groupe ,logo.field_logo_fid as fieldLogo
+        ,j.field_gestionnaire_value as gestionnaire,k.field_statut_value as statut,si.field_site_value as website  
+FROM node n
+  
+-- and s.field_statut_value IN ('') -- déjà triée sur le volet
+inner join field_data_field_email b on b.entity_id=n.nid
+INNER JOIN field_data_field_location l ON l.entity_id = n.nid
+INNER JOIN field_data_field_residence_id rc ON rc.field_residence_id_value = n.nid
+$cond
+INNER JOIN field_data_field_isehpa eh ON eh.entity_id = n.nid
+INNER JOIN field_data_field_isra er ON er.entity_id = n.nid
+INNER JOIN field_data_field_latitude lat ON lat.entity_id = n.nid
+INNER JOIN field_data_field_longitude lng ON lng.entity_id = n.nid
+inner join field_data_field_finess fi on fi.entity_id = n.nid
+inner join field_data_field_type ti on ti.entity_id = n.nid
+
+            left join field_data_field_gestionnaire j on j.entity_id = n.nid
+        left join field_data_field_statut k on k.entity_id = n.nid
+       left join field_data_field_site si on si.entity_id = n.nid  
+    
+    
+left JOIN field_data_field_capacite cap ON cap.entity_id = n.nid
+
+left JOIN field_data_field_groupe g on g.entity_id = n.nid
+left JOIN taxonomy_term_data grp on g.field_groupe_tid = grp.tid
+left JOIN field_data_field_logo logo on logo.entity_id  = grp.tid
+left join z_rkv z on z.k='chambreTarifMailLock' and z.k2 = n.nid
+
+WHERE n.type = 'residence'
+and ti.field_type_value = 'notEhpad'
+        ", 'mysql', 'utf8');
+
+        $x0 = fun::sql("select a.entity_id as cid,a.field_residence_target_id as rid,b.field_email_value as email,c.field_uuid_value as uuid,d.changed,e.field_tarif_chambre_simple_value as csTarif, f.field_location_locality as city,f.field_location_postal_code as cp,d.title,g.field_finess_value as finess,z.v as mailLockTime
     ,h.field_groupe_tid as groupeId
     ,h1.name as groupe ,i.field_logo_fid as fieldLogo,j.field_gestionnaire_value as gestionnaire,k.field_statut_value as statut,l.field_site_value as website  
      from field_data_field_residence a
@@ -342,7 +377,9 @@ function listResidenceLinks($a = null)
         left join field_data_field_site l on l.entity_id=a.field_residence_target_id              
      
       left join z_rkv z on z.k='chambreTarifMailLock' and z.k2=a.field_residence_target_id
-       where a.bundle='chambre'", 'mysql', 'utf8');#and field_residence_target_id in(" . implode(',
+       where a.bundle='chambre'",'mysql','utf8');
+
+        #and field_residence_target_id in(" . implode(',
 # ',$totalResidences) . ")
 #<th>cid</th>
         /*
@@ -354,7 +391,7 @@ function listResidenceLinks($a = null)
         $but1 = '<a title="##TITLE##" target="##TARGET##" href="##LINK##" class="btn btn-primary btn-sm btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg></a>';
 
         $thead = "<tr><th></th><th>edit res</th><th>rid</th><th>finess</th><th>cp</th><th>city</th><th>title</th><th>gest.</th><th>groupe.</th><th>statut.</th><th>email</th><th>web</th><th>tarif cs</th><th>changed</th><th>tarifs</th><th>action</th></tr>";
-        $content = "<a href='?se=NA'>Lister tous les ehpads sans tarifs</a> - <a href='/listResidenceLinks'>Lister tous les ehpads</a><span class=hidethen> - Veuillez patienter durant le chargement de toutes les données (" . count($x) . " résultats .. ) </span>    
+        $content = "<a href='?se=NA'>Lister tous les not ehpads sans tarifs</a> - <a href='/listResidenceLinks'>Lister tous les not ehpads</a><span class=hidethen> - Veuillez patienter durant le chargement de toutes les données (" . count($x) . " résultats .. ) </span>    
     <table class='res2chlist tw100' border=1><thead>$thead</thead><tbody>";
         foreach ($x as $t) {
             $web = $img = '';
