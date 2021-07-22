@@ -992,8 +992,8 @@ function residence_mgmt_dashboard()
 
 
 
-
     if($residenceIds) {
+
         $query = db_select('node', 'n');
         $query->condition('n.type', "residence", '=');
         $query->condition('n.nid', $residenceIds, 'IN');
@@ -1080,6 +1080,7 @@ function residence_mgmt_dashboard()
                 return $second->difference - $first->difference;
             }
         );
+
         #$quickWins = array_slice($quickWins, 0, 5, true);
         $a = 1;
         // varDebug($quickWins);
@@ -1536,17 +1537,25 @@ function residence_mgmt_departements()
 function residence_mgmt_residences($departementId = null, $ret = 0)
 {
     $departementId = explode('-', $departementId);
+
     $departementId = reset($departementId);
+
     $statistique_globale = get_statistique_globale($departementId);
+
     $residences = findResidence($departementId, $_POST);
+
     $requete_statistique = get_requete_statistique($residences);
+
+
 #Par département
     $currentMenu = "residences";
     $departementChartData = loadDepartementChartData($departementId);
+
     $dataMarkers = getLatLngResidencesByDepartment($departementId);
-  
+
     /* GLOBAL */
     $departement = taxonomy_term_load($departementId);
+
     $statistiques = get_data_bar_chart($departementId, $_POST);
 
     /* NOMBRE DE LITS */
@@ -1567,13 +1576,17 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
     $query->leftjoin('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
     $query->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
     $capaciteTotale = $query->execute()->fetch();#France globale
+
 #$x = fun::sql("select sum(field_capacite_value)as v from field_data_field_capacite");$sommeFrance=$x[0]['v'];
+
 
 // CUSTOM STATISTICS
 
 // POPULATION
     $numDepartment = substr($departement->name, 0, stripos($departement->name, " - "));
+
     $population = json_decode(getRequest(BASE_API_URL . "/api/populations/" . $numDepartment . "/2020"));
+
     $ages = array("75 à 79 ans", "80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 ans et plus");
 
     $totalPopulation = 0;
@@ -1583,8 +1596,12 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
         }
     }
 
+
     $mesLits = 0;
     $mesResidences = getMesResidencesByDepartement($departementId);
+/*
+    varDebug($mesResidences);
+    exit();*/
     foreach ($mesResidences as $maResidence) {
         $mesLits += (int)$maResidence->field_capacite_value;
     }
@@ -2612,9 +2629,9 @@ function get_data_bar_chart($departementId = null, $dataForm = array())
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array(':departementId' => $departementId));
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
     $query->innerjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid', array());
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid', array());
     $query->groupBy('l.field_location_locality');
     $query->addField('l', 'field_location_locality', 'city');
     $query->addExpression('count(n.nid)', 'count');
@@ -2666,7 +2683,9 @@ function getMesResidencesByDepartement($departmentId)
         $residenceIds[] = $residence['target_id'];
     }
 
-    $residences = findResidencesByUserAccess($groupes, $residenceIds, $departmentId);
+
+    $residences = findResidencesByUserAccessNull($groupes, $residenceIds, $departmentId);
+    //$residences = array();
 
     return $residences;
 }

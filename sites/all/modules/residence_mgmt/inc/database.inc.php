@@ -880,9 +880,65 @@ function findResidencesByUserAccess($groupes, $residenceIds, $departement = null
 
     $residences = fetchAll($query);
 
-
+    varDebug($residences);
+    exit();
     return $residences;
 }
+
+function findResidencesByUserAccessNull($groupes, $residenceIds, $departement = null) {
+
+    $groupes = ( count($groupes) >= 1 ) ? $groupes : null;
+
+    $residenceIds = ( count($residenceIds) >= 1 ) ? $residenceIds : null;
+
+    $query = db_select('node', 'n');
+    $query->condition('n.type', "residence", '=');
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+    $query->isNotNull('cs.field_pr_prixmin_value');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
+    $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
+    $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
+    $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
+    $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
+    $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+    $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id', array());
+
+    if( $departement != null ) {
+        $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array( ':departementId' => $departement ));
+    }
+
+    $query->fields('gr', array());
+    $query->fields('n', array('nid', 'title'));
+    $query->fields('s', array('field_statut_value'));
+    $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
+    $query->fields('cs', array('field_pr_prixmin_value'));
+    $query->fields('g', array('field_gestionnaire_value'));
+    $query->fields('c', array('field_capacite_value'));
+
+    $query->fields('eh', array('field_isehpa_value'));
+    $query->fields('er', array('field_isra_value'));
+
+    $query->where("n.nid IN (:residenceIds) or gr.field_groupe_tid IN (:groupes)", array( ':residenceIds' => $residenceIds, ':groupes' => $groupes ));
+
+    $residences = fetchAll($query);
+
+    return array();
+   // return $residences;
+}
+
 
 function getResidencesByUser( $userId ) {
 
