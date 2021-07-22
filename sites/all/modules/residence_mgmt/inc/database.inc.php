@@ -907,6 +907,8 @@ function findResidence($departementId = null, $dataForm = array()) {
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
@@ -916,9 +918,9 @@ function findResidence($departementId = null, $dataForm = array()) {
     $query->join('taxonomy_term_data', 'grp', 'g.field_groupe_tid = grp.tid', array());
     $query->leftJoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid', array());
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array( ':departementId' => $departementId ));
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
     $query->innerjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid and t.field_tarif_chambre_simple_value != :tarif', array( ':tarif' => 'NA' ));
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid ', array(  ));
     $query->join('field_data_field_capacite', 'capacite', 'capacite.entity_id =  n.nid', array());
 
     $query->fields('n', array('nid', 'title'));
@@ -929,8 +931,10 @@ function findResidence($departementId = null, $dataForm = array()) {
     $query->fields('s', array('field_statut_value'));
     $query->fields('grp', array('name'));
     $query->fields('logo', array('field_logo_fid'));
+    $query->fields('eh', array());
+    $query->fields('er', array());
     $query->fields('c', array('title'));
-    $query->fields('t', array('field_tarif_chambre_simple_value'));
+    $query->fields('t', array('field_pr_prixmin_value'));
     $query->fields('capacite', array('field_capacite_value'));
     if( isset($dataForm['residence']) && !empty($dataForm['residence']) ) {
         $query->condition('n.title', '%' . $dataForm['residence'] . '%', 'LIKE');#
@@ -949,11 +953,11 @@ function findResidence($departementId = null, $dataForm = array()) {
     }
 
     if( $dataForm['tarif_min'] && !empty( $dataForm['tarif_min']) ) {
-        $query->condition('t.field_tarif_chambre_simple_value',  $dataForm['tarif_min'], ">=");
+        $query->condition('t.field_pr_prixmin_value',  $dataForm['tarif_min'], ">=");
     }
 
     if(  $dataForm['tarif_max'] && !empty($dataForm['tarif_max']) ) {
-        $query->condition('t.field_tarif_chambre_simple_value', $dataForm['tarif_max'], "<=");
+        $query->condition('t.field_pr_prixmin_value', $dataForm['tarif_max'], "<=");
     }
     $residences = fetchAll($query);
     return $residences;

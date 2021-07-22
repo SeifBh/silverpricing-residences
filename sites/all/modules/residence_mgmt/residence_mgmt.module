@@ -2412,9 +2412,8 @@ function get_statistique_globale($departementId = null, $ajax = false)
 {
     $statistique_globale = array(
         "Nbre de maisons" => 0,
-        "Privé" => 0,
-        "Associatif" => 0,
-        "Public" => 0,
+        "EHPA" => 0,
+        "RA" => 0,
         "Tarif moyen" => 0,
         "Tarif médian" => 0,
         "Tarif plus bas" => 0,
@@ -2423,15 +2422,33 @@ function get_statistique_globale($departementId = null, $ajax = false)
 
     db_query('SET SESSION group_concat_max_len = 20000000');
     $a = fun::sql("
-select count(*)as roww,s.field_type_value as pkid 
+select eh.field_isehpa_value as ehpa, count(eh.field_isehpa_value) as NB_EHPA 
 from node n 
-inner join field_data_field_type s on s.entity_id = n.nid 
+inner join field_data_field_isehpa eh on eh.entity_id = n.nid 
+inner join field_data_field_type ty on ty.entity_id = n.nid 
+inner join field_data_field_isra er on er.entity_id = n.nid 
 inner join field_data_field_departement d on d.entity_id = n.nid 
 and d.field_departement_tid   = $departementId
 inner join field_data_field_capacite c on c.entity_id = n.nid
 inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.nid
 where n.type='residence'
-group by s.field_type_value", 'mysql', 'utf8');
+group by eh.field_isehpa_value", 'mysql', 'utf8');
+
+      $a2 = fun::sql("
+select er.field_isra_value as ra, count(er.field_isra_value) as NB_RA 
+from node n 
+inner join field_data_field_isehpa eh on eh.entity_id = n.nid 
+inner join field_data_field_type ty on ty.entity_id = n.nid 
+inner join field_data_field_isra er on er.entity_id = n.nid 
+inner join field_data_field_departement d on d.entity_id = n.nid 
+and d.field_departement_tid   = $departementId
+inner join field_data_field_capacite c on c.entity_id = n.nid
+inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.nid
+where n.type='residence'
+group by er.field_isra_value", 'mysql', 'utf8');
+
+
+
 
 
 
@@ -2457,10 +2474,17 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
     $c = 1;
 
     /* STATUT */
-    $statistique_globale["Privé"] = $a["Privé"];
-    $statistique_globale["Associatif"] = $a["Associatif"];
-    $statistique_globale["Public"] = $a["Public"];
-    $statistique_globale['Nbre de maisons'] = array_sum($a);
+    $sommepop_a = $a[0]["NB_EHPA"] + $a[1]["NB_EHPA"]  ;
+    $sommepop_a = $sommepop_a + $a2[0]["NB_RA"] + $a2[1]["NB_RA"]  ;
+    if($a[1]["NB_EHPA"] == 0){
+
+        $a[1]["NB_EHPA"] = 0 ;
+
+    };
+    if($a2[1]["NB_RA"] == 0){$a2[1]["NB_RA"] = 0 ;};
+    $statistique_globale["EHPA"] = $a[1]["NB_EHPA"];
+    $statistique_globale["RA"] = $a2[1]["NB_RA"];
+    $statistique_globale['Nbre de maisons'] =$sommepop_a;
     #$residenceTarifs = explode(",", $residences->tarifs);
     $statistique_globale["Tarif moyen"] = round(moyen($residenceTarifs), 2);
     $statistique_globale["Tarif médian"] = round(median($residenceTarifs), 2);
@@ -2470,7 +2494,9 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
     if ($ajax) {
         $statistique_globale['Nbre de lits'] = $cap;
     }
+
     if (0) {
+
         $query = db_select('node', 'n');
         $query->condition('n.type', "residence", '=');
         $query->join('field_data_field_type', 's', 's.entity_id = n.nid', array());
@@ -2503,11 +2529,12 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
         $statistique_globale['Nbre de maisons'] = $residences->count;
 
         /* STATUT */
+        varDebug($residences->statuses);
+        exit();
         $residenceStatuses = explode(",", $residences->statuses);
         $statuses = array_count_values($residenceStatuses);
-        $statistique_globale["Privé"] = $statuses["Privé"];
-        $statistique_globale["Associatif"] = $statuses["Associatif"];
-        $statistique_globale["Public"] = $statuses["Public"];
+        $statistique_globale["EHPA"] = $statuses["EHPA"];
+        $statistique_globale["RA"] = $statuses["RA"];
 
         $residenceTarifs = explode(",", $residences->tarifs);
         $statistique_globale["Tarif moyen"] = round(moyen($residenceTarifs), 2);

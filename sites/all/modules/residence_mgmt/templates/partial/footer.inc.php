@@ -123,7 +123,7 @@ var markers = [],hereMap = initHereMap("XbtFBu4z4GHw4B_nIv1A-6d9OixFidUGKc_41OIx
             ]
         });
 
-    <?php elseif( $currentMenu == "ma_maquette" ): 
+    <?php elseif( $currentMenu == "ma_maquette" ):
 
     elseif( $currentMenu == "departements" ): ?>
 
@@ -138,7 +138,7 @@ var markers = [],hereMap = initHereMap("XbtFBu4z4GHw4B_nIv1A-6d9OixFidUGKc_41OIx
                     backgroundColor: '#6dbaf5',
                     data: [
                         <?php foreach( $departements as $departement ):
-                            echo "\"$departement->count\","; 
+                            echo "\"$departement->count\",";
                         endforeach; ?>
                     ],
                 },
@@ -151,7 +151,7 @@ var markers = [],hereMap = initHereMap("XbtFBu4z4GHw4B_nIv1A-6d9OixFidUGKc_41OIx
                     fill: false,
                     data: [
                         <?php foreach( $departements as $departement ):
-                            echo "\"$departement->tarif_moyen\","; 
+                            echo "\"$departement->tarif_moyen\",";
                         endforeach; ?>
                     ]
                 },
@@ -1276,7 +1276,7 @@ var cl3,cl2,rmi='<?php echo RESIDENCE_MGMT_URI; ?>';
                         borderWidth: 1,
                         data: [
                             <?php foreach( $chartData['dataGroupe'] as $gChartData ):
-                                echo $statistiques_globales['Tarif plus haut'] . ","; 
+                                echo $statistiques_globales['Tarif plus haut'] . ",";
                             endforeach; ?>
                         ],
                     },
@@ -1292,7 +1292,7 @@ var cl3,cl2,rmi='<?php echo RESIDENCE_MGMT_URI; ?>';
                         borderWidth: 1,
                         data: [
                             <?php foreach( $chartData['dataGroupe'] as $gChartData ):
-                                echo $statistiques_globales['Tarif médian'] . ","; 
+                                echo $statistiques_globales['Tarif médian'] . ",";
                             endforeach; ?>
                         ],
                     },
@@ -1308,7 +1308,7 @@ var cl3,cl2,rmi='<?php echo RESIDENCE_MGMT_URI; ?>';
                         borderWidth: 1,
                         data: [
                             <?php foreach( $chartData['dataGroupe'] as $gChartData ):
-                                echo $statistiques_globales['Tarif plus bas'] . ","; 
+                                echo $statistiques_globales['Tarif plus bas'] . ",";
                             endforeach; ?>
                         ],
                     },
@@ -1407,9 +1407,9 @@ var cl3,cl2,rmi='<?php echo RESIDENCE_MGMT_URI; ?>';
 
         addMarkersAndSetViewBounds(hereMap, markers);
 
-        <?php 
-        
-        if( residence_mgmt_user_plan_has_access('PAGE_GROUPE_SECTION_RECHERCHE') ):  
+        <?php
+
+        if( residence_mgmt_user_plan_has_access('PAGE_GROUPE_SECTION_RECHERCHE') ):
         $a=1;?>
         // REQUEST HERE MAP
         var requestHereMap = initHereMap("XbtFBu4z4GHw4B_nIv1A-6d9OixFidUGKc_41OIxoN8", document.getElementById('residences-map-result'));
@@ -1451,7 +1451,7 @@ var cl3,cl2,rmi='<?php echo RESIDENCE_MGMT_URI; ?>';
 
         addMarkersAndSetViewBounds(requestHereMap, requestMarkers);
 
-        <?php endif; 
+        <?php endif;
 
 elseif( $currentMenu == "recherche-silverex" ):
     $a='https://ehpad.home/recherche-silverex';?>
@@ -1594,7 +1594,7 @@ defer(
         //cl(final,pngFileName,x);
         return x;
     }
-    
+
 );
 
 <?php
@@ -1862,7 +1862,7 @@ addInfoBubble(<?/*history*/?>hereMap, markerObject, "<?php echo "<b>" . htmlspec
         });
 
     <?php elseif($currentMenu == "nearby-residences"): ?>
-        
+
         $(document).ready(function() {
             $('#nearby-residences-updated-table').DataTable( {"language": {url: frenchDataTables},
                 "info": false,

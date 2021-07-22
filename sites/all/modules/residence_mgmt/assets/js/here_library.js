@@ -273,12 +273,10 @@ function addMarkersAndSetViewBounds(hereMap, markers) {
   });
 
   group.addObjects(markersList);
-  //map.addObject(group);
-
-  // get geo bounding box for the group and set it to the map
-  hereMap.map.getViewModel().setLookAtData({
-    bounds: group.getBoundingBox()
-  });
+    /*
+      hereMap.map.getViewModel().setLookAtData({
+        bounds: group.getBoundingBox()
+      });*/
 }
 
 

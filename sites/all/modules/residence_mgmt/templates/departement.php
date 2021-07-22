@@ -1,3 +1,42 @@
+<script>
+
+    window.onload = function() {
+        new Chart("chart", {
+            type: "bar",
+            data: {
+                labels: ["France", "Canada", "USA"],
+                datasets: [{
+                    data: [98.2, 97.7, 94.1],
+                    labels: ["Foo", "Bar", "Bla"],
+                }]
+            },
+            options: {
+                legend: false,
+                tooltips: false,
+                layout: {
+                    padding: 24
+                },
+                elements: {
+                    rectangle: {
+                        backgroundColor: "#cc55aa"
+                    }
+                },
+                plugins: {
+                    datalabels: {
+                        align: 'end',
+                        anchor: 'end',
+                        color: "#cc55aa",
+                        formatter: function(value, context) {
+                            return context.dataset.labels[context.dataIndex];
+                        }
+                    }
+                }
+            }
+        });
+
+    }
+
+</script>
 <div class="departement">
 <h3 class="mg-b-0 tx-spacing--1 text-uppercase"><?php echo $departement->name; ?></h3>
 <nav aria-label="breadcrumb">
@@ -123,6 +162,23 @@
         <div class="col-md-12">
 
             <div class="card mg-t-10 mg-b-10">
+                <div class="card-header d-sm-flex align-items-start justify-content-between">
+                    <h5 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">TEST</h5>
+                </div>
+                <div class="card-body pd-y-15 pd-x-10">
+                    <canvas id="chart"  height="100"></canvas>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="card mg-t-10 mg-b-10">
                   <div class="card-header d-sm-flex align-items-start justify-content-between">
                       <h5 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">Nombre de résidences et prix moyens par ville</h5>
                   </div>
@@ -225,7 +281,7 @@
                   <?php
                       $colors = array("Privé" => "#48a3b9", "Associatif" => "#eb9b6c", "Public" => "#836982");
                   ?>
-                  <?php foreach( $requete_statistique as $title => $statistique ): ?>
+                  <?php foreach( $statistique_globale as $title => $statistique ): ?>
                       <div class="media col-md-3 mg-t-15 mg-b-15">
                           <div style="background: <?php echo (array_key_exists($title, $colors)) ? $colors[$title]:"#0168fa"; ?>" class="wd-40 wd-md-50 ht-40 ht-md-50 tx-white mg-r-10 mg-md-r-10 d-flex align-items-center justify-content-center rounded op-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bar-chart-2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
@@ -269,8 +325,9 @@
                                 <td><?php echo $residence->field_location_postal_code;# ?></td>
                                 <td><?php echo $residence->field_location_locality; ?></td>
                                 <td><?php echo $residence->field_capacite_value; ?></td>
-                                <td><?php echo $residence->field_statut_value; ?></td>
-                                <td><?php echo $residence->field_tarif_chambre_simple_value; ?>€</td>
+
+                                <td><?php  if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0) {print "RA";}else{print "EHPA";} ?></td>
+                                <td><?php  if ($residence->field_pr_prixmin_value != null) {print $residence->field_pr_prixmin_value . "€";}else{print "NA";} ?></td>
                                 <td class="<?php echo ($difTarifsMoyDep > 0) ? "tx-success":" tx-danger"; ?>">
                                     <?php echo $difTarifsMoyDep; ?>€
                                 </td>
