@@ -645,7 +645,7 @@ function editChambreByUuid($uuid = null)
     if (!$uuid) {
         fun::r404('nothing here');
     }
-    $x = fun::sql("SELECT entity_id FROM field_data_field_uuid a WHERE a.field_uuid_value='" . addslashes($uuid) . "'");
+    $x = fun::sql("SELECT entity_id FROM field_data_field_pr_uuid a WHERE a.field_pr_uuid_value='" . addslashes($uuid) . "'");
     if (!$x) {
         fun::r404('nothing here 2');
     } elseif (count($x) > 1) {
@@ -657,9 +657,10 @@ function editChambreByUuid($uuid = null)
         updateChambre($eid, $_POST);
         fun::r302('?');
     } else {#chargement données et template
-        $chambre = entity_load('node', array($eid), array('type' => 'chambre'));
+        $chambre = entity_load('node', array($eid), array('type' => 'prixresidences'));
         $chambre = $chambre[$eid];
     }
+
     ob_start();
     include_once __DIR__ . "/templates/edit_residence.php";
     $content = ob_get_clean();
