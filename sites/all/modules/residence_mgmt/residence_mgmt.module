@@ -322,7 +322,7 @@ function listResidenceLinks($a = null)
         if (isset($_GET['se'])) $cond = "INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id   and cs.field_pr_prixmin_value IS NOT NULL";
 
         $x = fun::sql("
-        SELECT cs.entity_id as cid,n.nid AS nid,rc.field_residence_id_value as rid,b.field_email_value as email,n.changed, n.title AS title,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS cp, cs.field_pr_prixmin_value AS csTarif,fi.field_finess_value as finess, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid,z.v as mailLockTime
+        SELECT cs.entity_id as cid,n.nid AS nid,cp.field_pr_uuid_value as field_pr_uuid_value,rc.field_residence_id_value as rid,b.field_email_value as email,n.changed, n.title AS title,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS cp, cs.field_pr_prixmin_value AS csTarif,fi.field_finess_value as finess, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid,z.v as mailLockTime
          ,g.field_groupe_tid as groupeId,grp.name as groupe ,logo.field_logo_fid as fieldLogo
         ,j.field_gestionnaire_value as gestionnaire,k.field_statut_value as statut,si.field_site_value as website  
 FROM node n
@@ -338,6 +338,7 @@ INNER JOIN field_data_field_latitude lat ON lat.entity_id = n.nid
 INNER JOIN field_data_field_longitude lng ON lng.entity_id = n.nid
 inner join field_data_field_finess fi on fi.entity_id = n.nid
 inner join field_data_field_type ti on ti.entity_id = n.nid
+      inner join field_data_field_pr_uuid cp on cp.entity_id=rc.entity_id
 
             left join field_data_field_gestionnaire j on j.entity_id = n.nid
         left join field_data_field_statut k on k.entity_id = n.nid
@@ -419,7 +420,7 @@ and ti.field_type_value = 'notEhpad'
             $content .= "<tr><td>$img</td><td>" .
                 str_replace(['##TARGET##', '##TITLE##', '##LINK##'], ['nodeedit', 'edit residence', '/node/' . $t['rid'] . '/edit'], $but1)
                 . "</td><td><a target=residence href='/residence/$t[rid]'>$t[rid]</a></td><td>$t[finess]</td><td>$t[dep]</td><td>$t[city]</td><td>$t[title]</td><td>$t[gestionnaire]</td><td>$t[groupe]</td><td>$t[statut]</td><td>$t[email]</td><td>$web</td><td>$t[csTarif] </td><td>$t[date]</td><td>" .
-                str_replace(['##TARGET##', '##TITLE##', '##LINK##'], ['er', 'edit chambre', '/er/' . $t['uuid']], $but1)
+                str_replace(['##TARGET##', '##TITLE##', '##LINK##'], ['er', 'edit chambre', '/er/' . $t['field_pr_uuid_value']], $but1)
                 . "</td><td id='b$t[rid]'>$but</td></tr>";#->adds a time lock on cid -> grayed out for 1 month
             #$r2c[$t['rid']]=$t['cid'];
             #echo"<li><button></button>";
@@ -499,8 +500,8 @@ function fastAccess()
 
 function residence_mgmt_node_presave($n)
 {
-    if ($n->type == 'chambre' and !$n->field_uuid['und']) {
-        $n->field_uuid['und'][0]['value'] = uniqid();#mais les générer également pour chacune des entités
+    if($n->type=='prixresidences' and !$n->field_pr_uuid['und']){
+        $n->field_pr_uuid['und'][0]['value']=uniqid();#mais les générer également pour chacune des entités
     }
 }
 
@@ -509,10 +510,10 @@ function updateAllRoomsUuid()
 {
 
     #select n.nid,u.field_uuid_value as uuid from node n left join field_data_field_uuid u on n.nid=u.entity_id where type='chambre' and u.field_uuid_value is not null -- sauvegardées : 20
-    $x = fun::sql("select n.nid from node n left join field_data_field_uuid u on n.nid=u.entity_id where type='prixresidences' and u.field_uuid_value is null");
+    $x = fun::sql("select n.nid from node n left join field_data_field_pr_uuid u on n.nid=u.entity_id where type='prixresidences' and u.field_pr_uuid_value is null");
     foreach ($x as $t) {
         $y = node_load($t['nid']);
-        $y->field_uuid['und'][0]['value'] = uniqid();
+        $y->field_pr_uuid['und'][0]['value'] = uniqid();
         $saved = node_save($y);
         $a = 1;
     }

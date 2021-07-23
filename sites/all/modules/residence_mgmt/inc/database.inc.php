@@ -235,6 +235,9 @@ function addResidenceByJsonObject( $residenceData = null ) {
         $newPrixResidence->field_pr_cerfa[LANGUAGE_NONE][0]['value'] = $residenceData->cerfa;
         $newPrixResidence->field_pr_prixmin[LANGUAGE_NONE][0]['value'] = $residenceData->prixMin;
 
+        $newPrixResidence->field_pr_uuid[LANGUAGE_NONE][0]['value'] = uniqid();
+
+
         if( $residenceData->raPrice->updatedAt != "NA" ) {
             $newPrixResidence->field_updatedat[LANGUAGE_NONE][0]["value"]["date"] = date_format(date_create($residenceData->raPrice->updatedAt), 'Y-m-d H:i:s');
         } else {
