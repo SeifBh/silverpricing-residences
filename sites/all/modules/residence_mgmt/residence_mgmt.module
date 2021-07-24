@@ -1822,7 +1822,7 @@ function residence_mgmt_get_groupe_details($groupeId = null)
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
     $query->innerjoin('field_data_field_groupe', 'd', 'd.entity_id = n.nid and d.field_groupe_tid = :groupeId', array(':groupeId' => $groupeId));
-    $query->leftjoin('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+    $query->leftjoin('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
     $query->leftjoin('node', 'c', 'rc.entity_id = c.nid', array());
     $query->fields('c', array('nid'));
     $groupeResidences = fetchAll($query);

@@ -49,16 +49,14 @@
     var marker = { lat: <?php echo $dataMarker->field_latitude_value; ?>, lng: <?php echo $dataMarker->field_longitude_value; ?> };
     markers.push(marker);var markerObject = null;
     <?php
-    switch($dataMarker->field_statut_value) {
-        case "Public":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.public });";
+    switch($dataMarker->field_isehpa_value) {
+        case 0:
+            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
             break;
-        case "Associatif":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
+        case 1:
+            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
             break;
-        case "Privé":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
-            break;
+
     }
 
     $groupeLogo = "";
@@ -540,11 +538,14 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     if( isset($dataMarker->field_logo_fid) ) {
         $groupeLogo = "<img src='" . file_create_url(file_load($dataMarker->field_logo_fid)->uri) . "' width='16' alt='' />";
     }
-    switch($dataMarker->field_statut_value) {
-        case "Public":$color='836983';echo "markerObject = new H.map.Marker(marker, { icon: icon.public });";break;
-        case "Associatif":$color='EB9B6C';echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";break;
-        case "Privé":$color='584AB9';echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";break;
-        default:$color='FFF';break;
+    switch($dataMarker->field_isehpa_value) {
+        case 0:
+            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+            break;
+        case 1:
+            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+            break;
+
     }
 
     if(0 and 'nosvg'){
@@ -558,7 +559,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
             echo $groupeLogo;
             echo "<a href='/residence/$dataMarker->nid'>" . htmlspecialchars($dataMarker->title) . "</a><br /> ";
             echo "$dataMarker->field_location_postal_code, $dataMarker->field_location_locality <br /> ";
-            echo "Nb lits 56:$dataMarker->field_capacite_value <br /> ";
+            echo "Nb lits :$dataMarker->field_capacite_value <br /> ";
             echo "<b>$dataMarker->field_pr_prixmin_value €</b>";
             ?>"
     );
@@ -605,16 +606,14 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     var markerObject = null;
     <?php
 
-    switch($r->field_statut_value) {
-        case "Public":
-            echo "markerObject = new H.map.Marker(m, { icon: icon.public });";
-            break;
-        case "Associatif":
-            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
-            break;
-        case "Privé":
+    switch($r->field_isehpa_value) {
+        case 0:
             echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
             break;
+        case 1:
+            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+            break;
+
     }
     ?>
 
@@ -623,7 +622,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
             if (isset($r->field_logo_fid)) echo"<img src='" . file_create_url(file_load($r->field_logo_fid)->uri) . "' width='16' alt='' />";
             echo "<a href='/residence/$r->nid'>" . htmlspecialchars($r->title) . "</a><br /> ";
             echo "$r->field_location_postal_code, $r->field_location_locality <br /> ";
-            echo "Nb lits 54:$r->field_capacite_value <br /> ";
+            echo "Nb lits :$r->field_capacite_value <br /> ";
             echo "<b>$r->field_pr_prixmin_value €</b>";
             ?>"
     );
@@ -719,16 +718,14 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
 
     <?php
 
-    switch($dataMarker->field_statut_value) {
-        case "Public":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.public });";
+    switch($dataMarker->field_isehpa_value) {
+        case 0:
+            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
             break;
-        case "Associatif":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
+        case 1:
+            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
             break;
-        case "Privé":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
-            break;
+
     }
 
     ?>
@@ -738,7 +735,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
             if (isset($dataMarker->field_logo_fid)) echo"<img src='" . file_create_url(file_load($dataMarker->field_logo_fid)->uri) . "' width='16' alt='' />";
             echo create_link($dataMarker->title, '/residence/' . $dataMarker->nid, residence_mgmt_user_plan_has_access("PAGE_DETAIL_RESIDENCE_CONCURRENTE")) . "<br/>";
             echo "$dataMarker->field_location_postal_code, $dataMarker->field_location_locality <br /> ";
-            echo "Nb lits 20:$dataMarker->cap <br /> ";
+            echo "Nb lits :$dataMarker->cap <br /> ";
             echo "<b>$dataMarker->field_pr_prixmin_value €</b>";
             ?>");
 
@@ -1376,16 +1373,14 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
 
     <?php
 
-    switch($r->field_statut_value) {
-        case "Public":
-            echo "markerObject = new H.map.Marker(m, { icon: icon.public });";
-            break;
-        case "Associatif":
-            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
-            break;
-        case "Privé":
+    switch($r->field_isehpa_value) {
+        case 0:
             echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
             break;
+        case 1:
+            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+            break;
+
     }
 
     ?>
@@ -1394,7 +1389,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         if (isset($r->field_logo_fid)) echo"<img src='" . file_create_url(file_load($r->field_logo_fid)->uri) . "' width='16' alt='' />";
         echo "<a href='/residence/$r->nid'>" . htmlspecialchars($r->title) . "</a><br /> ";
         echo "$r->field_location_postal_code, $r->field_location_locality <br /> ";
-        echo "Nb lits 21:$r->field_capacite_value <br>";
+        echo "Nb lits :$r->field_capacite_value <br>";
         echo "<b>$r->field_pr_prixmin_value €</b>";
         ?>"
     );
@@ -1420,16 +1415,14 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     var markerObject = null;
     <?php
 
-    switch($r->field_statut_value) {
-        case "Public":
-            echo "markerObject = new H.map.Marker(m, { icon: icon.public });";
-            break;
-        case "Associatif":
-            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
-            break;
-        case "Privé":
+    switch($r->field_isehpa_value) {
+        case 0:
             echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
             break;
+        case 1:
+            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+            break;
+
     }
 
     ?>
@@ -1438,7 +1431,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         if (isset($r->field_logo_fid)) echo"<img src='" . file_create_url(file_load($r->field_logo_fid)->uri) . "' width='16' alt='' />";
         echo "<a href='/residence/$r->nid'>" . htmlspecialchars($r->title) . "</a><br /> ";
         echo "$r->field_location_postal_code, $r->field_location_locality <br /> ";
-        echo "Nb lits 99:$r->field_capacite_value <br>";
+        echo "Nb lits :$r->field_capacite_value <br>";
         echo "<b>$r->field_pr_prixmin_value €</b>";
         ?>"
     );
@@ -1538,11 +1531,14 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         foreach( $residences as $k=>$residence ){
         $k2=$k+1;
         $a=1;
-        switch($residence->field_statut_value) {
-            case "Associatif":$color='EB9B6C';$txtcolor='000';$b='FFF';break;
-            case "Public":$color='836983';$txtcolor='FFF';$b='000';break;#gris bof
-            case "Privé":$color='584AB9';$txtcolor='FFF';$b='000';break;
-            default:$color='FFF';$txtcolor='000';$b='FFF';break;
+        switch($residence->field_isehpa_value) {
+            case 0:
+                echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+                break;
+            case 1:
+                echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+                break;
+
         }
         ?>
         fs=<?=$fs?>;k=<?=$k2?>;bgColor='<?=$color?>';txtColor='<?=$txtcolor?>';border='<?=$b?>';w=<?=$w?>;h=<?=$h?>;zoom=<?=$zoom?>;
@@ -1560,7 +1556,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
                 $groupeLogo=''; if (isset($residence->field_logo_fid)) {$groupeLogo = "<img src='" . file_create_url(file_load($residence->field_logo_fid)->uri) . "' width='16' alt='' />";}
                 echo " #$k2 $groupeLogo <a href='/residence/$residence->nid'>" . htmlspecialchars($residence->title) . "</a><br /> ";
                 echo "$residence->field_location_postal_code, $residence->field_location_locality <br /> ";
-                echo "Nb lits 10 :$residence->field_capacite_value <br /> ";
+                echo "Nb lits  :$residence->field_capacite_value <br /> ";
                 echo "<b>$residence->field_pr_prixmin_value €</b>";
                 ?>");
             return final;
@@ -1640,14 +1636,19 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         <?php
         }else{
         $groupeLogo=''; if (isset($residence->field_logo_fid)) {$groupeLogo = "<img src='" . file_create_url(file_load($residence->field_logo_fid)->uri) . "' width='16' alt='' />";}
-        $desc=" #$k2 $groupeLogo <a href='/residence/$residence->nid'>" . htmlspecialchars($residence->title) . "</a><br />$residence->field_location_postal_code, $residence->field_location_locality <br />Nb lits 44:$residence->field_capacite_value <br /><b>$residence->field_pr_prixmin_value €</b>";
+        $desc=" #$k2 $groupeLogo <a href='/residence/$residence->nid'>" . htmlspecialchars($residence->title) . "</a><br />$residence->field_location_postal_code, $residence->field_location_locality <br />Nb lits :$residence->field_capacite_value <br /><b>$residence->field_pr_prixmin_value €</b>";
 
         $k2=$k+1;
-        switch($residence->field_statut_value) {
-            case "Associatif":$color='EB9B6C';$txtcolor='000';$b='FFF';break;
-            case "Public":$color='836983';$txtcolor='FFF';$b='000';break;#gris bof
-            case "Privé":$color='584AB9';$txtcolor='FFF';$b='000';break;
-            default:$color='FFF';$txtcolor='000';$b='FFF';break;
+
+
+        switch($residence->field_isehpa_value) {
+            case 0:
+                echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+                break;
+            case 1:
+                echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+                break;
+
         }?>
         fs=<?=$fs?>;k=<?=$k2?>;bgColor='<?=$color?>';txtColor='<?=$txtcolor?>';border='<?=$b?>';w=<?=$w?>;h=<?=$h?>;zoom=<?=$zoom?>;
         pngFileName=k+'-'+bgColor+'-'+txtColor+'-'+border+'-'+w+'-'+h+'-'+zoom;

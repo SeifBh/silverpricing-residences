@@ -78,6 +78,8 @@ function findResidencesByGroup( $groupId ) {
 
     $query->join('field_data_field_groupe', 'grp', 'grp.entity_id = n.nid and grp.field_groupe_tid = :groupId', array( ':groupId' => $groupId ));
     $query->join('field_data_field_type', 's', 's.entity_id = n.nid', array());
+    $query->join('field_data_field_statut', 'ss', 'ss.entity_id = n.nid', array());
+
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
@@ -91,11 +93,18 @@ function findResidencesByGroup( $groupId ) {
     $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.field_groupe_tid',[]);$query->fields('logo',['field_logo_fid']);
 
 
+    $query->fields('er', array('field_isra_value'));
+
+    $query->fields('eh', array('field_isehpa_value'));
+
+
     $query->fields('n', array('nid', 'title'));
     $query->fields('ff', array('field_finess_value'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('lng', array('field_longitude_value'));
+    $query->fields('ss', array('field_statut_value'));
+
     $query->fields('t', array('field_pr_prixmin_value'));
     $query->fields('capacite', array('field_capacite_value'));
 
