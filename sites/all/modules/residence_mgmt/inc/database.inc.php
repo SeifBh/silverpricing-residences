@@ -59,6 +59,23 @@ function findResidencesByGroup( $groupId ) {
     
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+    $query->isNotNull('t.field_pr_prixmin_value');
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
+
     $query->join('field_data_field_groupe', 'grp', 'grp.entity_id = n.nid and grp.field_groupe_tid = :groupId', array( ':groupId' => $groupId ));
     $query->join('field_data_field_type', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
@@ -91,6 +108,23 @@ function searchResidencesByGroup($groupeId = null, $dataForm = array()) {
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+    $query->isNotNull('t.field_pr_prixmin_value');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
+
     $query->join('field_data_field_groupe', 'g', 'g.entity_id = n.nid and g.field_groupe_tid = :groupeId', [ ':groupeId' => $groupeId ]);
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
@@ -100,8 +134,8 @@ function searchResidencesByGroup($groupeId = null, $dataForm = array()) {
     $query->join('field_data_field_capacite', 'capacite', 'capacite.entity_id =  n.nid', array());
     $query->join('field_data_field_departement', 'dn', 'dn.entity_id = n.nid', array());
     $query->join('taxonomy_term_data', 'd', 'd.tid = dn.field_departement_tid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 't', 't.entity_id = rc.entity_id', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = rc.entity_id', array());
 
     #$query->leftjoin('field_data_field_groupe', 'g', 'g.entity_id = n.nid',[]);
     #$query->leftjoin('taxonomy_term_data', 'grp', 'g.field_groupe_tid =:groupeId', array());
@@ -117,7 +151,7 @@ function searchResidencesByGroup($groupeId = null, $dataForm = array()) {
     $query->fields('s', array('field_statut_value'));
     $query->fields('grp', array('name'));
     $query->fields('logo', array('field_logo_fid'));
-    $query->fields('t', array('field_tarif_chambre_simple_value'));
+    $query->fields('t', array('field_pr_prixmin_value'));
     $query->fields('capacite', array('field_capacite_value'));
 
     if( isset($dataForm['residence']) && !empty($dataForm['residence']) ) {

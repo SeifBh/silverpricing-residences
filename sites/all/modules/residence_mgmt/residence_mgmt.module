@@ -1778,11 +1778,12 @@ function residence_mgmt_get_groupe_details($groupeId = null)
 
     $groupe = taxonomy_term_load($groupeId);
     $residences = findResidencesByGroup($groupeId);
+
     $departements = findDepartmentsByGroup($groupeId);
 
     foreach ($residences as $r) {
-        if (!empty($r->field_tarif_chambre_simple_value) && $r->field_tarif_chambre_simple_value != "NA") {
-            $tarifList[] = $r->field_tarif_chambre_simple_value;
+        if (!empty($r->field_pr_prixmin_value) && $r->field_pr_prixmin_value != null) {
+            $tarifList[] = $r->field_pr_prixmin_value;
         }
         $statistiques_globales["Nbre de lits"] += $r->field_capacite_value;
     }
@@ -1797,8 +1798,8 @@ function residence_mgmt_get_groupe_details($groupeId = null)
     $residencesFiltered = searchResidencesByGroup($groupeId, $_POST);
 
     foreach ($residencesFiltered as $r) {
-        if (!empty($r->field_tarif_chambre_simple_value && $r->field_tarif_chambre_simple_value != "NA")) {
-            $tarifFilteredList[] = $r->field_tarif_chambre_simple_value;
+        if (!empty($r->field_pr_prixmin_value && $r->field_pr_prixmin_value != null)) {
+            $tarifFilteredList[] = $r->field_pr_prixmin_value;
         }
         $statistiques["Nbre de lits"] += $r->field_capacite_value;
     }
@@ -1832,10 +1833,10 @@ function residence_mgmt_get_groupe_details($groupeId = null)
     }
 
     $query = db_select('field_revision_field_date_de_modification', 'dm');
-    $query->leftJoin('field_revision_field_tarif_chambre_simple', 'cs', 'cs.revision_id = dm.revision_id', array());
-    $query->condition('cs.field_tarif_chambre_simple_value', 'NA', '<>');
+    $query->leftJoin('field_revision_field_pr_prixmin', 'cs', 'cs.revision_id = dm.revision_id', array());
+    $query->isNotNull('cs.field_pr_prixmin_value');
     $query->condition('dm.entity_id', $chambresNids, 'IN');
-    $query->fields('cs', array('entity_id', 'field_tarif_chambre_simple_value'));
+    $query->fields('cs', array('entity_id', 'field_pr_prixmin_value'));
     $query->addExpression("DATE_FORMAT(dm.field_date_de_modification_value, '%Y-%m')", 'date_modification');
     $query->orderBy('date_modification', 'asc');
     $groupeChambres = fetchAll($query);
@@ -1847,7 +1848,7 @@ function residence_mgmt_get_groupe_details($groupeId = null)
     }
 
     foreach ($groupeChambres as $groupeChambre) {
-        $resultList[$groupeChambre->date_modification][$groupeChambre->entity_id] = $groupeChambre->field_tarif_chambre_simple_value;
+        $resultList[$groupeChambre->date_modification][$groupeChambre->entity_id] = $groupeChambre->field_pr_prixmin_value;
     }
 
     $priceList = []; // current price of residences
