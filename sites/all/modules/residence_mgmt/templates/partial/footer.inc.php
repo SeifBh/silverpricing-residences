@@ -1373,12 +1373,11 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
 
     switch($r->field_isehpa_value) {
         case "0":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
+            echo "markerObject = new H.map.Marker(m, { icon: icon.public });";
             break;
         case "1":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
+            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
             break;
-
     }
 
     ?>
@@ -1415,12 +1414,11 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
 
     switch($r->field_isehpa_value) {
         case "0":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
+            echo "markerObject = new H.map.Marker(m, { icon: icon.public });";
             break;
         case "1":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
+            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
             break;
-
     }
 
     ?>

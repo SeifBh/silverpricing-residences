@@ -152,6 +152,8 @@ function searchResidencesByGroup($groupeId = null, $dataForm = array()) {
     $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid', array());
 
     $query->fields('n', array('nid', 'title'));
+    $query->fields('eh', array());
+    $query->fields('er', array());
     $query->fields('ff', array('field_finess_value'));
     $query->fields('d', array('name'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
