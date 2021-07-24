@@ -1081,7 +1081,7 @@ function residence_mgmt_dashboard()
         $query->fields('k', array('field_residence_id_value'));
         $query->orderBy("b.field_pr_prixmin_value", "DESC");
 
-        $query->range(0, 155);
+        $query->range(0, 55);
         $quickWins = fetchAll($query);
 
 
@@ -1159,7 +1159,7 @@ function residence_mgmt_dashboard()
          $query->fields('tmh', array('field_tmh_value'));
          $query->fields('f', array('field_favoris_value'));*/
         $query->fields('n', array());
-        $query->range(0, 155);
+        $query->range(0, 55);
         $maquettes = fetchAll($query);
 
         // file_put_contents( DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file, json_encode($maquettes));
@@ -1245,7 +1245,7 @@ function residence_mgmt_dashboard()
             //$query->addExpression('GROUP_CONCAT(s.field_statut_type)', 'statuses');
             $query->addExpression('GROUP_CONCAT(tarif.field_pr_prixmin_value)', 'tarifs');
             $query->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
-            $query->range(0, 155);
+            $query->range(0, 55);
 
             $residences = $query->execute()->fetch();
         }
@@ -1313,7 +1313,7 @@ function residence_mgmt_dashboard()
             #$query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
             $query->leftjoin('field_data_field_manager', 'mgr', 'mgr.entity_id = n.nid', []);
             $query->fields('mgr', ['field_manager_value']);
-            $query->range(0, 155);
+            $query->range(0, 55);
 
             $residences = fetchAll($query);
             foreach ($residences as $t) {#
@@ -1330,6 +1330,7 @@ function residence_mgmt_dashboard()
         */
         // DATA MAPS
         $dataMarkers = $residences;
+
 
     }
     // varDebug(count($dataMarkers));
@@ -1584,6 +1585,7 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
     $statistique_globale = get_statistique_globale($departementId);
 
     $residences = findResidence($departementId, $_POST);
+
 
     $requete_statistique = get_requete_statistique($residences);
 
@@ -2321,6 +2323,7 @@ function residence_mgmt_recherche_silverex()
 #(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude))))
                 $s = "select * from silverpricing_data_db.health_organizations where (" . implode(' or ', $wor) . ") and (6371 * acos(cos(radians(latitude)) * cos(radians($lat) ) * cos(radians($lon) -radians(longitude)) + sin(radians(latitude)) * sin(radians($lat)))) <= $perimetre";
                 $healthOrganizations = \fun::sql($s, 'larav');
+      
                 foreach ($healthOrganizations as &$t) {
                     $t = (object)$t;
                 }

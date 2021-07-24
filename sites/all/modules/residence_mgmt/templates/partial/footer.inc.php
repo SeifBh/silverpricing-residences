@@ -45,16 +45,17 @@
     // Create a marker using the previously instantiated icon and add marker to the map:
     <?php
     $a='home dashboard';
+
     foreach( $dataMarkers as $dataMarker ): ?>
     var marker = { lat: <?php echo $dataMarker->field_latitude_value; ?>, lng: <?php echo $dataMarker->field_longitude_value; ?> };
     markers.push(marker);var markerObject = null;
     <?php
     switch($dataMarker->field_isehpa_value) {
-        case 0:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+        case "0":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
             break;
-        case 1:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+        case "1":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
             break;
 
     }
@@ -539,11 +540,11 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         $groupeLogo = "<img src='" . file_create_url(file_load($dataMarker->field_logo_fid)->uri) . "' width='16' alt='' />";
     }
     switch($dataMarker->field_isehpa_value) {
-        case 0:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+        case "0":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
             break;
-        case 1:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+        case "1":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
             break;
 
     }
@@ -605,16 +606,13 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     requestMarkers.push(m);
     var markerObject = null;
     <?php
-
-    switch($r->field_isehpa_value) {
-        case 0:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
-            break;
-        case 1:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
-            break;
-
+    switch($residence->field_statut_value) {
+        case "Associatif":$color='EB9B6C';$txtcolor='000';$b='FFF';break;
+        case "Public":$color='836983';$txtcolor='FFF';$b='000';break;#gris bof
+        case "Privé":$color='584AB9';$txtcolor='FFF';$b='000';break;
+        default:$color='FFF';$txtcolor='000';$b='FFF';break;
     }
+
     ?>
 
     addInfoBubble(<?/*departement*/?>requestHereMap, markerObject,
@@ -719,11 +717,11 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     <?php
 
     switch($dataMarker->field_isehpa_value) {
-        case 0:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+        case "0":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
             break;
-        case 1:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+        case "1":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
             break;
 
     }
@@ -1374,11 +1372,11 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     <?php
 
     switch($r->field_isehpa_value) {
-        case 0:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+        case "0":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
             break;
-        case 1:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+        case "1":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
             break;
 
     }
@@ -1416,11 +1414,11 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     <?php
 
     switch($r->field_isehpa_value) {
-        case 0:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+        case "0":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
             break;
-        case 1:
-            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+        case "1":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
             break;
 
     }
@@ -1531,14 +1529,11 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         foreach( $residences as $k=>$residence ){
         $k2=$k+1;
         $a=1;
-        switch($residence->field_isehpa_value) {
-            case 0:
-                echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
-                break;
-            case 1:
-                echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
-                break;
-
+        switch($residence->field_statut_value) {
+            case "Associatif":$color='EB9B6C';$txtcolor='000';$b='FFF';break;
+            case "Public":$color='836983';$txtcolor='FFF';$b='000';break;#gris bof
+            case "Privé":$color='584AB9';$txtcolor='FFF';$b='000';break;
+            default:$color='FFF';$txtcolor='000';$b='FFF';break;
         }
         ?>
         fs=<?=$fs?>;k=<?=$k2?>;bgColor='<?=$color?>';txtColor='<?=$txtcolor?>';border='<?=$b?>';w=<?=$w?>;h=<?=$h?>;zoom=<?=$zoom?>;
@@ -1642,11 +1637,11 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
 
 
         switch($residence->field_isehpa_value) {
-            case 0:
-                echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+            case "0":
+                echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
                 break;
-            case 1:
-                echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+            case "1":
+                echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
                 break;
 
         }?>

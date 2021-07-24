@@ -819,6 +819,7 @@ and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
     // DEPARTEMENT
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
     $query->join('taxonomy_term_data', 't', 'd.field_departement_tid = t.tid', array());
+    $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
 
     // GROUPE
     $query->join('field_data_field_groupe', 'grp', 'grp.entity_id = n.nid', array());
@@ -833,19 +834,21 @@ and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('lng', array('field_longitude_value'));
     $query->fields('t', array('name'));
+    $query->fields('s', array('field_statut_value'));
 
-    $query->fields('eh', array('field_isehpa_value'));
-    $query->fields('er', array('field_isra_value'));
+    $query->fields('eh', array());
+    $query->fields('er', array());
 
 
     $query->fields('grp_term', array('name'));
     $query->fields('grp_logo', array('field_logo_fid'));
-
     $query->addExpression('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude))))', 'distance', array( ':latitude' => $latitude, ':longitude' => $longitude ));
-    $query->where('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude)))) <= :perimetre', array( ':perimetre' => $perimetre, ':latitude' => $latitude, ':longitude' => $longitude ));
+    //$query->where('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude)))) <= :perimetre', array( ':perimetre' => $perimetre, ':latitude' => $latitude, ':longitude' => $longitude ));
     $query->orderBy('distance', 'ASC');
     #$_ENV['stop']=__FILE__.__line__;
+    $query->range(0,20);
     $residences = fetchAll($query);
+
     return $residences;
 }
 
@@ -1000,8 +1003,23 @@ function findResidence($departementId = null, $dataForm = array()) {
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+    $query->isNotNull('t.field_pr_prixmin_value');
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
+
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
@@ -1564,6 +1582,22 @@ function getLatLngResidencesByDepartment( $departementId ) {
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+    $query->isNotNull('t.field_pr_prixmin_value');
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
@@ -1584,7 +1618,8 @@ function getLatLngResidencesByDepartment( $departementId ) {
     $query->fields('lng', array('field_longitude_value'));
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
-    $query->fields('t', array('field_pr_prixmin_value'));
+    $query->fields('er', array());
+    $query->fields('eh', array());
 
 
     $residences = fetchAll($query);
