@@ -1084,7 +1084,7 @@ function residence_mgmt_dashboard()
         $query->range(0, 5);
         $quickWins = fetchAll($query);
 
-   
+
         foreach ($quickWins as $key => $r) {
 
 
@@ -1392,7 +1392,7 @@ function residence_mgmt_get_quick_win()
     $query->join('field_data_field_departement', 'dep', 'dep.entity_id = n.nid', array());
     $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
     $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
 
 
     $query->fields('n', array('nid', 'title'));
