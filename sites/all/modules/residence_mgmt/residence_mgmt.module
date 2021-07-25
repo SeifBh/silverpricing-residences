@@ -680,15 +680,8 @@ php72 ~/home/ehpad/app/z/alerts.php '{"210007159":{"prixHebPermCs":1}}' ;
 
 function residence_mgmt_cron($a = null, $b = null)
 {
-    print '<pre>';
-    var_dump('processing...');
-    print '<pre>';
-
-
+    
     updateAllResidencesFromPersonnesAgeesJson();
-    print '<pre>';
-    var_dump('done');
-    print '<pre>';
 
 
 }

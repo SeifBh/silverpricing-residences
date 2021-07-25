@@ -204,13 +204,13 @@ function importResidencesNotEhpad($passedFiness = null, $_c = null)
         }
         $_c = json_decode($_a['contents'], 1);
     }
-/*
-    usort($_c, function ($a, $b) {
-        return $b->Variable1 <=> $a->Variable1;
-    });
+    /*
+        usort($_c, function ($a, $b) {
+            return $b->Variable1 <=> $a->Variable1;
+        });
 
-    $parts = array_slice($_c, 1, 10);
-*/
+        $parts = array_slice($_c, 1, 10);
+    */
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
@@ -266,6 +266,30 @@ function importResidencesNotEhpad($passedFiness = null, $_c = null)
 
 function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsForces = [], $_c = null)
 {
+
+
+    $mode = "PROD";
+    $localJson = array(
+        array(
+            '_id' => '17649',
+            'title' => 'MARPA de Manziat Bage La Ville',
+            'updatedAt' => '2021-07-11T18:33:52.000Z',
+            'raPrice' => array(
+                '_id' => '010001246',
+                'updatedAt' => '2019-07-03T22:00:00.000Z',
+                'PrixF1' => 793,
+                'PrixF1Bis' => 856,
+                'PrixF2' => 1076
+            ),
+            'noFinesset' => '010001246',
+            'IsEHPAD' => false,
+            'IsEHPA' => false,
+            'cerfa' => null,
+            'prixMin' => 793
+
+        ));
+
+
 #todo:lock##ini_set('max_execution_time',9999999);
     $champs = [];
     if (isset($_POST["forceFiness"]) and $_POST["forceFiness"]) {
@@ -274,7 +298,9 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
     }
     ini_set('max_execution_time', -1);
     ini_set('memory_limit', -1);
+
     if (strpos($_SERVER['HTTP_HOST'], '.home') === FALSE) {
+
         $lf = __file__ . __function__ . '.lock';
         if (is_file($lf) and filemtime($lf) > time() - 70000) die("locked:$lf");
         touch($lf);
@@ -283,20 +309,23 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
             unlink($lf);
         });#
     }
+
+
     echo '<pre>';
     $btime = $starts = time();
     /* Attention : ce ne sont pas toutes des Ehpad .. */
     $ch2date = $res2date = $__inserts = $__updates = $chambreIdtoResId = $resFit2Id = $ch2date = $res2date = $notModified = $fin2rid = $tarifsModifies = $c2r = [];
     $geomodif = $newResidences = 0;
     $url = 'https://www.pour-les-personnes-agees.gouv.fr/api/v1/establishment/';#finess:argv2,/010001246
-    #$url='https://www.pour-les-personnes-agees.gouv.fr/api/v1/establishment/010001246';
-    #https://www.pour-les-personnes-agees.gouv.fr/api/v1/establishment/010786259
+
     if (!$_c) {
         $f = $_SERVER['DOCUMENT_ROOT'] . 'z/curlcache/' . date('ymd') . '-' . preg_replace('~[^a-z0-9\.\-_]+|\-+~i', '-', $url) . 'json';
         if (is_file($f)) {
+
             $_a = ['contents' => file_get_contents($f)];#cached
             $a = 2;
         } else {
+
             $_a = Alptech\Wip\fun::cup(['url' => $url, 'timeout' => 1600]);
             if (!$_a['contents'] or $_a['info']['http_code'] != 200 or $_a['error']) {
                 \Alptech\Wip\fun::dbm([__FILE__ . __line__, 'scrappingError:' . $currentUrl, $_a], 'php500');
@@ -305,49 +334,65 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
             $_written = file_put_contents($f, $_a['contents']);#
         }
         $_c = json_decode($_a['contents'], 1);
+
+        //$_c = $_c['contents'];
     }
-    unset($_a);
-    $_mem[__line__] = memory_get_usage(1);
+
+    if ($mode == "DEV") {
+        unset($_c);
+
+        $_c = json_encode($localJson);
+        $_c = json_decode($_c, true);
+
+    }
+    $_c = array_slice($_c, 0, 3);
+
     foreach ($_c as $k => &$t) {
         $finesses[] = $t['noFinesset'];
     }
     $finesses = array_unique($finesses);
-
     $idPersonnesAgees2Res = $res2prix = [];
+
     if ('memTarif') {
+
         $tarifs = ['cs' => [], 'cst' => [], 'cd' => [], 'cdt' => [], 'gir12' => [], 'gir34' => [], 'gir56' => []];
-        $x = Alptech\Wip\fun::sql("select field_tarif_chambre_simple_value as v,entity_id as id from field_data_field_tarif_chambre_simple where field_tarif_chambre_simple_value<>'NA'");#where entity_id in array_keys($__updates['chambre']);
+        $x = Alptech\Wip\fun::sql("select field_pr_prixmin_value as v,entity_id as id from field_data_field_pr_prixmin where field_pr_prixmin_value IS NOT NULL");#where entity_id in array_keys($__updates['chambre']);
+
         foreach ($x as $t) {
             $tarifs['cs'][$t['id']] = $t['v'];
         }
-        $x = Alptech\Wip\fun::sql("select field_tarif_chambre_double_value as v,entity_id as id from field_data_field_tarif_chambre_double where field_tarif_chambre_double_value<>'NA'");
+
+
+        $x = Alptech\Wip\fun::sql("select field_pr_prixf1_value as v,entity_id as id from field_data_field_pr_prixf1 where field_pr_prixf1_value IS NOT NULL");
+
         foreach ($x as $t) {
             $tarifs['cd'][$t['id']] = $t['v'];
         }
-        $x = Alptech\Wip\fun::sql("select field_tarif_chambre_simple_tempo_value as v,entity_id as id from field_data_field_tarif_chambre_simple_tempo where field_tarif_chambre_simple_tempo_value<>'NA'");
+        $x = Alptech\Wip\fun::sql("select field_pr_prixf1bis_value as v,entity_id as id from field_data_field_pr_prixf1bis where field_pr_prixf1bis_value IS NOT NULL");
         foreach ($x as $t) {
             $tarifs['cst'][$t['id']] = $t['v'];
         }
-        $x = Alptech\Wip\fun::sql("select field_tarif_chambre_double_tempo_value as v,entity_id as id from field_data_field_tarif_chambre_double_tempo where field_tarif_chambre_double_tempo_value<>'NA'");
+        $x = Alptech\Wip\fun::sql("select field_pr_prixf2_value as v,entity_id as id from field_data_field_pr_prixf2 where field_pr_prixf2_value IS NOT NULL");
         foreach ($x as $t) {
             $tarifs['cdt'][$t['id']] = $t['v'];
         }
-        $x = Alptech\Wip\fun::sql("select field_tarif_gir_1_2_value as v,entity_id as id from field_data_field_tarif_gir_1_2 where field_tarif_gir_1_2_value<>'NA'");
-        foreach ($x as $t) {
-            $tarifs['gir12'][$t['id']] = $t['v'];
-        }
-        $x = Alptech\Wip\fun::sql("select field_tarif_gir_3_4_value as v,entity_id as id from field_data_field_tarif_gir_3_4 where field_tarif_gir_3_4_value<>'NA'");
-        foreach ($x as $t) {
-            $tarifs['gir34'][$t['id']] = $t['v'];
-        }
-        $x = Alptech\Wip\fun::sql("select field_tarif_gir_5_6_value as v,entity_id as id from field_data_field_tarif_gir_5_6 where field_tarif_gir_5_6_value<>'NA'");
-        foreach ($x as $t) {
-            $tarifs['gir56'][$t['id']] = $t['v'];
-        }
+        /* $x = Alptech\Wip\fun::sql("select field_tarif_gir_1_2_value as v,entity_id as id from field_data_field_tarif_gir_1_2 where field_tarif_gir_1_2_value<>'NA'");
+         foreach ($x as $t) {
+             $tarifs['gir12'][$t['id']] = $t['v'];
+         }
+         $x = Alptech\Wip\fun::sql("select field_tarif_gir_3_4_value as v,entity_id as id from field_data_field_tarif_gir_3_4 where field_tarif_gir_3_4_value<>'NA'");
+         foreach ($x as $t) {
+             $tarifs['gir34'][$t['id']] = $t['v'];
+         }
+         $x = Alptech\Wip\fun::sql("select field_tarif_gir_5_6_value as v,entity_id as id from field_data_field_tarif_gir_5_6 where field_tarif_gir_5_6_value<>'NA'");
+         foreach ($x as $t) {
+             $tarifs['gir56'][$t['id']] = $t['v'];
+         }*/
         $_mem[__line__] = memory_get_usage(1);
+
         $a = 1;
     }
-#erreur:: ORDER BY clause is not in GROUP BY clause and contains nonaggregated column 'silverpricing_db.t.revision_id' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+
 
     $mysql58groupMode = Alptech\Wip\fun::sql("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
 
@@ -365,7 +410,7 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
             $res2date[$t['a']] = $t['date'];
         }
 
-        $x = Alptech\Wip\fun::sql("SELECT t.entity_id as a,field_residence_target_id as b,n.changed as date FROM field_data_field_residence t inner join node n on n.nid=t.entity_id where t.bundle='chambre' group by t.entity_id order by t.revision_id desc");#field_date_de_modification ..
+        $x = Alptech\Wip\fun::sql("SELECT t.entity_id as a,field_residence_id_value as b,n.changed as date FROM field_data_field_residence_id t inner join node n on n.nid=t.entity_id where t.bundle='prixresidences' group by t.entity_id order by t.revision_id desc");#field_date_de_modification ..
         foreach ($x as $t) {
             $res2chambre[$t['b']][] = $t['a'];
             $ch2date[$t['a']] = $t['date'];
@@ -373,6 +418,9 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
         $a = 1;
     }
 
+    foreach ($x as $t) {
+        $fin2rid[$t['b']] = $t['a'];
+    }
     $x = Alptech\Wip\fun::sql("select entity_id as k,field_personnesageesid_value as v from field_data_field_personnesageesid");
     foreach ($x as $t) {
         $idPersonnesAgees2Res[$t['v']] = $t['k'];
@@ -393,20 +441,9 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
 #+ todo :: catch all mysql insertions
 
     $a = 1;
-    foreach ($_c as $k => $t) {#10899 valeurs / 7400 ehpad
 
-     
-
-
-        if ($forceFiness) {#Marpa & Autres ...
-            if ($t['noFinesset'] != $forceFiness) {
-                continue;
-            }
-            $t['ehpadPrice'] = array_merge($t['ehpadPrice'], $tarifsForces);#sinon magie !!2,
-            $a = 1;
-        }
-        if (!isset($t['ehpadPrice']) and !$t['IsEHPAD']) {#Marpa & Autres ...
-
+    foreach ($_c as $k => &$t) {#10899 valeurs / 7400 ehpad
+        if (!isset($t['ehpadPrice']) and !$t['IsEHPAD']) {
 
             $_rid = $prices = $prixR = 0;
 
@@ -414,33 +451,17 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
             $a = "cuj 'https://ehpad.home/updateAllResidencesByJson?ignore=1' a '' 1";
             $t = array_filter($t);
 
-
-            /*
-            field_personnesageesid‎
-            field_finess
-
-             field_type,field_sous_type,field_metrescarres,field_taille,field_prixlogement,field_prixservices‎
-            Type= {{ Résidence Senior | Ehpad }}
-            Sous-type = Résidence Services | Autonomie | Ehpa | Marpa
-            MètresCarrés=59
-            Taille=F1|F2|F3|F4
-            PrixLogement= (location men) 500€ loyer
-            PrixServices= (global) + 900€ services obligatoires
-             */
             if (isset($resFit2Id[$t['noFinesset']])) {
                 $_rid = $resFit2Id[$t['noFinesset']];
             } elseif (isset($idPersonnesAgees2Res[$t['_id']])) {
                 $_rid = $idPersonnesAgees2Res[$t['_id']];
             }
 
-#if(isset($fin2marpa[$t['noFinesset']])){$upd=1;}elseif(isset($id2marpa[$t['_id']])){$upd=2;}
-
             if (isset($t['raPrice'])) {
                 $prices = $t['raPrice'];
                 unset($t['raPrice']);
             }#save it for later
-
-            foreach ($t as $k => &$v) {
+            foreach ($t as $k => $v) {
                 if (is_array($v)) {
                     foreach ($v as $k2 => $v2) {
                         if ($v2) $t[$k . '_' . $k2] = $v2;
@@ -450,29 +471,60 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
             }
             unset($v);
             $t = array_filter($t);
-#array_walk($champs, function($a, &$b) { $b=trim(strtolower($b));});
             $t = array_map_assoc('aktolower', $t);
 
             if ($_rid) {
                 $res = node_load($_rid);
                 $a = 1;
+
             } else {#nouvelle entité
+
+
                 $res = new stdClass();
+                $res->uid = 1;
+                $res->uid['und'][0]['value'] = 1;
+
                 $res->type = 'residence';
                 $res->title = $t['title'];
                 $res->field_finess['und'][0]['value'] = $t['nofinesset'];
-                /*
-                Type= {{ Résidence Senior | Ehpad }}
-                Sous-type = Résidence Services | Autonomie | Ehpa | Marpa
-                */
-                $res->field_type['und'][0]['value'] = 'Résidence Senior';
-                $res->field_groupe['und'][0]['tid'] = 102;#default
-                $res->field_personnesageesid['und'][0]['value'] = $t['_id'];
-            }/*isconv_apl,isf1bis,isf2,ishcompl,isra,legal_status,*/
+                $res->field_type['und'][0]['value'] = 'notEhpad';
+                $res->field_isehpa['und'][0]['value'] = (int)$t['isehpa'];
+                $res->field_isra['und'][0]['value'] = (int)$t['isra'];
+                $res->field_isesld['und'][0]['value'] = (int)$t['isesld'];
+                $res->field_isaja['und'][0]['value'] = (int)$t['isaja'];
+                $res->field_ishcompl['und'][0]['value'] = (int)$t['ishcompl'];
+                $res->field_ishtempo['und'][0]['value'] = (int)$t['ishtempo'];
+                $res->field_isacc_jour['und'][0]['value'] = (int)$t['isacc_jour'];
+                $res->field_isacc_nuit['und'][0]['value'] = (int)$t['isacc_nuit'];
+                $res->field_ishab_aide_soc['und'][0]['value'] = (int)$t['ishab_aide_soc'];
 
-            if ('ok') {
+
+                $res->field_alzheimer['und'][0]['value'] = (int)$t['IsALZH'];
+                $res->field_accueil_de_jour['und'][0]['value'] = (int)$t['IsACC_JOUR'];
+                $res->field_aide_sociale['und'][0]['value'] = (int)$t['IsHAB_AIDE_SOC'];
+
+                $res->field_capacite['und'][0]['value'] = $t['capacity'];
+                $res->field_statut['und'][0]['value'] = $statuses[$t['legal_status']];
+
+                $res->field_tarif_gir_1_2['und'][0]['value'] = $t['ehpadPrice']['tarifGir12'];
+                $res->field_tarif_gir_3_4['und'][0]['value'] = $t['ehpadPrice']['tarifGir34'];
+                $res->field_tarif_gir_5_6['und'][0]['value'] = $t['ehpadPrice']['tarifGir56'];
+
+
+                $res->field_location['und'][0]['country'] = 'FR';
+                $res->field_location['und'][0]['thoroughfare'] = $t['coordinates_street'];
+                $res->field_location['und'][0]['locality'] = $t['coordinates_city'] . $arrondissement;
+                $res->field_location['und'][0]['postal_code'] = $t['coordinates_postcode'];
+
+                $departmentId = findDepartmentByNumber($t['coordinates_deptcode']);
+
+                $res->field_departement['und'][0]['tid'] = $departmentId;
+                $res->field_groupe['und'][0]['tid'] = 102;
                 $res->field_latitude['und'][0]['value'] = $t['coordinates_latitude'];
+
                 $res->field_longitude['und'][0]['value'] = $t['coordinates_longitude'];
+                $res->field_gestionnaire['und'][0]['value'] = $t['coordinates_gestionnaire'];
+                $res->status = 1;
 
                 $status = 'Privé';
                 if (preg_match('~assoc~i', $t['legal_status'])) $status = 'Associatif'; elseif (preg_match('~public~i', $t['legal_status'])) $status = 'Public';
@@ -483,17 +535,10 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
 
                 $res->field_statut['und'][0]['value'] = $status;#privé non lucratif #<== todo conversion????
 
-                $departmentId = findDepartmentByNumber($t['coordinates_deptcode']);
-                if ($departmentId) $res->field_departement['und'][0]['tid'] = $departmentId;
-
-                $res->field_location['und'][0]['country'] = 'FR';
-                $res->field_location['und'][0]['thoroughfare'] = $t['coordinates_street'];
-                $res->field_location['und'][0]['locality'] = $t['coordinates_city'] . $arrondissement;
-                $res->field_location['und'][0]['postal_code'] = $t['coordinates_postcode'];
-                #$res->field_location['und'][0]['lat']=$t['coordinates_latitude'];$res->field_location['und'][0]['lon']=$t['coordinates_longitude'];
             }
 
             $map = [
+
                 'updatedat' => 'field_modificationDate',
                 #'title'=>'title',
                 'nofinesset' => 'field_finess',
@@ -518,8 +563,6 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
             $b = node_save($res);
             $_rid = $res->nid;
             $a = 1;
-#$champs+=array_keys($t);#écrase ceux déjà en place
-
             if ($prices) {
                 if ($_rid) {
                     if (isset($res2prix[$_rid])) {
@@ -532,15 +575,19 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                 }#a:48160 marpa manziat bage la ville =>48163
                 if (!$prixR) {#nouvelle entité
                     $prixR = new stdClass();
+                    $prixR->status = 1;
                     $prixR->title = 'prix::' . $t['title'];
                     $prixR->type = 'prixresidences';
                     $prixR->field_residence_id['und'][0]['value'] = $_rid;
+                    $prixR->uid = 1;
                 }
                 /*
                 field_updatedat
                 field_residence_id
                  */
-                $map = ['PrixF1' => 'field_prixf1', 'PrixF1ASH' => 'field_prixf1ash', 'PrixF1Bis' => 'field_prixf1bis', 'PrixF1BisASH' => 'field_prixf1bisash', 'PrixF2' => 'field_prixf2', 'PrixF2ASH' => 'field_prixf2ash‎', 'autreTarifPrest' => 'field_autretarifprest‎', 'prestObligatoire' => 'field_prestobligatoire‎', 'cerfa' => 'field_cerfa', 'prixMin' => 'field_prixmin'];
+                $map = ['PrixF1' => 'field_pr_prixf1', 'prixMin' => 'field_pr_prixmin', 'PrixF1ASH' => 'field_pr_prixf1ash', 'PrixF1Bis' => 'field_pr_prixf1bis', 'PrixF1BisASH' => 'field_pr_prixf1bisash',
+                    'PrixF2' => 'field_pr_prixf2', 'PrixF2ASH' => 'field_pr_prixf2ash‎', 'autreTarifPrest' => 'field_pr_autretarifprest‎',
+                    'prestObligatoire' => 'field_pr_prestobligatoire_lt', 'cerfa' => 'field_pr_cerfa'];
                 foreach ($map as $k => $v) {
                     if (isset($prices[$k])) {
                         #$v2=str_replace('field_','',$v);$prixR->$v2=$prices[$k];
@@ -548,20 +595,20 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                         #$prixR->$v=$prices[$k];
                     }
                 }
+
                 $at = date('Y-m-d H:i:s', strtotime($prices['updatedAt']));
-                $prixR->field_updatedat = ['und' => [0 => ['date_type' => 'datetime', 'value' => $at, 'timezone' => 'Europe/Paris', 'timezone_db' => 'UTC',]]];/*
-    $prixR->field_updatedat['und'][0]=['date_type'=>'datetime','value'=>$at,'timezone' => 'Europe/Paris', 'timezone_db' =>'UTC',];/*
-    $prixR->field_updatedat‎['und'][0]['value']['date']=['value'=>$prices['updatedAt'],'timezone' => 'UTC', 'timezone_db' => 'UTC',];node_save($prixR);/*
-    $prixR->field_updatedat‎['und'][0]['value']['date']=date('Y-m-d H:i:s',strtotime($prices['updatedAt']));node_save($prixR);/*
-    $prixR->field_updatedat‎['und'][0]['value']=substr($prices['updatedAt'],0,10);
-    $prixR->field_updatedat‎['und'][0]['value']=['date'=>substr($prices['updatedAt'],0,10)];node_save($prixR);
-    $prixR->field_updatedat‎['und'][0]['value']=$prices['updatedAt'];node_save($prixR);*/
-                #'updatedAt'=>'field_updatedat‎',
+                $prixR->field_updatedat = ['und' => [0 => ['date_type' => 'datetime', 'value' => $at, 'timezone' => 'Europe/Paris', 'timezone_db' => 'UTC',]]];
+
+                $prixR->field_pr_prixmin['und'][0]['value'] = $prices['PrixF1'];
+                $prixR->field_pr_cerfa['und'][0]['value'] = $t['cerfa'];
+                $prixR->field_pr_uuid['und'][0]['value'] = uniqid();
+
                 $b = node_save($prixR);
                 $_Pid = $prixR->nid;
                 $a = 1;
             }
-            continue;
+
+
         }
         if (isset($_GET['ignore'])) continue;
 
@@ -569,11 +616,12 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
         $rid = $cnid = $chambre = $residence = $modifRes = $modifCh = $data = $priceLastMod = 0;
         $chambres = [];
         $lastmod = strtotime($t["updatedAt"]);
-        if (isset($t["ehpadPrice"]["updatedAt"])) $priceLastMod = $lastmod = strtotime($t["ehpadPrice"]["updatedAt"]);#upper Modif on prices
 
-        #$finess=ltrim($t['noFinesset'],0);#<== Surtout pas
+        if (isset($t["ehpadPrice"]["updatedAt"])) $priceLastMod = $lastmod = strtotime($t["ehpadPrice"]["updatedAt"]);
+
+
         $finess = $t['noFinesset'];
-        #file_put_contents('current.log',$k.'/'.$finess);#todo apcu / memcached / redis ?
+
         if (isset($fin2rid[$finess])) {
             $a = 'has';
             if (isset($resFit2Id[$finess])) {
@@ -581,16 +629,20 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
             } else {
                 $whut = 1;
             }
+
+
         }
 
         if (isset($resFit2Id[$finess])) {#exists :: at 698
             $rid = $resFit2Id[$finess];
+
             if ($res2date[$rid]) {
                 $modifRes = $res2date[$rid];
                 if (isset($res2chambre[$rid])) {
                     $chambres = $res2chambre[$rid];
                     if ($chambres) {
                         $cnid = reset($chambres);
+
                         if ($ch2date[$cnid]) {#compare $lastmod avec
                             $modifCh = $ch2date[$cnid];
                             $_lastmod = $lastmod;
@@ -603,7 +655,7 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                             } elseif ($lastmod <= $modifRes and $lastmod <= $modifCh) {#ne nécessite pas de modification :: si deux runs successifs ...
                                 #not modified,
                                 $notModified['residence'][] = $rid;
-                                $notModified['chambre'][] = $cnid;
+                                $notModified['prixresidences'][] = $cnid;
                                 continue;
                             }
                             $a = 'chambre existe avec date';
@@ -612,8 +664,11 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                     }
                 }
 
-                if ($rid and isset($t['ehpadPrice']) and 'alertes Modification de prix lorsque résidence et chambre trouvée -- et pour une nouvelle résidence ?') {
-                    if (isset($tarifs['gir12'][$rid]) and $tarifs['gir12'][$rid] != $t['ehpadPrice']['tarifGir12']) {
+                if ($rid and isset($t['raPrice']) and 'alertes Modification de prix lorsque résidence et chambre trouvée -- et pour une nouvelle résidence ?') {
+
+
+
+                    /*if (isset($tarifs['gir12'][$rid]) and $tarifs['gir12'][$rid] != $t['ehpadPrice']['tarifGir12']) {
                         $tarifsModifies['r'][$rid]['gir12'] = [$tarifs['gir12'][$rid], $t['ehpadPrice']['tarifGir12']];
                     }
                     if (isset($tarifs['gir34'][$rid]) and $tarifs['gir34'][$rid] != $t['ehpadPrice']['tarifGir34']) {
@@ -621,30 +676,30 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                     }
                     if (isset($tarifs['gir56'][$rid]) and $tarifs['gir56'][$rid] != $t['ehpadPrice']['tarifGir56']) {
                         $tarifsModifies['r'][$rid]['gir56'] = [$tarifs['gir56'][$rid], $t['ehpadPrice']['tarifGir56']];
-                    }
+                    }*/
                     #cs,cd,cdt,
                     if ($cnid) {
                         $c2r[$cnid] = $rid;#pour mapper par la suite
                         $k = 'cs';
-                        $k2 = 'prixHebPermCs';
-                        if (isset($tarifs[$k][$cnid]) and $tarifs[$k][$cnid] != $t['ehpadPrice'][$k2]) {
-                            $tarifsModifies['c'][$cnid][$k] = [$tarifs[$k][$cnid], $t['ehpadPrice'][$k2]];
+                        $k2 = 'PrixF1';
+                        if (isset($tarifs[$k][$cnid]) and $tarifs[$k][$cnid] != $t['raPrice'][$k2]) {
+                            $tarifsModifies['c'][$cnid][$k] = [$tarifs[$k][$cnid], $t['raPrice'][$k2]];
                         }
-                        $k = 'cst';
-                        $k2 = 'prixHebTempCs';
-                        if (isset($tarifs[$k][$cnid]) and $tarifs[$k][$cnid] != $t['ehpadPrice'][$k2]) {
-                            $tarifsModifies['c'][$cnid][$k] = [$tarifs[$k][$cnid], $t['ehpadPrice'][$k2]];
-                        }
-                        $k = 'cd';
-                        $k2 = 'prixHebPermCd';
-                        if (isset($tarifs[$k][$cnid]) and $tarifs[$k][$cnid] != $t['ehpadPrice'][$k2]) {
-                            $tarifsModifies['c'][$cnid][$k] = [$tarifs[$k][$cnid], $t['ehpadPrice'][$k2]];
-                        }
-                        $k = 'cdt';
-                        $k2 = 'prixHebTempCd';
-                        if (isset($tarifs[$k][$cnid]) and $tarifs[$k][$cnid] != $t['ehpadPrice'][$k2]) {
-                            $tarifsModifies['c'][$cnid][$k] = [$tarifs[$k][$cnid], $t['ehpadPrice'][$k2]];
-                        }
+                        /*  $k = 'cst';
+                          $k2 = 'prixHebTempCs';
+                          if (isset($tarifs[$k][$cnid]) and $tarifs[$k][$cnid] != $t['ehpadPrice'][$k2]) {
+                              $tarifsModifies['c'][$cnid][$k] = [$tarifs[$k][$cnid], $t['ehpadPrice'][$k2]];
+                          }
+                          $k = 'cd';
+                          $k2 = 'prixHebPermCd';
+                          if (isset($tarifs[$k][$cnid]) and $tarifs[$k][$cnid] != $t['ehpadPrice'][$k2]) {
+                              $tarifsModifies['c'][$cnid][$k] = [$tarifs[$k][$cnid], $t['ehpadPrice'][$k2]];
+                          }
+                          $k = 'cdt';
+                          $k2 = 'prixHebTempCd';
+                          if (isset($tarifs[$k][$cnid]) and $tarifs[$k][$cnid] != $t['ehpadPrice'][$k2]) {
+                              $tarifsModifies['c'][$cnid][$k] = [$tarifs[$k][$cnid], $t['ehpadPrice'][$k2]];
+                          }*/
                     }
                 }
 
@@ -655,11 +710,11 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                     if($rtt>=$modifRes or $rtt>=$lastmod){
                         $err=1;#revision timestamp above declared modifications
                     }
-                    if (0) {
+                    if(0){
 #$residence->type = 'residence';$residence->body = '';$residence->language = LANGUAGE_NONE;
 #if($residenceData->finess){$residence->field_finess[$residence->language][0]['value'] = $residenceData->finess;}
 #$residence->field_location[$residence->language][0]['country'] = "FR";
-                    }
+                }
                     $residence->field_personnesageesid = $t['_id'];
                     $residence->modificationDate = date('YmdHis', $lastmod);
                     $residence->title = $t['title'];#$title->getNode()->nodeValue;
@@ -674,10 +729,10 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                     $residence->field_site = $t['coordinates']['website'];
                     $residence->field_departement = $t['coordinates']['deptcode'];
 #if(isset($residenceData->address))$residence->field_address[$residence->language][0]['value'] = $residenceData->address;
-                    if (isset($t['ehpadPrice'])) {
-                        if ($t['ehpadPrice']['tarifGir12']) $residence->field_tarif_gir_1_2['und'][0]['value'] = $t['ehpadPrice']['tarifGir12'];
-                        if ($t['ehpadPrice']['tarifGir34']) $residence->field_tarif_gir_3_4['und'][0]['value'] = $t['ehpadPrice']['tarifGir34'];
-                        if ($t['ehpadPrice']['tarifGir56']) $residence->field_tarif_gir_5_6['und'][0]['value'] = $t['ehpadPrice']['tarifGir56'];
+                    if (isset($t['raPrice'])) {
+                        if ($t['raPrice']['PrixF1']) $residence->field_pr_prixf1['und'][0]['value'] = $t['raPrice']['PrixF1'];
+                        if ($t['raPrice']['PrixF1Bis']) $residence->field_pr_prixf1bis['und'][0]['value'] = $t['raPrice']['PrixF1Bis'];
+                        if ($t['raPrice']['PrixF2']) $residence->field_pr_prixf2['und'][0]['value'] = $t['raPrice']['PrixF2'];
                         #$tarifs=['cs'=>[],'cst'=>[],'cd'=>[],'cdt'=>[],'gir12'=>[],'gir34'=>[],'gir56'=>[]];
                     }
 // $residence->field_groupe[$residence->language][0]['value'] = "";
@@ -710,37 +765,113 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                 $residence = node_load($rid);
             }
             $a = 1;
-        } else {#y'à pas cette résidence, on la crée
-            $a = 1;#$residenceData from ça
-            $newResidences++;
-            $residenceData->finess = $finess;
-            $residenceData->title = $t['title'];
-            $residenceData->email = $t["coordinates"]["emailContact"];
-            $residenceData->website = $t["coordinates"]["website"];
-            $residenceData->phone = $t["coordinates"]["phone"];
-            $residenceData->gestionnaire = $t["coordinates"]["gestionnaire"];
-            #$residenceData->address = trim(preg_replace('/\s+/', ' ', $_c['coordinates']['title'].' '.$_c['coordinates']['street'].' '.$_c['coordinates']['postcode'].' '.$_c['coordinates']['city']));
-            $residenceData->location[0]['address']['city'] = $t["coordinates"]["city"];
-            $residenceData->location[0]['address']['postcode'] = $t["coordinates"]["postcode"];
-            $residenceData->location[0]['lat'] = $t["coordinates"]["latitude"];
-            $residenceData->location[0]['lon'] = $t["coordinates"]["longitude"];
-            $residenceData->groupe = 102;
-#select distinct(field_statut_value) from field_revision_field_statut #Associatif,Privé,Public
-            $status = 'Privé';
-            if (preg_match('~assoc~i', $t['legal_status'])) $status = 'Associatif';
-            elseif (preg_match('~public~i', $t['legal_status'])) $status = 'Public';
-            $a = 1;
-            $residenceData->status = $status;#privé non lucratif #<== todo conversion????
-            $residenceData->tarif = [2 => ['tarif-gir-1-2' => 0, 'tarif-gir-3-4' => 0, 'tarif-gir-5-6' => 0]];
+        }
 
-            $residence = addResidence($residenceData, $t['coordinates']['deptcode']);
-            $rid = $residence->nid;
-            $__inserts['residences'][$finess] = $resFit2Id[$finess] = intval($rid);
-            $a = 1;
+        else{#y'à pas cette résidence, on la crée
+            $a=1;#$residenceData from ça
+            $newResidences++;
+
+            /*$res = new stdClass();
+            $res->uid = 1;
+            $res->uid['und'][0]['value'] = 1;
+
+            $res->type = 'residence';
+            $res->title = $t['title'];
+            $res->field_finess['und'][0]['value'] = $t['nofinesset'];
+            $res->field_type['und'][0]['value'] = 'notEhpad';
+            $res->field_isehpa['und'][0]['value'] = (int)$t['isehpa'];
+            $res->field_isra['und'][0]['value'] = (int)$t['isra'];
+            $res->field_isesld['und'][0]['value'] = (int)$t['isesld'];
+            $res->field_isaja['und'][0]['value'] = (int)$t['isaja'];
+            $res->field_ishcompl['und'][0]['value'] = (int)$t['ishcompl'];
+            $res->field_ishtempo['und'][0]['value'] = (int)$t['ishtempo'];
+            $res->field_isacc_jour['und'][0]['value'] = (int)$t['isacc_jour'];
+            $res->field_isacc_nuit['und'][0]['value'] = (int)$t['isacc_nuit'];
+            $res->field_ishab_aide_soc['und'][0]['value'] = (int)$t['ishab_aide_soc'];
+
+
+            $res->field_alzheimer['und'][0]['value'] = (int)$t['IsALZH'];
+            $res->field_accueil_de_jour['und'][0]['value'] = (int)$t['IsACC_JOUR'];
+            $res->field_aide_sociale['und'][0]['value'] = (int)$t['IsHAB_AIDE_SOC'];
+
+            $res->field_capacite['und'][0]['value'] = $t['capacity'];
+            $res->field_statut['und'][0]['value'] = $statuses[$t['legal_status']];
+
+            $res->field_tarif_gir_1_2['und'][0]['value'] = $t['ehpadPrice']['tarifGir12'];
+            $res->field_tarif_gir_3_4['und'][0]['value'] = $t['ehpadPrice']['tarifGir34'];
+            $res->field_tarif_gir_5_6['und'][0]['value'] = $t['ehpadPrice']['tarifGir56'];
+
+
+            $res->field_location['und'][0]['country'] = 'FR';
+            $res->field_location['und'][0]['thoroughfare'] = $t['coordinates_street'];
+            $res->field_location['und'][0]['locality'] = $t['coordinates_city'] . $arrondissement;
+            $res->field_location['und'][0]['postal_code'] = $t['coordinates_postcode'];
+
+            $departmentId = findDepartmentByNumber($t['coordinates_deptcode']);
+
+            $res->field_departement['und'][0]['tid'] = $departmentId;
+            $res->field_groupe['und'][0]['tid'] = 102;
+            $res->field_latitude['und'][0]['value'] = $t['coordinates_latitude'];
+
+            $res->field_longitude['und'][0]['value'] = $t['coordinates_longitude'];
+            $res->field_gestionnaire['und'][0]['value'] = $t['coordinates_gestionnaire'];
+            $res->status = 1;
+
+            $status = 'Privé';
+            if (preg_match('~assoc~i', $t['legal_status'])) $status = 'Associatif'; elseif (preg_match('~public~i', $t['legal_status'])) $status = 'Public';
+            $arrondissement = '';
+            if (substr($t['coordinates']['postcode'], 0, 3) == '750') {
+                $arrondissement = ' ' . substr($t['coordinates']['postcode'], -2);
+            }
+
+            $res->field_statut['und'][0]['value'] = $status;#privé non lucratif #<== todo conversion????
+
+            */
+            $residenceData->finess=$finess;
+            $residenceData->title=$t['title'];
+            $residenceData->email=$t["coordinates"]["emailContact"];
+            $residenceData->website=$t["coordinates"]["website"];
+            $residenceData->phone=$t["coordinates"]["phone"];
+            $residenceData->gestionnaire=$t["coordinates"]["gestionnaire"];
+
+            #$residenceData->address = trim(preg_replace('/\s+/', ' ', $_c['coordinates']['title'].' '.$_c['coordinates']['street'].' '.$_c['coordinates']['postcode'].' '.$_c['coordinates']['city']));
+            $residenceData->location[0]['address']['city']=$t["coordinates"]["city"];
+            $residenceData->location[0]['address']['postcode']=$t["coordinates"]["postcode"];
+            $residenceData->location[0]['lat']=$t["coordinates"]["latitude"];
+            $residenceData->location[0]['lon']=$t["coordinates"]["longitude"];
+            $residenceData->groupe = 102;
+
+            $residenceData->field_type = 'notEhpad';
+            $residenceData->field_isehpa = (int)$t['isehpa'];
+            $residenceData->field_isra = (int)$t['isra'];
+            $residenceData->field_isesld = (int)$t['isesld'];
+            $residenceData->field_isaja = (int)$t['isaja'];
+            $residenceData->field_ishcompl = (int)$t['ishcompl'];
+            $residenceData->field_ishtempo = (int)$t['ishtempo'];
+            $residenceData->field_isacc_jour = (int)$t['isacc_jour'];
+            $residenceData->field_isacc_nuit = (int)$t['isacc_nuit'];
+            $residenceData->field_ishab_aide_soc = (int)$t['ishab_aide_soc'];
+
+            $residenceData->field_pr_prixmin = $t['prixMin'];
+            $residenceData->field_capacite = $t['capacity'];
+
+
+#select distinct(field_statut_value) from field_revision_field_statut #Associatif,Privé,Public
+            $status='Privé';
+            if(preg_match('~assoc~i',$t['legal_status']))$status='Associatif';
+            elseif(preg_match('~public~i',$t['legal_status']))$status='Public';
+            $a=1;
+            $residenceData->status=$status;#privé non lucratif #<== todo conversion????
+            $residenceData->tarif=[2=>['tarif-gir-1-2'=>0,'tarif-gir-3-4'=>0,'tarif-gir-5-6'=>0]];
+
+            $residence=addResidence($residenceData,$t['coordinates']['deptcode']);
+            $rid=$residence->nid;
+            $__inserts['residences'][$finess]=$resFit2Id[$finess]=intval($rid);
+            $a=1;
         }#array_keys($chambreIdtoResId,31210)[0] == 31209
 
-        if ($lastmod > $modifCh) {#room needs update ??? #£Si modification Manuelle ne devrait pas être écrasée
-            if (isset($res2chambre[$rid])) {
+        if($lastmod>$modifCh){#room needs update ??? #£Si modification Manuelle ne devrait pas être écrasée
+            if(isset($res2chambre[$rid])) {
                 $chambres = $res2chambre[$rid];#$chambres=array_keys($chambreIdtoResId,$residence->nid);x
                 $cnid = reset($chambres);
 
@@ -748,128 +879,117 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
 #Mettre tous les tarifs dans une matrice et stocker les variations, ici, à la source !!
 #select nr.timestamp,field_tarif_chambre_simple_value as v from node_revision nr inner join field_revision_field_tarif_chambre_simple cs on cs.revision_id=nr.vid where nid=33980 order by timestamp desc limit 20
 
-            } else {#création de chambre, sans tarifs, afin de la lier
-                $chambreData[0]['chambre-double'] = 'NA';
-                $chambreData[1]['chambre-double'] = 'NA';
-                $chambreData[0]['chambre-seule'] = 'NA';
-                $chambreData[1]['chambre-seule'] = 'NA';
-                $chambre = addChambre($chambreData, $residence);
-                $cnid = $chambre->nid;
-                $chambreIdtoResId[$cnid] = $residence->nid;
-                $__inserts['chambre'][$finess] = $cnid = intval($chambre->nid);
+            }else{#création de chambre, sans tarifs, afin de la lier
+                $chambreData[0]['chambre-double']='NA';
+                $chambreData[1]['chambre-double']='NA';
+                $chambreData[0]['chambre-seule']='NA';
+                $chambreData[1]['chambre-seule']='NA';
+                $chambre=addChambre($chambreData, $residence);
+                $cnid=$chambre->nid;
+                $chambreIdtoResId[$cnid]=$residence->nid;
+                $__inserts['prixresidences'][$finess]=$cnid=intval($chambre->nid);
             }
             #todo : get chambre nodeId per Residence fitness Number ( might not exists !//// )
             #puis données ordinaires ..
-            if ($cnid) {#si chambre trouvée ( avec des tarifs ) ..
-                if (!$data) $data = _data2object($t, null);
+            if($cnid){#si chambre trouvée ( avec des tarifs ) ..
+                if(!$data)$data=_data2object($t,null);
                 #$residence->modificationDate = date('YmdHis',$lastmod);
-                synchronizeChambre($cnid, $data, $finess);
-                $__updates['chambres'][] = $cnid;
+                synchronizeChambre($cnid,$data,$finess);
+                $__updates['chambres'][]=$cnid;
             }#+ finess
-            $a = 'inserée';
-        } else {#no room updates
-            $notModified['chambre'][] = $cnid;
+            $a='inserée';
+        }else{#no room updates
+            $notModified['chambre'][]=$cnid;
         }
-        $t = null;
+
+
+        $t=null;
     }
+
 
     unset($t);
-    if (0) {
-        $champs = array_unique($champs);
-        $sql = '';
-        foreach ($champs as $t) {
-            $sql .= "\nalter table z_residences add $t varchar(255) null;";
-        }
-        $a = 1;
+    if(0){
+        $champs=array_unique($champs);
+        $sql='';foreach($champs as $t){$sql.="\nalter table z_residences add $t varchar(255) null;";}
+        $a=1;
     }
 
 
-    $a = 1;
-    $took = time() - $starts;
-    $starts = time();
-    $msg = "\n\ninsert : résidences:" . count($__inserts['residences']) . ';chambres:' . count($__inserts['chambre']) . "\nupdates:r:" . count($__updates['residences']) . ';c:' . count($__updates['chambres']) . "\nnotModified:r:" . count($notModified['residence']) . ';c:' . count($notModified['chambre']) . "\nTook: $took seconds\n";
-    file_put_contents($_SERVER['DOCUMENT_ROOT'] . 'z/updated/' . date('ymdHis') . '-chambreResidencesInserted.json', json_encode(compact('msg', '__inserts', '__updates', 'notModified')));
+
+
+
+    $a=1;
+    $took=time()-$starts;$starts=time();
+    $msg="\n\ninsert : résidences:".count($__inserts['residences']).';chambres:'.count($__inserts['prixresidences'])."\nupdates:r:".count($__updates['residences']).';c:'.count($__updates['chambres'])."\nnotModified:r:".count($notModified['residence']).';c:'.count($notModified['prixresidences'])."\nTook: $took seconds\n";
+    file_put_contents($_SERVER['DOCUMENT_ROOT'].'z/updated/'.date('ymdHis').'-chambreResidencesInserted.json',json_encode(compact('msg','__inserts','__updates','notModified')));
     #print_r($__inserts);print_r($__updates);
-    if (isset($_ENV['loggedSql']) and $_ENV['loggedSql']) {
-        file_put_contents('sqInserts.log', implode("\n", $_ENV['loggedSql']));
+    if(isset($_ENV['loggedSql']) and $_ENV['loggedSql']){file_put_contents('sqInserts.log',implode("\n",$_ENV['loggedSql']));}
+    if($tarifsModifies){
+        file_put_contents($_SERVER['DOCUMENT_ROOT'].'z/updated/'.date('ymdHis').'-tarifsModifies.json',json_encode($tarifsModifies));
+        $a=1;#
     }
-    if ($tarifsModifies) {
-        file_put_contents($_SERVER['DOCUMENT_ROOT'] . 'z/updated/' . date('ymdHis') . '-tarifsModifies.json', json_encode($tarifsModifies));
-        $a = 1;#
-    }
+
+
+
+
+
 
     echo $msg;###<<<  $_ENV['loggedSql']
-    unset($msg, $__inserts, $__updates, $notModified, $_c, $tarifs);
-    $_mem[__line__] = memory_get_usage(1);
+    unset($msg,$__inserts,$__updates,$notModified,$_c,$tarifs);
+    $_mem[__line__]=memory_get_usage(1);
 
-    if ($tarifsModifies) {
-        $sql = "update z_rkv set v='" . $btime . "' where k='lastScrapping'";
-        $ok = Alptech\Wip\fun::sql($sql);#
+    if($tarifsModifies){
+        $sql="update z_rkv set v='".$btime."' where k='lastScrapping'";$ok=Alptech\Wip\fun::sql($sql);#
 
-        $_inserts = [];
-        foreach ($tarifsModifies as $type => $t) {
-            if ($type == 'c') {
-                foreach ($t as $cid => $chambre2prix) {
-                    $rid = $c2r[$cid];
-                    foreach ($chambre2prix as $chambre => $prix0) {
-                        foreach ($prix0 as $k => $prix) {
-                            $_inserts[$rid][$chambre . '_' . $k] = $prix;
+        $_inserts=[];
+        foreach($tarifsModifies as $type=>$t){
+            if($type=='c'){
+                foreach($t as $cid=>$chambre2prix){
+                    $rid=$c2r[$cid];
+                    foreach($chambre2prix as $chambre=>$prix0){
+                        foreach($prix0 as $k=>$prix){
+                            $_inserts[$rid][$chambre.'_'.$k]=$prix;
                         }
                     }
                 }
                 #remonter à la résidence
-            } elseif ($type == 'r') {
-                foreach ($t as $rid => $chambre2prix) {
+            }elseif($type=='r'){
+                foreach($t as $rid=>$chambre2prix) {
                     foreach ($chambre2prix as $chambre => $prix0) {
                         foreach ($prix0 as $k => $prix) {
-                            $_inserts[$rid][$chambre . '_' . $k] = $prix;
+                            $_inserts[$rid][$chambre.'_'.$k] = $prix;
                         }
                     }
                 }
             }
         }#end foreach tarif modifié
 
-        foreach ($_inserts as $rid => $k2v) {
-            $k2v['rid'] = $rid;
+        foreach($_inserts as $rid=>$k2v){
+            $k2v['rid']=$rid;
             #$_inserts[]['$lastmod'] =strtotime($t["updatedAt"]);
             #$k2v['date']=$now;
-            $k2v['btime'] = $btime;
-            $k2v['date'] = $lastmod;
-            $sql = 'insert into z_variations ' . Alptech\Wip\fun::insertValues($k2v);
-            $insertId = Alptech\Wip\fun::sql($sql);#
-            $b = 1;
+            $k2v['btime']=$btime;
+            $k2v['date']=$lastmod;
+            $sql='insert into z_variations '.Alptech\Wip\fun::insertValues($k2v);
+            $insertId=Alptech\Wip\fun::sql($sql);#
+            $b=1;
         }
     }
 
+
     #processAlertFor($now);
 
-    $took = time() - $starts;
-    $starts = time();
+    $took=time()-$starts;$starts=time();
     #echo"\n\nAlertsTook:$took";#
-    if ($geomodif or $newResidences) {#si seulement modifications géographique ou nouvelle résidence, recalcul des proximités
-        $_SESSION['geo'] = 1;
-        $took = time() - $starts;
-        $starts = time();
-        require_once rtrim($_SERVER['DOCUMENT_ROOT'], '/') . '/z/geo.php';
-        echo "\n\nGeocodingTook: $took";#
+    if($geomodif or $newResidences){#si seulement modifications géographique ou nouvelle résidence, recalcul des proximités
+        $_SESSION['geo']=1;
+        $took=time()-$starts;$starts=time();
+        require_once rtrim($_SERVER['DOCUMENT_ROOT'],'/').'/z/geo.php';
+        echo"\n\nGeocodingTook: $took";#
     }
     return 1;
-    if ($__inserts['residences']) {#do the geo recoding
 
-    }
-    /*
-    #A) Get aRids from alert last timestamp
-    #B) uRids from registred alerts ( user inner join residences )
-    #C) Intersections geographiques
-    #D) => from z_geo where rid in($uRids) and list like '%$aRid,%'
-    #$took=time()-$starts;$starts=time();
 
-    my -u a -pb silverpricing_db < ../db/silverpricing_db.sql;drushy cc all;
-    a;cuj 'https://ehpad.home/yo' a '' 1 'sql=(insert|update) ';b;say done;
-
-    Une alerte peut être identifiée par date ! Les interceptions donnent z_variations.id
-    select * from z_geo where list like'%,33979,%' -- 40 ehpads l'ayant dans ses coordonnées les plus proches
-    */
     print_r($_mem);
 }
 
