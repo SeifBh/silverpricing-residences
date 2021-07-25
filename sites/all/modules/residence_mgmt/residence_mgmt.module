@@ -680,7 +680,14 @@ php72 ~/home/ehpad/app/z/alerts.php '{"210007159":{"prixHebPermCs":1}}' ;
 
 function residence_mgmt_cron($a = null, $b = null)
 {
-    
+
+/*
+    $query = db_query('SELECT n.nid FROM {node} n WHERE n.type = :tp', array(':tp' => 'residence'));
+    foreach ($query as $n) {
+        node_delete($n->nid);
+    }*/
+
+
     updateAllResidencesFromPersonnesAgeesJson();
 
 
@@ -1061,7 +1068,7 @@ function residence_mgmt_dashboard()
         $query->join('field_data_field_departement', 'dep', 'dep.entity_id = n.nid', array());
         $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
         $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
-        $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+        $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
 
 
         $query->fields('n', array('nid', 'title'));
@@ -1077,7 +1084,7 @@ function residence_mgmt_dashboard()
         $query->range(0, 5);
         $quickWins = fetchAll($query);
 
-
+   
         foreach ($quickWins as $key => $r) {
 
 
