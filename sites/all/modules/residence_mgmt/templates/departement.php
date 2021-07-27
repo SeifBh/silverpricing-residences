@@ -163,7 +163,7 @@
                           </div>
 
                           <div class="form-group col-md-12">
-                              <?php $statuses = array('Privé', 'Public', 'Associatif'); ?>
+                              <?php $statuses = array('RA', 'Résidence Seniors', 'Ehpa'); ?>
                               <select id="statut" name="statut[]" class="form-control form-control-sm select2" multiple>
                                   <option value="">Statut</option>
                                   <?php foreach( $statuses as $status ): ?>
@@ -227,7 +227,7 @@
                   <?php
                       $colors = array("Privé" => "#48a3b9", "Associatif" => "#eb9b6c", "Public" => "#836982");
                   ?>
-                  <?php foreach( $statistique_globale as $title => $statistique ): ?>
+                  <?php foreach( $requete_statistique as $title => $statistique ): ?>
                       <div class="media col-md-3 mg-t-15 mg-b-15">
                           <div style="background: <?php echo (array_key_exists($title, $colors)) ? $colors[$title]:"#0168fa"; ?>" class="wd-40 wd-md-50 ht-40 ht-md-50 tx-white mg-r-10 mg-md-r-10 d-flex align-items-center justify-content-center rounded op-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bar-chart-2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>

@@ -1600,7 +1600,7 @@ function getLatLngResidencesByDepartment( $departementId ) {
     $query->condition($db_or);
 
 
-    $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
+   $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
@@ -1625,6 +1625,7 @@ function getLatLngResidencesByDepartment( $departementId ) {
 
 
     $residences = fetchAll($query);
+
 
 
     return $residences;

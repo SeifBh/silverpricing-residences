@@ -606,11 +606,16 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     requestMarkers.push(m);
     var markerObject = null;
     <?php
-    switch($residence->field_statut_value) {
-        case "Associatif":$color='EB9B6C';$txtcolor='000';$b='FFF';break;
-        case "Public":$color='836983';$txtcolor='FFF';$b='000';break;#gris bof
-        case "Privé":$color='584AB9';$txtcolor='FFF';$b='000';break;
-        default:$color='FFF';$txtcolor='000';$b='FFF';break;
+
+
+    switch($r->field_isehpa_value) {
+        case "0":
+            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+            break;
+        case "1":
+            echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
+            break;
+
     }
 
     ?>

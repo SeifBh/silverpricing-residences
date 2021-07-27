@@ -345,7 +345,8 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
         $_c = json_decode($_c, true);
 
     }
-    $_c = array_slice($_c, 0, 200);
+  //  $_c = array_slice($_c, 0, 1500);
+    //$_c = array_unique($_c);
 
     foreach ($_c as $k => &$t) {
         $finesses[] = $t['noFinesset'];
@@ -442,20 +443,25 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
 
     $a = 1;
 
-    foreach ($_c as $k => $t) {#10899 valeurs / 7400 ehpad
+    foreach ($_c as $k => &$t) {#10899 valeurs / 7400 ehpad
         if (!$t['IsEHPAD']) {
             if (!$t['IsEHPAD']) {
+
+
 
                 $_rid = $prices = $prixR = 0;
 
                 $__url = $url . $t['noFinesset'];
                 $a = "cuj 'https://ehpad.home/updateAllResidencesByJson?ignore=1' a '' 1";
-                $t = array_filter($t);
+                //$t = array_filter($t);
 
                 if (isset($resFit2Id[$t['noFinesset']])) {
+
                     $_rid = $resFit2Id[$t['noFinesset']];
+
                 } elseif (isset($idPersonnesAgees2Res[$t['_id']])) {
                     $_rid = $idPersonnesAgees2Res[$t['_id']];
+
                 }
 
                 if (isset($t['raPrice'])) {
@@ -471,8 +477,10 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                     }
                 }
                 unset($v);
-                $t = array_filter($t);
+               // $t = array_filter($t);
+
                 $t = array_map_assoc('aktolower', $t);
+
 
                 if ($_rid) {
                     $res = node_load($_rid);
@@ -486,7 +494,7 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                     $res->uid['und'][0]['value'] = 1;
 
                     $res->type = 'residence';
-                    $res->title = $t['title'];
+                    $res->title = $t['title'] ;
                     $res->field_finess['und'][0]['value'] = $t['nofinesset'];
                     $res->field_type['und'][0]['value'] = 'notEhpad';
                     $res->field_isehpa['und'][0]['value'] = (int)$t['isehpa'];
@@ -518,8 +526,8 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                     $res->field_location['und'][0]['postal_code'] = $t['coordinates_postcode'];
 
                     $departmentId = findDepartmentByNumber($t['coordinates_deptcode']);
-
-                    $res->field_departement['und'][0]['tid'] = $departmentId;
+                    //depmod
+                    $res->field_departement['und'][0]['tid'] =$departmentId;
                     $res->field_groupe['und'][0]['tid'] = 102;
                     $res->field_latitude['und'][0]['value'] = $t['coordinates_latitude'];
 
@@ -718,7 +726,8 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                     }
                         $residence->field_personnesageesid = $t['_id'];
                         $residence->modificationDate = date('YmdHis', $lastmod);
-                        $residence->title = $t['title'];#$title->getNode()->nodeValue;
+                        $residence->title = $t['title'] . " tata";#$title->getNode()->nodeValue;
+                        $residence->field_type = "testme";#$title->getNode()->nodeValue;
                         $residence->field_gestionnaire = $t['coordinates']['gestionnaire'];#trim(str_replace('Gestionnaire :', '', $itemLeft->first('.fiche-box .cnsa_search_item-statut')->getNode()->nodeValue));
                         $status = 'Privé';
                         if (preg_match('~assoc~i', $t['legal_status'])) $status = 'Associatif'; elseif (preg_match('~public~i', $t['legal_status'])) $status = 'Public';
@@ -728,6 +737,7 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                         $residence->field_telephone = $t['coordinates']['phone'];
                         $residence->field_email = $t['coordinates']['emailContact'];
                         $residence->field_site = $t['coordinates']['website'];
+                        //depmod
                         $residence->field_departement = $t['coordinates']['deptcode'];
 #if(isset($residenceData->address))$residence->field_address[$residence->language][0]['value'] = $residenceData->address;
                         if (isset($t['raPrice'])) {
@@ -743,6 +753,7 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                         }
                         $residence->field_location['und'][0]['locality'] = $t['coordinates']['city'] . $arrondissement;
                         $residence->field_location['und'][0]['postal_code'] = $t['coordinates']['postcode'];
+                        //$residence->status = 1;
                         if ($t['coordinates']['latitude'] != $residence->field_latitude['und'][0]['value']) {
                             $geomodif++;
                             $residence->field_latitude['und'][0]['value'] = $t['coordinates']['latitude'];
@@ -772,64 +783,23 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                 $a=1;#$residenceData from ça
                 $newResidences++;
 
-                /*$res = new stdClass();
-                $res->uid = 1;
-                $res->uid['und'][0]['value'] = 1;
+                $residenceData = new stdClass();
+                $residenceData->uid = 1;
+                $residenceData->uid['und'][0]['value'] = 1;
 
-                $res->type = 'residence';
-                $res->title = $t['title'];
-                $res->field_finess['und'][0]['value'] = $t['nofinesset'];
-                $res->field_type['und'][0]['value'] = 'notEhpad';
-                $res->field_isehpa['und'][0]['value'] = (int)$t['isehpa'];
-                $res->field_isra['und'][0]['value'] = (int)$t['isra'];
-                $res->field_isesld['und'][0]['value'] = (int)$t['isesld'];
-                $res->field_isaja['und'][0]['value'] = (int)$t['isaja'];
-                $res->field_ishcompl['und'][0]['value'] = (int)$t['ishcompl'];
-                $res->field_ishtempo['und'][0]['value'] = (int)$t['ishtempo'];
-                $res->field_isacc_jour['und'][0]['value'] = (int)$t['isacc_jour'];
-                $res->field_isacc_nuit['und'][0]['value'] = (int)$t['isacc_nuit'];
-                $res->field_ishab_aide_soc['und'][0]['value'] = (int)$t['ishab_aide_soc'];
+                $residenceData->type = 'residence';
 
 
-                $res->field_alzheimer['und'][0]['value'] = (int)$t['IsALZH'];
-                $res->field_accueil_de_jour['und'][0]['value'] = (int)$t['IsACC_JOUR'];
-                $res->field_aide_sociale['und'][0]['value'] = (int)$t['IsHAB_AIDE_SOC'];
 
-                $res->field_capacite['und'][0]['value'] = $t['capacity'];
-                $res->field_statut['und'][0]['value'] = $statuses[$t['legal_status']];
+                $residenceData->field_type = "testme 555555";
 
-                $res->field_tarif_gir_1_2['und'][0]['value'] = $t['ehpadPrice']['tarifGir12'];
-                $res->field_tarif_gir_3_4['und'][0]['value'] = $t['ehpadPrice']['tarifGir34'];
-                $res->field_tarif_gir_5_6['und'][0]['value'] = $t['ehpadPrice']['tarifGir56'];
+                $residenceData->field_finess[$residenceData->language][0]['value'] =$t['nofinesset'];
 
 
-                $res->field_location['und'][0]['country'] = 'FR';
-                $res->field_location['und'][0]['thoroughfare'] = $t['coordinates_street'];
-                $res->field_location['und'][0]['locality'] = $t['coordinates_city'] . $arrondissement;
-                $res->field_location['und'][0]['postal_code'] = $t['coordinates_postcode'];
 
-                $departmentId = findDepartmentByNumber($t['coordinates_deptcode']);
+                $residenceData->field_capacite = $t['capacity'];
 
-                $res->field_departement['und'][0]['tid'] = $departmentId;
-                $res->field_groupe['und'][0]['tid'] = 102;
-                $res->field_latitude['und'][0]['value'] = $t['coordinates_latitude'];
-
-                $res->field_longitude['und'][0]['value'] = $t['coordinates_longitude'];
-                $res->field_gestionnaire['und'][0]['value'] = $t['coordinates_gestionnaire'];
-                $res->status = 1;
-
-                $status = 'Privé';
-                if (preg_match('~assoc~i', $t['legal_status'])) $status = 'Associatif'; elseif (preg_match('~public~i', $t['legal_status'])) $status = 'Public';
-                $arrondissement = '';
-                if (substr($t['coordinates']['postcode'], 0, 3) == '750') {
-                    $arrondissement = ' ' . substr($t['coordinates']['postcode'], -2);
-                }
-
-                $res->field_statut['und'][0]['value'] = $status;#privé non lucratif #<== todo conversion????
-
-                */
-                $residenceData->finess=$finess;
-                $residenceData->title=$t['title'];
+                $residenceData->title=$t['title'] ;
                 $residenceData->email=$t["coordinates"]["emailContact"];
                 $residenceData->website=$t["coordinates"]["website"];
                 $residenceData->phone=$t["coordinates"]["phone"];
@@ -842,7 +812,6 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                 $residenceData->location[0]['lon']=$t["coordinates"]["longitude"];
                 $residenceData->groupe = 102;
 
-                $residenceData->field_type = 'notEhpad';
                 $residenceData->field_isehpa = (int)$t['isehpa'];
                 $residenceData->field_isra = (int)$t['isra'];
                 $residenceData->field_isesld = (int)$t['isesld'];
@@ -853,11 +822,10 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                 $residenceData->field_isacc_nuit = (int)$t['isacc_nuit'];
                 $residenceData->field_ishab_aide_soc = (int)$t['ishab_aide_soc'];
 
-                $residenceData->field_pr_prixmin = $t['prixMin'];
-                $residenceData->field_capacite = $t['capacity'];
 
 
-#select distinct(field_statut_value) from field_revision_field_statut #Associatif,Privé,Public
+
+
                 $status='Privé';
                 if(preg_match('~assoc~i',$t['legal_status']))$status='Associatif';
                 elseif(preg_match('~public~i',$t['legal_status']))$status='Public';

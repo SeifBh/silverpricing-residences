@@ -681,15 +681,20 @@ php72 ~/home/ehpad/app/z/alerts.php '{"210007159":{"prixHebPermCs":1}}' ;
 function residence_mgmt_cron($a = null, $b = null)
 {
 
-/*
-    $query = db_query('SELECT n.nid FROM {node} n WHERE n.type = :tp', array(':tp' => 'residence'));
+
+    $query = db_query("SELECT n.nid FROM {node} n WHERE n.type = :tp and n.title LIKE '%-ok%' ", array(':tp' => 'residence'));
     foreach ($query as $n) {
-        node_delete($n->nid);
-    }*/
+        $residence = node_load($n->nid);
 
 
+        $residence->title = substr($residence->title, 0, strlen($residence->title) -3);
+        node_save($residence);
+        //node_delete($n->nid);
+    }
+
+/*
     updateAllResidencesFromPersonnesAgeesJson();
-
+*/
 
 }
 
@@ -1081,7 +1086,7 @@ function residence_mgmt_dashboard()
         $query->fields('k', array('field_residence_id_value'));
         $query->orderBy("b.field_pr_prixmin_value", "DESC");
 
-        $query->range(0, 5);
+        $query->range(0, 20);
         $quickWins = fetchAll($query);
 
 
@@ -1159,7 +1164,7 @@ function residence_mgmt_dashboard()
          $query->fields('tmh', array('field_tmh_value'));
          $query->fields('f', array('field_favoris_value'));*/
         $query->fields('n', array());
-        $query->range(0, 5);
+        $query->range(0, 20);
         $maquettes = fetchAll($query);
 
         // file_put_contents( DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file, json_encode($maquettes));
@@ -1245,7 +1250,7 @@ function residence_mgmt_dashboard()
             //$query->addExpression('GROUP_CONCAT(s.field_statut_type)', 'statuses');
             $query->addExpression('GROUP_CONCAT(tarif.field_pr_prixmin_value)', 'tarifs');
             $query->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
-            $query->range(0, 5);
+            $query->range(0, 20);
 
             $residences = $query->execute()->fetch();
         }
@@ -1313,7 +1318,7 @@ function residence_mgmt_dashboard()
             #$query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
             $query->leftjoin('field_data_field_manager', 'mgr', 'mgr.entity_id = n.nid', []);
             $query->fields('mgr', ['field_manager_value']);
-            $query->range(0, 5);
+            $query->range(0, 20);
 
             $residences = fetchAll($query);
             foreach ($residences as $t) {#
@@ -1584,6 +1589,7 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
 
     $statistique_globale = get_statistique_globale($departementId);
 
+
     $residences = findResidence($departementId, $_POST);
 
 
@@ -1595,6 +1601,7 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
     $departementChartData = loadDepartementChartData($departementId);
 
     $dataMarkers = getLatLngResidencesByDepartment($departementId);
+
 
     /* GLOBAL */
     $departement = taxonomy_term_load($departementId);
@@ -2056,7 +2063,7 @@ function residence_mgmt_get_residence_details($residenceId = null, $limit = 10)
     $tarifChambreSimple = floatval($chambre->field_pr_prixmin['und'][0]['value']);
     $tarifResidencesConcurrentesSorted = [];
     foreach ($residencesConcurrentes['direct'] as $r) {
-        $tarifResidencesConcurrentesSorted[] = floatval($r->field_tarif_chambre_simple_value);
+        $tarifResidencesConcurrentesSorted[] = floatval($r->field_pr_prixmin_value);
     }
     sort($tarifResidencesConcurrentesSorted, SORT_NUMERIC);
     $tarifResidencesConcurrentesSorted = array_reverse($tarifResidencesConcurrentesSorted);
@@ -2495,7 +2502,8 @@ inner join field_data_field_departement d on d.entity_id = n.nid
 and d.field_departement_tid   = $departementId
 inner join field_data_field_capacite c on c.entity_id = n.nid
 inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.nid
-where n.type='residence'
+inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id and tarif.field_pr_prixmin_value IS NOT NULL
+where n.type='residence' and field_isehpa_value <> '0'
 group by eh.field_isehpa_value", 'mysql', 'utf8');
 
       $a2 = fun::sql("
@@ -2508,11 +2516,10 @@ inner join field_data_field_departement d on d.entity_id = n.nid
 and d.field_departement_tid   = $departementId
 inner join field_data_field_capacite c on c.entity_id = n.nid
 inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.nid
-where n.type='residence'
-group by er.field_isra_value", 'mysql', 'utf8');
+inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id and tarif.field_pr_prixmin_value IS NOT NULL
 
-
-
+where n.type='residence' and field_isra_value <> '0'
+group by er.field_isra_value ", 'mysql', 'utf8');
 
 
 
@@ -2528,6 +2535,7 @@ inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.n
 inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id and tarif.field_pr_prixmin_value IS NOT NULL
 where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
 
+
     #better as utf8 :)
     $residenceTarifs = [];
     $cap = 0;
@@ -2538,17 +2546,18 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
     $c = 1;
 
     /* STATUT */
-    $sommepop_a = $a[0]["NB_EHPA"] + $a[1]["NB_EHPA"]  ;
-    $sommepop_a = $sommepop_a + $a2[0]["NB_RA"] + $a2[1]["NB_RA"]  ;
-    if($a[1]["NB_EHPA"] == 0){
+    $sommepop_a = $a[0]["NB_EHPA"] + $a[0]["NB_EHPA"]  ;
+    $sommepop_a = $sommepop_a + $a2[0]["NB_RA"] + $a2[0]["NB_RA"]  ;
+    if($a[0]["NB_EHPA"] == 0){
 
-        $a[1]["NB_EHPA"] = 0 ;
+        $a[0]["NB_EHPA"] = 0 ;
 
     };
-    if($a2[1]["NB_RA"] == 0){$a2[1]["NB_RA"] = 0 ;};
-    $statistique_globale["EHPA"] = $a[1]["NB_EHPA"];
-    $statistique_globale["RA"] = $a2[1]["NB_RA"];
-    $statistique_globale['Nbre de maisons'] =$sommepop_a;
+    if($a2[0]["NB_RA"] == 0){$a2[0]["NB_RA"] = 0 ;};
+    $statistique_globale["EHPA"] = $a[0]["NB_EHPA"];
+    $statistique_globale["RA"] = $a2[0]["NB_RA"];
+
+    $statistique_globale['Nbre de maisons'] = $a[0]["NB_EHPA"] + $a2[0]["NB_RA"];
     #$residenceTarifs = explode(",", $residences->tarifs);
     $statistique_globale["Tarif moyen"] = round(moyen($residenceTarifs), 2);
     $statistique_globale["Tarif médian"] = round(median($residenceTarifs), 2);
