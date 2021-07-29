@@ -937,7 +937,7 @@ function findResidencesByUserAccessNull($groupes, $residenceIds, $departement = 
     $query->condition('n.type', "residence", '=');
     $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
     $query->condition('ty.field_type_value', 'notEhpad', '=');
-    $query->isNotNull('cs.field_pr_prixmin_value');
+    //$query->isNotNull('cs.field_pr_prixmin_value');
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
@@ -1005,7 +1005,7 @@ function findResidence($departementId = null, $dataForm = array()) {
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
-    $query->isNotNull('t.field_pr_prixmin_value');
+   // $query->isNotNull('t.field_pr_prixmin_value');
 
     $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
     $query->condition('ty.field_type_value', 'notEhpad', '=');
@@ -1597,7 +1597,7 @@ function getLatLngResidencesByDepartment( $departementId ) {
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
-    $query->isNotNull('t.field_pr_prixmin_value');
+   // $query->isNotNull('t.field_pr_prixmin_value');
 
     $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
     $query->condition('ty.field_type_value', 'notEhpad', '=');
@@ -1621,7 +1621,7 @@ function getLatLngResidencesByDepartment( $departementId ) {
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
     $query->innerjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid and t.field_pr_prixmin_value IS NOT NULL', array(  ));
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid ' /**/, array(  ));
 
     $query->leftjoin('field_data_field_capacite', 'cap', 'cap.entity_id = n.nid',[]);$query->fields('cap', ['field_capacite_value']);
     $query->leftjoin('field_data_field_groupe', 'g', 'g.entity_id = n.nid',[]);

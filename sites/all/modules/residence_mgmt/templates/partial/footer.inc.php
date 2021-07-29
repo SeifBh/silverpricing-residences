@@ -641,7 +641,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
 
     var pressionConcurrentielle = new JustGage({
         id: "pression_concurrentielle",
-        value: ratio*100, min: 0, max: 100,
+        value: ratio, min: 0, max: 100,
         levelColors: ['#a7d500', '#e4cb00', '#f90d00'],
         hideValue: false, hideMinMax: false, relativeGaugeSize: true,decimals : 2
         //,label: "%",labelFontSize: "16px"

@@ -1650,18 +1650,21 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
 
     $mesLits = 0;
     $mesResidences = getMesResidencesByDepartement($departementId);
-    /*
-        varDebug($mesResidences);
-        exit();*/
+
     foreach ($mesResidences as $maResidence) {
         $mesLits += (int)$maResidence->field_capacite_value;
     }
+
+
+
 
     if ($ret) {
         $litsTotaux = $capaciteDepartement->nombre_lits;
         $nbMaisonSurPop = round((($statistique_globale['Nbre de maisons'] / $totalPopulation) * 100), 2);
         return compact('nbMaisonSurPop', 'statistique_globale', 'totalPopulation', 'litsTotaux', 'mesLits');
     }
+
+
 
     /* CUSTOM */
     if (!empty($_POST) && residence_mgmt_has_enough_user_balance('DEPARTMENT_REQUEST')) {
@@ -2504,7 +2507,7 @@ inner join field_data_field_departement d on d.entity_id = n.nid
 and d.field_departement_tid   = $departementId
 inner join field_data_field_capacite c on c.entity_id = n.nid
 inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.nid
-inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id and tarif.field_pr_prixmin_value IS NOT NULL
+inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id /*and tarif.field_pr_prixmin_value IS NOT NULL*/
 where n.type='residence' and field_isehpa_value <> '0'
 group by eh.field_isehpa_value", 'mysql', 'utf8');
 
@@ -2518,7 +2521,7 @@ inner join field_data_field_departement d on d.entity_id = n.nid
 and d.field_departement_tid   = $departementId
 inner join field_data_field_capacite c on c.entity_id = n.nid
 inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.nid
-inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id and tarif.field_pr_prixmin_value IS NOT NULL
+inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id /*and tarif.field_pr_prixmin_value IS NOT NULL*/
 
 where n.type='residence' and field_isra_value <> '0'
 group by er.field_isra_value ", 'mysql', 'utf8');
@@ -2687,7 +2690,7 @@ function get_data_bar_chart($departementId = null, $dataForm = array())
     $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array(':departementId' => $departementId));
     $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
-    $query->isNotNull('t.field_pr_prixmin_value');
+    //$query->isNotNull('t.field_pr_prixmin_value');
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
@@ -2768,7 +2771,7 @@ function getMesResidencesByDepartement($departmentId)
     }
 
 
-    $residences = findResidencesByUserAccessNull($groupes, $residenceIds, $departmentId);
+    $residences = findResidencesByUserAccess($groupes, $residenceIds, $departmentId);
     //$residences = array();
 
     return $residences;
