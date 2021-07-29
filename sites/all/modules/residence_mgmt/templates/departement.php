@@ -163,7 +163,7 @@
                           </div>
 
                           <div class="form-group col-md-12">
-                              <?php $statuses = array('RA', 'Résidence Seniors', 'Ehpa'); ?>
+                              <?php $statuses = array('Résidence autonomie', 'Résidence Seniors', 'Ehpa'); ?>
                               <select id="statut" name="statut[]" class="form-control form-control-sm select2" multiple>
                                   <option value="">Statut</option>
                                   <?php foreach( $statuses as $status ): ?>
@@ -259,8 +259,8 @@
                         <tbody>
                             <?php $rows = 0; foreach( $residences as $residence ):
                                 $a=1;
-                                $difTarifsMoyDep = round($residence->field_tarif_chambre_simple_value - $statistique_globale["Tarif moyen"], 2);
-                                $difTarifsMoyRequete = round($residence->field_tarif_chambre_simple_value - $requete_statistique["Tarif moyen"], 2);
+                                $difTarifsMoyDep = round($residence->field_pr_prixmin_value - $statistique_globale["Tarif moyen"], 2);
+                                $difTarifsMoyRequete = round($residence->field_pr_prixmin_value - $requete_statistique["Tarif moyen"], 2);
                             ?>
                             <tr>
                                 <td><?php if( isset($residence->field_logo_fid) ) {

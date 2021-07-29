@@ -1061,9 +1061,22 @@ function findResidence($departementId = null, $dataForm = array()) {
         $query->condition('l.field_location_locality', '%' . $dataForm['ville'] . '%', 'LIKE');
     }
 
-    if( $dataForm['statut'] && !empty($dataForm['statut']) ) {
-        $query->condition('s.field_statut_value', $dataForm['statut'], 'IN');
+    if ($dataForm['statut'] && !empty($dataForm['statut'])) {
+        switch($dataForm['statut'][0]) {
+            case "Résidence autonomie":
+                $query->condition('er.field_isra_value', '1', '=');
+                break;
+
+            case "Ehpa":
+                $query->condition('eh.field_isehpa_value', '1', '=');
+                break;
+
+        }
+
+
     }
+
+
 
     if( $dataForm['tarif_min'] && !empty( $dataForm['tarif_min']) ) {
         $query->condition('t.field_pr_prixmin_value',  $dataForm['tarif_min'], ">=");
