@@ -879,11 +879,12 @@ function findResidencesByUserAccess($groupes, $residenceIds, $departement = null
 
     $residenceIds = ( count($residenceIds) >= 1 ) ? $residenceIds : null;
 
+ 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
     $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
     $query->condition('ty.field_type_value', 'notEhpad', '=');
-    $query->isNotNull('cs.field_pr_prixmin_value');
+   // $query->isNotNull('cs.field_pr_prixmin_value');
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());

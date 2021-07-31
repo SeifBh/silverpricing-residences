@@ -312,8 +312,14 @@
     elseif( $currentMenu == "residences" /*departement detail*/ ):
     #https://ehpad.home/departement/75-74-HauteSavoie
     $mesPrixParVille=[];$detailParVille='';
+
     foreach( $mesResidences as $t ){
-        $mesPrixParVille[strtolower($t->field_location_locality)][$t->title]=$t->field_pr_prixmin_value;
+    if($t->field_pr_prixmin_value != null){
+            
+            $mesPrixParVille[strtolower($t->field_location_locality)][$t->title]=$t->field_pr_prixmin_value;
+        }else{
+        $t->field_pr_prixmin_value = 0;
+      }
     }
 
     foreach ($departementChartData as $k => $data) {
@@ -494,7 +500,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
                         },
                         scaleLabel: {
                             display: true,
-                            labelString: 'Nombre de résidences',
+                            labelString: 'Nombre de résidences x3',
                             fontSize: 10
                         }
                     },
@@ -641,7 +647,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
 
     var pressionConcurrentielle = new JustGage({
         id: "pression_concurrentielle",
-        value: ratio, min: 0, max: 100,
+        value: ratio*100, min: 0, max: 100,
         levelColors: ['#a7d500', '#e4cb00', '#f90d00'],
         hideValue: false, hideMinMax: false, relativeGaugeSize: true,decimals : 2
         //,label: "%",labelFontSize: "16px"

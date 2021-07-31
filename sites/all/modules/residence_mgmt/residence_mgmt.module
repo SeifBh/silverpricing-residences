@@ -1651,9 +1651,11 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
     $mesLits = 0;
     $mesResidences = getMesResidencesByDepartement($departementId);
 
+
     foreach ($mesResidences as $maResidence) {
         $mesLits += (int)$maResidence->field_capacite_value;
     }
+
 
 
 
@@ -2813,12 +2815,24 @@ function loadDepartementChartData($departementId = null)
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array(':departementId' => $departementId));
     $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
     $query->innerjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid and t.field_pr_prixmin_value IS NOT NULL', array());
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid '/*and t.field_pr_prixmin_value IS NOT NULL*/, array());
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+    
     $query->groupBy('l.field_location_locality');
     $query->addField('l', 'field_location_locality', 'ville');
     $query->addExpression('count(n.nid)', 'count');
     $query->addExpression('SUM(t.field_pr_prixmin_value)', 'totaltarif');
     $departementChartData = fetchAll($query);
+
 
     return $departementChartData;
 }
