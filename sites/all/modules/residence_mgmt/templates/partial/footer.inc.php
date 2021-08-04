@@ -608,8 +608,8 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     if( residence_mgmt_user_plan_has_access('PAGE_DEPARTEMENT_SECTION_RECHERCHE') ):
     #todo:définition dynamique des minimum / maximums
     ?>
-    var popTot=<?=$totalPopulation?>,nbMaisonTot=<?=$statistique_globale['Nbre de maisons']?>,meslits=<?=$mesLits?>,Nblits=<?=$capaciteDepartement->nombre_lits?>,ratio=meslits/Nblits,mesRes=Math.round(ratio*100,2)<?php #echo round( 100 - (() * 100) , 2); ?>;
-    nbMaisonSurPop=<?php echo round( (($statistique_globale['Nbre de maisons'] / $totalPopulation) * 100) , 2); ?>;//0.17
+    var popTot=<?=$totalPopulation?>,nbMaisonTot=<?=$statistique_globale['Nbre de résidences']?>,meslits=<?=$mesLits?>,Nblits=<?=$capaciteDepartement->nombre_lits?>,ratio=meslits/Nblits,mesRes=Math.round(ratio*100,2)<?php #echo round( 100 - (() * 100) , 2); ?>;
+    nbMaisonSurPop=<?php echo round( (($statistique_globale['Nbre de résidences'] / $totalPopulation) * 100) , 2); ?>;//0.17
     pressionlits=<?php echo round( (( $capaciteDepartement->nombre_lits / $totalPopulation ) * 100) , 2 ); ?>;
 
     pressionlitsMin=3;pressionlitsMax=17;//*100

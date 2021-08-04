@@ -71,11 +71,18 @@ function historyCheck(el){
                             <select>
                         </div>
 
+
+
                         <div class="form-group col-md-12">
-                            <input type="number" class="form-control form-control-sm" id="perimetre" name="perimetre" placeholder="Périmetre" min="1" value="<?php echo (!empty($_POST['perimetre'])) ? $_POST['perimetre'] : 5 ?>"/>
+                            <div class="input-group mb-3">
+                                <input type="number" class="form-control form-control-sm" id="perimetre" name="perimetre" placeholder="Périmetre" min="1" value="<?php echo (!empty($_POST['perimetre'])) ? $_POST['perimetre'] : 5 ?>"/>
+
+                                <div class="input-group-append">
+                                    <span class="input-group-text" style="height: 90%;">km</span>
+                                </div>
+                            </div>
+
                         </div>
-
-
 
                         <div class="form-group col-md-12">
                             <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Rechercher</button>
@@ -126,7 +133,7 @@ function historyCheck(el){
                             <th scope="col">Ville</th>
                             <th scope="col">Département</th>
                             <th scope="col">Distance</th>
-                            <th scope="col">Status</th>
+                            <th scope="col">Type</th>
                             <th scope="col">Tarif</th>
                             </tr>
                         </thead>

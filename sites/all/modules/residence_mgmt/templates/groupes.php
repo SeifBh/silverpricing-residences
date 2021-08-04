@@ -12,7 +12,7 @@
                           <th scope="col">Logo</th>
                           <th scope="col">Groupe</th>
                           <th scope="col">Résidence</th>
-                          <th scope="col">Lits</th>
+                          <th scope="col">Logements</th>
                           <th scope="col">Tarif min</th>
                           <th scope="col">Tarif max</th>
                           <th scope="col">Tarif moyen</th>

@@ -249,8 +249,8 @@
                             <th scope="col">Résidences</th>
                             <th scope="col">Code Postal</th>
                             <th scope="col">Villes</th>
-                            <th scope="col">Nombre de lits</th>
-                            <th scope="col">Status</th>
+                            <th scope="col">Nombre de logements</th>
+                            <th scope="col">Type</th>
                             <th scope="col">Tarifs</th>
                             <th scope="col">Dif tarifs moy dep</th>
                             <th scope="col">Dif tarifs moy requête</th>

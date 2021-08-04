@@ -90,7 +90,30 @@ if($images){?>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb breadcrumb-style1 mg-b-10">
                         <li class="breadcrumb-item"><a href="/departement/<?php echo $departement->tid; ?>-<?php echo str_replace(' ','',$departement->name); ?>"><?php echo $departement->name; ?></a></li>
-                        <li class="breadcrumb-item"><a href="#"><?php echo $residence->field_statut['und'][0]['value'] ?></a></li>
+                        <li class="breadcrumb-item"><a href="#">
+
+                                <?php
+
+
+                                       if ($residence->field_isra['und'][0]['value']  == 1 && $residence->field_isehpa['und'][0]['value'] == 0 && $residence->field_isrs['und'][0]['value'] == 0) {
+
+                                           print "Résidence autonomie";
+
+                                       }else if ($residence->field_isra['und'][0]['value']  == 0 && $residence->field_isehpa['und'][0]['value'] == 0 && $residence->field_isrs['und'][0]['value'] == 1){
+
+                                           print "Résidence Seniors";
+
+                                       }
+                                       else{
+
+                                           print "EHPA";
+
+                                       }
+
+
+                                ?>
+
+                            </a></li>
                         <?php if( $groupe != null ): ?>
                             <li class="breadcrumb-item"><a href="/groupe/<?php echo $groupe->tid; ?>"><?php echo $groupe->name; ?></a></li>
                         <?php endif; ?>
@@ -147,8 +170,8 @@ if($images){?>
   <?php echo ( isset($residence->field_location['und'][0]["thoroughfare"]) ) ? $residence->field_location['und'][0]["thoroughfare"]:""; ?>
   <?php echo ",<br> " . $residence->field_location['und'][0]['postal_code']; ?>
   <?php echo ", " . $residence->field_location['und'][0]['locality'];
-
-  echo $residence->field_capacite["und"][0]["value"]." nombre de lits";?>
+    echo "<br>";
+  echo "\n ".$residence->field_capacite["und"][0]["value"]." nombre de logements";?>
 </span>
 
             </td>
@@ -254,7 +277,7 @@ if($images){?>
     <div class="col-md-6">
         <div class="card mg-t-10 mg-b-10">
             <div class="card-header d-sm-flex align-items-start justify-content-between">
-                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">Situation concurrentielle a date</h6>
+                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">Les 10 résidences concurentes les plus proches</h6>
             </div>
             <div class="card-body pd-y-15 pd-x-10">
                 <div id="situation-concurrentielle" class="row pd-10">
@@ -829,7 +852,7 @@ endif; ?>
 
         <div class="card mg-t-15 mg-b-15">
             <div class="card-header d-sm-flex align-items-start justify-content-between">
-                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences de même type</h6>
+                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences de même type les plus proches</h6>
             </div>
             <div class="card-body pd-y-15 pd-x-10">
 
@@ -901,7 +924,7 @@ endif; ?>
                             <th scope="col">ville</th>
                             <th scope="col">KM</th>
                             <th scope="col">€</th>
-                            <th scope="col">Lits</th>
+                            <th scope="col">Logements</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -964,7 +987,7 @@ endif; ?>
 
         <div class="card mg-t-15 mg-b-15">
             <div class="card-header d-sm-flex align-items-start justify-content-between">
-                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences de type diff.</h6>
+                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences (tous types) les plus proches</h6>
             </div>
             <div class="card-body pd-y-15 pd-x-10">
                 <div class="row">
@@ -1035,7 +1058,7 @@ endif; ?>
                             <th scope="col">ville</th>
                             <th scope="col">KM</th>
                             <th scope="col">€</th>
-                            <th scope="col">Lits</th>
+                            <th scope="col">Logements</th>
                         </tr>
                         </thead>
                         <tbody>

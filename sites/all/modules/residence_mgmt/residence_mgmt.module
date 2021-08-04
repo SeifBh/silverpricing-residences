@@ -1672,7 +1672,7 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
 
     if ($ret) {
         $litsTotaux = $capaciteDepartement->nombre_lits;
-        $nbMaisonSurPop = round((($statistique_globale['Nbre de maisons'] / $totalPopulation) * 100), 2);
+        $nbMaisonSurPop = round((($statistique_globale['Nbre de résidences'] / $totalPopulation) * 100), 2);
         return compact('nbMaisonSurPop', 'statistique_globale', 'totalPopulation', 'litsTotaux', 'mesLits');
     }
 
@@ -1781,7 +1781,7 @@ function residence_mgmt_get_groupe_details($groupeId = null)
     }
 
     $statistiques_globales = array(
-        "Nbre de maisons" => 0,
+        "Nbre de résidences" => 0,
         "Nbre de lits" => 0,
         "Tarif plus haut" => 0,
         "Tarif moyen" => 0,
@@ -1790,7 +1790,7 @@ function residence_mgmt_get_groupe_details($groupeId = null)
     );
 
     $statistiques = array(
-        "Nbre de maisons" => 0,
+        "Nbre de résidences" => 0,
         "Nbre de lits" => 0,
         "Tarif plus haut" => 0,
         "Tarif moyen" => 0,
@@ -1813,7 +1813,7 @@ function residence_mgmt_get_groupe_details($groupeId = null)
         $statistiques_globales["Nbre de lits"] += $r->field_capacite_value;
     }
 
-    $statistiques_globales['Nbre de maisons'] = count($residences);
+    $statistiques_globales['Nbre de résidences'] = count($residences);
     $statistiques_globales["Tarif moyen"] = round(moyen($tarifList), 2);
     $statistiques_globales["Tarif médian"] = median($tarifList);
     $statistiques_globales["Tarif plus bas"] = min($tarifList);
@@ -1829,7 +1829,7 @@ function residence_mgmt_get_groupe_details($groupeId = null)
         $statistiques["Nbre de lits"] += $r->field_capacite_value;
     }
 
-    $statistiques['Nbre de maisons'] = count($residencesFiltered);
+    $statistiques['Nbre de résidences'] = count($residencesFiltered);
     $statistiques["Tarif moyen"] = round(moyen($tarifFilteredList), 2);
     $statistiques["Tarif médian"] = median($tarifFilteredList);
     $statistiques["Tarif plus bas"] = min($tarifFilteredList);
@@ -1996,6 +1996,7 @@ function residence_mgmt_get_residence_details($residenceId = null, $limit = 10)
     $departement = $groupe = $typesDeChambres = null;
     $residencesConcurrentes = ['direct' => [], 'indirect' => []];
     $residence = entity_load('node', array($residenceId), array('type' => 'residence'));
+
 
     $query = db_select('field_data_field_residence_id', 'rc');
     $query->condition('rc.field_residence_id_value', $residenceId, '=');
@@ -2499,7 +2500,7 @@ function residence_mgmt_edit_residence($residenceId = null)
 function get_statistique_globale($departementId = null, $ajax = false)
 {
     $statistique_globale = array(
-        "Nbre de maisons" => 0,
+        "Nbre de résidences" => 0,
         "EHPA" => 0,
         "RA" => 0,
         "RS" => 0,
@@ -2599,7 +2600,7 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
     $statistique_globale["RA"] = $a2[0]["NB_RA"];
     $statistique_globale["RS"] = $a3[0]["NB_RS"];
 
-    $statistique_globale['Nbre de maisons'] = $a[0]["NB_EHPA"] + $a2[0]["NB_RA"]+ $a3[0]["NB_RS"];
+    $statistique_globale['Nbre de résidences'] = $a[0]["NB_EHPA"] + $a2[0]["NB_RA"]+ $a3[0]["NB_RS"];
     #$residenceTarifs = explode(",", $residences->tarifs);
     $statistique_globale["Tarif moyen"] = round(moyen($residenceTarifs), 2);
     $statistique_globale["Tarif médian"] = round(median($residenceTarifs), 2);
@@ -2641,7 +2642,7 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
 
 
         /* NOMBRE DE MAISONS */
-        $statistique_globale['Nbre de maisons'] = $residences->count;
+        $statistique_globale['Nbre de résidences'] = $residences->count;
 
         /* STATUT */
         varDebug($residences->statuses);
@@ -2675,7 +2676,7 @@ function get_requete_statistique($residences = array(), $name = '')
 {
 
     $requete_statistique = array(
-        "Nbre de maisons" => 0,
+        "Nbre de résidences" => 0,
         "EHPA" => 0,
         "RA" => 0,
         "RS" => 0,
@@ -2686,7 +2687,7 @@ function get_requete_statistique($residences = array(), $name = '')
     );
 
     /* NOMBRE DE MAISONS */
-    $requete_statistique['Nbre de maisons'] = count($residences);
+    $requete_statistique['Nbre de résidences'] = count($residences);
     /* STATUT */
     foreach ($residences as $residence) {
         if ($residence->field_isehpa_value == 1 && $residence->field_isra_value == 0 && $residence->field_isrs_value == 0) {

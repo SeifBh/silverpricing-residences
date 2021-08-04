@@ -14,9 +14,9 @@
                                   <th scope="col">Résidence</th>
                                   <th scope="col">Ville</th>
                                   <th scope="col">Gestionnaire</th>
-                                  <th scope="col">Status</th>
+                                  <th scope="col">Type</th>
                                   <th scope="col">Tarif</th>
-                                  <th scope="col">Nbre de lits</th>
+                                  <th scope="col">Nbre de logements</th>
                                   <th scope="col">Action</th>
                               </tr>
                           </thead>
