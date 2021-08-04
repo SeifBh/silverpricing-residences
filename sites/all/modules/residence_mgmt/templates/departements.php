@@ -120,7 +120,7 @@
                           <th scope="col">Tarif moyen</th>
                           <th scope="col">Tarif médian</th>
                           <th scope="col">Résidence</th>
-                          <th scope="col">Lits</th>
+                          <th scope="col">Logements</th>
                       </tr>
                   </thead>
                   <tbody>

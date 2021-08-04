@@ -206,7 +206,7 @@
                                     <th scope="col">Position départementale</th>
                                     <th scope="col">Position concurrentielle</th>
                                     <th scope="col">Tarifs</th>
-                                    <th scope="col">Nbre de lits</th>
+                                    <th scope="col">Nbre de logements</th>
                                     <th scope="col">Date maj</th>
                                 </tr>
                                 </thead>

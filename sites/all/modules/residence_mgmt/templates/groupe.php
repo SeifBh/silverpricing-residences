@@ -143,7 +143,7 @@
                             <th scope="col">Departement</th>
                             <th scope="col">Ville</th>
                             <th scope="col">Tarif</th>
-                            <th scope="col">Nombre de lits</th>
+                            <th scope="col">Nombre de logements</th>
                             </tr>
                         </thead>
                         <tbody>
