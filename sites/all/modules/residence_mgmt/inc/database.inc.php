@@ -888,12 +888,14 @@ function findResidencesByUserAccess($groupes, $residenceIds, $departement = null
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
     $db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
     $query->condition($db_or);
 
 
@@ -919,6 +921,7 @@ function findResidencesByUserAccess($groupes, $residenceIds, $departement = null
 
     $query->fields('eh', array('field_isehpa_value'));
     $query->fields('er', array('field_isra_value'));
+    $query->fields('rs', array('field_isrs_value'));
 
     $query->where("n.nid IN (:residenceIds) or gr.field_groupe_tid IN (:groupes)", array( ':residenceIds' => $residenceIds, ':groupes' => $groupes ));
 
@@ -1013,12 +1016,14 @@ function findResidence($departementId = null, $dataForm = array()) {
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
     $db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
     $query->condition($db_or);
 
 
@@ -1047,6 +1052,7 @@ function findResidence($departementId = null, $dataForm = array()) {
     $query->fields('logo', array('field_logo_fid'));
     $query->fields('eh', array());
     $query->fields('er', array());
+    $query->fields('rs', array());
     $query->fields('c', array('title'));
     $query->fields('t', array('field_pr_prixmin_value'));
     $query->fields('capacite', array('field_capacite_value'));
@@ -1068,6 +1074,9 @@ function findResidence($departementId = null, $dataForm = array()) {
                 $query->condition('er.field_isra_value', '1', '=');
                 break;
 
+            case "Résidence Seniors":
+                $query->condition('rs.field_isrs_value', '1', '=');
+                break;
             case "Ehpa":
                 $query->condition('eh.field_isehpa_value', '1', '=');
                 break;
@@ -1605,12 +1614,14 @@ function getLatLngResidencesByDepartment( $departementId ) {
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rsm', 'rsm.entity_id = n.nid', array());
 
     $db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
     $query->condition($db_or);
 
 
@@ -1636,6 +1647,7 @@ function getLatLngResidencesByDepartment( $departementId ) {
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
     $query->fields('er', array());
     $query->fields('eh', array());
+    $query->fields('rsm', array());
 
 
     $residences = fetchAll($query);

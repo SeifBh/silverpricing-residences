@@ -1602,7 +1602,6 @@ function residence_mgmt_residences($departementId = null, $ret = 0)
 
     $dataMarkers = getLatLngResidencesByDepartment($departementId);
 
-
     /* GLOBAL */
     $departement = taxonomy_term_load($departementId);
 
@@ -2492,6 +2491,7 @@ function get_statistique_globale($departementId = null, $ajax = false)
         "Nbre de maisons" => 0,
         "EHPA" => 0,
         "RA" => 0,
+        "RS" => 0,
         "Tarif moyen" => 0,
         "Tarif médian" => 0,
         "Tarif plus bas" => 0,
@@ -2528,6 +2528,22 @@ inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id /
 where n.type='residence' and field_isra_value <> '0'
 group by er.field_isra_value ", 'mysql', 'utf8');
 
+    $a3 = fun::sql("
+select rs.field_isrs_value as rs, count(rs.field_isrs_value) as NB_RS 
+from node n 
+inner join field_data_field_isehpa eh on eh.entity_id = n.nid 
+inner join field_data_field_type ty on ty.entity_id = n.nid 
+inner join field_data_field_isrs rs on rs.entity_id = n.nid 
+inner join field_data_field_departement d on d.entity_id = n.nid 
+and d.field_departement_tid   = $departementId
+inner join field_data_field_capacite c on c.entity_id = n.nid
+inner join field_data_field_residence_id rc on rc.field_residence_id_value = n.nid
+inner join field_data_field_pr_prixmin tarif on tarif.entity_id = rc.entity_id /*and tarif.field_pr_prixmin_value IS NOT NULL*/
+
+where n.type='residence' and field_isrs_value <> '0'
+group by rs.field_isrs_value ", 'mysql', 'utf8');
+
+
 
 
     #better as utf8 :)
@@ -2560,11 +2576,19 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
         $a[0]["NB_EHPA"] = 0 ;
 
     };
+
+    if($a3[0]["NB_RS"] == 0){
+
+        $a3[0]["NB_RS"] = 0 ;
+
+    };
+
     if($a2[0]["NB_RA"] == 0){$a2[0]["NB_RA"] = 0 ;};
     $statistique_globale["EHPA"] = $a[0]["NB_EHPA"];
     $statistique_globale["RA"] = $a2[0]["NB_RA"];
+    $statistique_globale["RS"] = $a3[0]["NB_RS"];
 
-    $statistique_globale['Nbre de maisons'] = $a[0]["NB_EHPA"] + $a2[0]["NB_RA"];
+    $statistique_globale['Nbre de maisons'] = $a[0]["NB_EHPA"] + $a2[0]["NB_RA"]+ $a3[0]["NB_RS"];
     #$residenceTarifs = explode(",", $residences->tarifs);
     $statistique_globale["Tarif moyen"] = round(moyen($residenceTarifs), 2);
     $statistique_globale["Tarif médian"] = round(median($residenceTarifs), 2);
@@ -2615,6 +2639,7 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
         $statuses = array_count_values($residenceStatuses);
         $statistique_globale["EHPA"] = $statuses["EHPA"];
         $statistique_globale["RA"] = $statuses["RA"];
+        $statistique_globale["RS"] = $statuses["RS"];
 
         $residenceTarifs = explode(",", $residences->tarifs);
         $statistique_globale["Tarif moyen"] = round(moyen($residenceTarifs), 2);
@@ -2642,6 +2667,7 @@ function get_requete_statistique($residences = array(), $name = '')
         "Nbre de maisons" => 0,
         "EHPA" => 0,
         "RA" => 0,
+        "RS" => 0,
         "Tarif moyen" => 0,
         "Tarif médian" => 0,
         "Tarif plus bas" => 0,
@@ -2652,14 +2678,19 @@ function get_requete_statistique($residences = array(), $name = '')
     $requete_statistique['Nbre de maisons'] = count($residences);
     /* STATUT */
     foreach ($residences as $residence) {
-        if ($residence->field_isehpa_value == 1 && $residence->field_isehpa_value == 0) {
+        if ($residence->field_isehpa_value == 1 && $residence->field_isra_value == 0 && $residence->field_isrs_value == 0) {
 
             $requete_statistique["EHPA"]++;
         }
-        else  if ($residence->field_isehpa_value == 0 && $residence->field_isra_value == 1) {
+        else  if ($residence->field_isehpa_value == 0 && $residence->field_isra_value == 1 && $residence->field_isrs_value == 0) {
 
 
             $requete_statistique["RA"]++;
+        }
+        else  if ($residence->field_isehpa_value == 0 && $residence->field_isra_value == 0 && $residence->field_isrs_value == 1) {
+
+
+            $requete_statistique["RS"]++;
         }
     }
 
@@ -2696,12 +2727,14 @@ function get_data_bar_chart($departementId = null, $dataForm = array())
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
     $db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
 
     $query->condition($db_or);
     //$query->condition('er.field_isra_value', '1', '=');
@@ -2711,6 +2744,7 @@ function get_data_bar_chart($departementId = null, $dataForm = array())
     $query->addField('l', 'field_location_locality', 'city');
     $query->fields('eh',array('field_isehpa_value'));
     $query->fields('er',array('field_isra_value'));
+    $query->fields('rs',array('field_isrs_value'));
     $query->addExpression('count(n.nid)', 'count');
     $query->orderBy('count', 'DESC');
     //$query->condition('er.field_isra_value', '1', '=');
@@ -2732,7 +2766,9 @@ function get_data_bar_chart($departementId = null, $dataForm = array())
             case "Résidence autonomie":
                 $query->condition('er.field_isra_value', '1', '=');
                 break;
-
+            case "Résidence Seniors":
+                $query->condition('rs.field_isrs_value', '1', '=');
+                break;
             case "Ehpa":
                 $query->condition('eh.field_isehpa_value', '1', '=');
                 break;
@@ -2818,12 +2854,14 @@ function loadDepartementChartData($departementId = null)
     $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid '/*and t.field_pr_prixmin_value IS NOT NULL*/, array());
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
     $db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
     $query->condition($db_or);
 
     

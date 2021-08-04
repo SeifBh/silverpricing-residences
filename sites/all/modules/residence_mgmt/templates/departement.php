@@ -272,7 +272,25 @@
                                 <td><?php echo $residence->field_location_locality; ?></td>
                                 <td><?php echo $residence->field_capacite_value; ?></td>
 
-                                <td><?php  if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0) {print "RA";}else{print "EHPA";} ?></td>
+                                <td><?php
+
+                                    if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 0) {
+
+                                        print "Résidence autonomie";
+
+                                    }else if($residence->field_isra_value == 0 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 1) {
+
+                                        print "Résidence Seniors";
+
+                                    }
+                                    else{
+
+                                        print "EHPA";
+
+                                    }
+                                    ?>
+
+                                </td>
                                 <td><?php  if ($residence->field_pr_prixmin_value != null) {print $residence->field_pr_prixmin_value . "€";}else{print "NA";} ?></td>
                                 <td class="<?php echo ($difTarifsMoyDep > 0) ? "tx-success":" tx-danger"; ?>">
                                     <?php echo $difTarifsMoyDep; ?>€

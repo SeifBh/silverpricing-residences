@@ -545,15 +545,30 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     if( isset($dataMarker->field_logo_fid) ) {
         $groupeLogo = "<img src='" . file_create_url(file_load($dataMarker->field_logo_fid)->uri) . "' width='16' alt='' />";
     }
+    
     switch($dataMarker->field_isehpa_value) {
-        case "0":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
-            break;
+
         case "1":
             echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
             break;
 
     }
+    switch($dataMarker->field_isra_value) {
+
+        case "1":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
+            break;
+
+    }
+    switch($dataMarker->field_isrs_value) {
+
+        case "1":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.public });";
+            break;
+
+    }
+
+
 
     if(0 and 'nosvg'){
     $fs=14;if($k>10);if($k>100)$fs=12;#plus large
@@ -612,12 +627,22 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     requestMarkers.push(m);
     var markerObject = null;
     <?php
+    switch($r->field_isrs_value) {
 
+        case "1":
+            echo "markerObject = new H.map.Marker(m, { icon: icon.public });";
+            break;
 
-    switch($r->field_isehpa_value) {
-        case "0":
+    }
+    switch($r->field_isra_value) {
+
+        case "1":
             echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
             break;
+
+    }
+    switch($r->field_isehpa_value) {
+
         case "1":
             echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
             break;
