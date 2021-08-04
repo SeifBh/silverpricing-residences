@@ -1,3 +1,8 @@
+<script>
+
+
+
+</script>
 <?php
 
 
@@ -916,15 +921,15 @@ endif; ?>
                 </div>
 
                 <div class="table-responsive">
-                    <table id="table-residences-direct" class="table table-sm text-center classement">
+                    <table id="table-residences-direct" class="table table-striped" style="width:100%">
                         <thead>
                         <tr>
-                            <th scope="col">résidence</th>
-                            <th scope="col">type</th>
-                            <th scope="col">ville</th>
-                            <th scope="col">KM</th>
-                            <th scope="col">€</th>
-                            <th scope="col">Logements</th>
+                            <th width="25%">résidence</th>
+                            <th  width="10%">type</th>
+                            <th width="10%">ville</th>
+                            <th width="5%">KM</th>
+                            <th width="5%">€</th>
+                            <th width="5%">Logements</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -1050,15 +1055,15 @@ endif; ?>
                 </div>
 
                 <div class="table-responsive">
-                    <table id="table-residences-indirect" class="table table-sm text-center classement">
+                    <table id="table-residences-indirect" class="table table-striped">
                         <thead>
                         <tr>
-                            <th scope="col">résidence</th>
-                            <th scope="col">type</th>
-                            <th scope="col">ville</th>
-                            <th scope="col">KM</th>
-                            <th scope="col">€</th>
-                            <th scope="col">Logements</th>
+                            <th scope="col" width="25%">résidence</th>
+                            <th scope="col" width="10%">type</th>
+                            <th scope="col" width="10%">ville</th>
+                            <th scope="col" width="5%">KM</th>
+                            <th scope="col" width="5%">€</th>
+                            <th scope="col" width="5%">Logements</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -1082,14 +1087,39 @@ endif; ?>
                                 $defaultResTypeRes="ISRA";
 
                             }
+                            if(!$residenceConcurrent->field_isrs_value && !$residenceConcurrent->field_isra_value) {
 
+                                $defaultResTypeRes="ISRS";
+
+                            }
 
                             ?>
                             <tr class="_r<?php echo $i.$s?>">
                                 <td class="text-left">
                                     <?php echo create_link($residenceConcurrent->title, "/residence/$residenceConcurrent->nid" , residence_mgmt_user_plan_has_access("PAGE_DETAIL_RESIDENCE_CONCURRENTE")); ?>
                                 </td>
-                                <td class="text-center"><?php if ($defaultResTypeRes == "ISRA"){print "RA";}else{print "EHPA";}   ?></td>
+                                <td class="text-center"><?php
+
+
+
+
+                                    if ($defaultResTypeRes == "ISRA") {
+
+                                        print "Résidence autonomie";
+
+                                    }else if($defaultResTypeRes == "ISRS") {
+
+                                        print "Résidence Seniors";
+
+                                    }
+                                    else{
+
+                                        print "EHPA";
+
+                                    }
+
+
+                                    ?></td>
                                 <td class="text-center"><?php print $residenceConcurrent->field_location_locality ?></td>
                                 <td class="text-center"><?php print round($residenceConcurrent->distance) ?></td>
                                 <td class="text-center"><?php print $residenceConcurrent->field_pr_prixmin_value ?></td>

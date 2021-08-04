@@ -2363,6 +2363,7 @@ function residence_mgmt_recherche_silverex()
         residence_mgmt_update_user_balance("RESIDENCES_REQUEST", ["perimetre" => $_POST['perimetre']], $_POST, $residences, $name, $healthOrganizations);
     }
 
+
     ob_start();
     include_once __DIR__ . "/templates/search.php";
     $content = ob_get_clean();
@@ -2502,8 +2503,8 @@ function get_statistique_globale($departementId = null, $ajax = false)
     $statistique_globale = array(
         "Nbre de résidences" => 0,
         "EHPA" => 0,
-        "RA" => 0,
-        "RS" => 0,
+        "Résidence autonomie" => 0,
+        "Résidence Seniors" => 0,
         "Tarif moyen" => 0,
         "Tarif médian" => 0,
         "Tarif plus bas" => 0,
@@ -2597,8 +2598,8 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
 
     if($a2[0]["NB_RA"] == 0){$a2[0]["NB_RA"] = 0 ;};
     $statistique_globale["EHPA"] = $a[0]["NB_EHPA"];
-    $statistique_globale["RA"] = $a2[0]["NB_RA"];
-    $statistique_globale["RS"] = $a3[0]["NB_RS"];
+    $statistique_globale["Résidence autonomie"] = $a2[0]["NB_RA"];
+    $statistique_globale["Résidence Seniors"] = $a3[0]["NB_RS"];
 
     $statistique_globale['Nbre de résidences'] = $a[0]["NB_EHPA"] + $a2[0]["NB_RA"]+ $a3[0]["NB_RS"];
     #$residenceTarifs = explode(",", $residences->tarifs);
@@ -2645,13 +2646,12 @@ where n.type='residence'", 'mysql', 'utf8');#better as utf8 :)
         $statistique_globale['Nbre de résidences'] = $residences->count;
 
         /* STATUT */
-        varDebug($residences->statuses);
-        exit();
+
         $residenceStatuses = explode(",", $residences->statuses);
         $statuses = array_count_values($residenceStatuses);
         $statistique_globale["EHPA"] = $statuses["EHPA"];
-        $statistique_globale["RA"] = $statuses["RA"];
-        $statistique_globale["RS"] = $statuses["RS"];
+        $statistique_globale["Résidence autonomie"] = $statuses["Résidence autonomie"];
+        $statistique_globale["Résidence Seniors"] = $statuses["Résidence Seniors"];
 
         $residenceTarifs = explode(",", $residences->tarifs);
         $statistique_globale["Tarif moyen"] = round(moyen($residenceTarifs), 2);
@@ -2678,14 +2678,15 @@ function get_requete_statistique($residences = array(), $name = '')
     $requete_statistique = array(
         "Nbre de résidences" => 0,
         "EHPA" => 0,
-        "RA" => 0,
-        "RS" => 0,
+        "Résidence autonomie" => 0,
+        "Résidence Seniors" => 0,
         "Tarif moyen" => 0,
         "Tarif médian" => 0,
         "Tarif plus bas" => 0,
         "Tarif plus haut" => 0,
     );
 
+ 
     /* NOMBRE DE MAISONS */
     $requete_statistique['Nbre de résidences'] = count($residences);
     /* STATUT */
@@ -2697,12 +2698,12 @@ function get_requete_statistique($residences = array(), $name = '')
         else  if ($residence->field_isehpa_value == 0 && $residence->field_isra_value == 1 && $residence->field_isrs_value == 0) {
 
 
-            $requete_statistique["RA"]++;
+            $requete_statistique["Résidence autonomie"]++;
         }
         else  if ($residence->field_isehpa_value == 0 && $residence->field_isra_value == 0 && $residence->field_isrs_value == 1) {
 
 
-            $requete_statistique["RS"]++;
+            $requete_statistique["Résidence Seniors"]++;
         }
     }
 

@@ -28,7 +28,26 @@
                                   <td><a href="<?php echo '/residence/' . $residence->nid; ?>"><?php echo $residence->title ?></a></td>
                                   <td><?php echo $residence->field_location_locality; ?></td>
                                   <td><?php echo $residence->field_gestionnaire_value; ?></td>
-                                  <td><?php if($residence->field_isra_value == 1 ) {echo "RA";} else {echo "EHPA";} ?></td>
+                                  <td><?php
+
+
+                                      if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 0) {
+
+                                          print "Résidence autonomie";
+
+                                      }else if($residence->field_isra_value == 0 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 1) {
+
+                                          print "Résidence Seniors";
+
+                                      }
+                                      else{
+
+                                          print "EHPA";
+
+                                      }
+
+
+                                      ?></td>
                                   <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
                                   <td><?php echo $residence->field_capacite_value; ?></td>
                                   <td><a href="<?php echo "/edit-residence/$residence->nid"; ?>" class="btn btn-primary btn-sm btn-icon"><i data-feather="edit"></i></a></td>

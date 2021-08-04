@@ -62,7 +62,7 @@ function historyCheck(el){
                         </div>
 
                         <div class="form-group col-md-12">
-                            <?php $statuses = array('EHPA', 'RA'); ?>
+                            <?php $statuses = array('EHPA', 'Résidence autonomie','Résidence Seniors'); ?>
                             <select id="statut" name="statut" class="form-control form-control-sm">
                                 <option value="aucun">Statut</option>
                                 <?php foreach( $statuses as $status ): ?>
@@ -154,7 +154,26 @@ function historyCheck(el){
                                 <td><?php echo $residence->field_location_locality; ?></td>
                                 <td><?php echo $residence->name; ?></td>
                                 <td><?php echo round($residence->distance, 2); ?> KM</td>
-                                <td><?php  if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0) {print "RA";}else{print "EHPA";} ?></td>
+                                <td><?php
+
+                                    if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 0) {
+
+                                        print "Résidence autonomie";
+
+                                    }else if($residence->field_isra_value == 0 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 1) {
+
+                                        print "Résidence Seniors";
+
+                                    }
+                                    else{
+
+                                        print "EHPA";
+
+                                    }
+
+
+
+                                    ?></td>
                                 <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
                             </tr>
                             <?php endforeach; ?>

@@ -243,14 +243,14 @@
               <div class="row">
                     <div class="col-md-12">
 
-                        <table id="request-table" class="table table-hover table-sm no-footer">
+                        <table id="request-table" class="table table-striped no-footer">
                         <thead>
-                            <tr><th scope="col">Groupe</th>
-                            <th scope="col">Résidences</th>
-                            <th scope="col">Code Postal</th>
-                            <th scope="col">Villes</th>
-                            <th scope="col">Nombre de logements</th>
-                            <th scope="col">Type</th>
+                            <tr><th scope="col" width="6%">Groupe</th>
+                            <th scope="col" width="25%">Résidences</th>
+                            <th scope="col" width="10%">Code Postal</th>
+                            <th scope="col" width="10%">Villes</th>
+                            <th scope="col" width="5%">Nombre de logements</th>
+                            <th scope="col" >Type</th>
                             <th scope="col">Tarifs</th>
                             <th scope="col">Dif tarifs moy dep</th>
                             <th scope="col">Dif tarifs moy requête</th>

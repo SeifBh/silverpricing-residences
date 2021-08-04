@@ -795,18 +795,31 @@ and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
 
+    if( $statut = "Résidence autonomie" ) {
+        $query->condition('field_isra_value', 1, '=');
+    } elseif( $statut = "Résidence Seniors" )  {
+        $query->condition('field_isrs_value', 1, '=');
+    }
+    else{
+        $query->condition('field_isehpa_value', 1, '=');
+
+    }
+
+
     $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
     $query->condition('ty.field_type_value', 'notEhpad', '=');
     $query->isNotNull('cs.field_pr_prixmin_value');
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
     $db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
     $query->condition($db_or);
 
 
@@ -840,6 +853,7 @@ and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
 
     $query->fields('eh', array());
     $query->fields('er', array());
+    $query->fields('rs', array());
 
 
     $query->fields('grp_term', array('name'));
