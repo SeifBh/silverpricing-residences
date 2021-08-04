@@ -1051,12 +1051,14 @@ function residence_mgmt_dashboard()
 
         $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
         $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+        $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
         $db_or = db_or();
 
 
         $db_or->condition('field_isehpa_value', 0, '<>');
         $db_or->condition('field_isra_value', 0, '<>');
+        $db_or->condition('field_isrs_value', 0, '<>');
         $query->condition($db_or);
 
 
@@ -1086,7 +1088,7 @@ function residence_mgmt_dashboard()
         $query->fields('k', array('field_residence_id_value'));
         $query->orderBy("b.field_pr_prixmin_value", "DESC");
 
-        $query->range(0, 20);
+        $query->range(0, 55);
         $quickWins = fetchAll($query);
 
 
@@ -1164,7 +1166,7 @@ function residence_mgmt_dashboard()
          $query->fields('tmh', array('field_tmh_value'));
          $query->fields('f', array('field_favoris_value'));*/
         $query->fields('n', array());
-        $query->range(0, 20);
+        $query->range(0, 1);
         $maquettes = fetchAll($query);
 
         // file_put_contents( DRUPAL_RESIDENCE_CACHE . "/$user->uid/dashboard/" . $cache_file, json_encode($maquettes));
@@ -1187,6 +1189,7 @@ function residence_mgmt_dashboard()
 
             $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
             $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+            $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
             $db_or = db_or();
             $query->leftjoin('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
@@ -1194,6 +1197,7 @@ function residence_mgmt_dashboard()
 
             $db_or->condition('field_isehpa_value', 0, '<>');
             $db_or->condition('field_isra_value', 0, '<>');
+            $db_or->condition('field_isrs_value', 0, '<>');
             $query->condition($db_or);
             $query->fields('n', array('nid', 'title'));
 
@@ -1230,12 +1234,14 @@ function residence_mgmt_dashboard()
 
             $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
             $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+            $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
             $db_or = db_or();
 
 
             $db_or->condition('field_isehpa_value', 0, '<>');
             $db_or->condition('field_isra_value', 0, '<>');
+            $db_or->condition('field_isrs_value', 0, '<>');
             $query->condition($db_or);
 
 
@@ -1250,7 +1256,7 @@ function residence_mgmt_dashboard()
             //$query->addExpression('GROUP_CONCAT(s.field_statut_type)', 'statuses');
             $query->addExpression('GROUP_CONCAT(tarif.field_pr_prixmin_value)', 'tarifs');
             $query->addExpression('SUM(c.field_capacite_value)', 'nombre_lits');
-            $query->range(0, 20);
+            $query->range(0, 55);
 
             $residences = $query->execute()->fetch();
         }
@@ -1274,12 +1280,14 @@ function residence_mgmt_dashboard()
 
             $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
             $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+            $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
             $db_or = db_or();
 
 
             $db_or->condition('field_isehpa_value', 0, '<>');
             $db_or->condition('field_isra_value', 0, '<>');
+            $db_or->condition('field_isrs_value', 0, '<>');
             $query->condition($db_or);
 
 
@@ -1303,6 +1311,7 @@ function residence_mgmt_dashboard()
             $query->fields('ty', array());
             $query->fields('eh', array());
             $query->fields('er', array());
+            $query->fields('rs', array());
             $query->fields('n', array('nid', 'title'));
             $query->fields('nc', ['changed']);#
             $query->fields('ff', array('field_finess_value'));
@@ -1318,7 +1327,7 @@ function residence_mgmt_dashboard()
             #$query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
             $query->leftjoin('field_data_field_manager', 'mgr', 'mgr.entity_id = n.nid', []);
             $query->fields('mgr', ['field_manager_value']);
-            $query->range(0, 20);
+            $query->range(0, 55);
 
             $residences = fetchAll($query);
             foreach ($residences as $t) {#
@@ -1380,12 +1389,14 @@ function residence_mgmt_get_quick_win()
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
     $db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
     $query->condition($db_or);
 
 

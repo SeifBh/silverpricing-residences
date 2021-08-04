@@ -51,13 +51,19 @@
     markers.push(marker);var markerObject = null;
     <?php
     switch($dataMarker->field_isehpa_value) {
-        case "0":
-            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
-            break;
         case "1":
             echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
             break;
-
+    }
+    switch($dataMarker->field_isrs_value) {
+        case "1":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.public });";
+            break;
+    }
+    switch($dataMarker->field_isra_value) {
+        case "1":
+            echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
+            break;
     }
 
     $groupeLogo = "";
