@@ -246,11 +246,11 @@
                         <table id="request-table" class="table table-striped no-footer">
                         <thead>
                             <tr><th scope="col" width="6%">Groupe</th>
-                            <th scope="col" width="25%">Résidences</th>
+                            <th scope="col" width="20%">Résidences</th>
                             <th scope="col" width="10%">Code Postal</th>
                             <th scope="col" width="10%">Villes</th>
-                            <th scope="col" width="5%">Nombre de logements</th>
-                            <th scope="col" >Type</th>
+                            <th scope="col" width="12%">Nb. logements</th>
+                            <th scope="col" width="8%">Type</th>
                             <th scope="col">Tarifs</th>
                             <th scope="col">Dif tarifs moy dep</th>
                             <th scope="col">Dif tarifs moy requête</th>

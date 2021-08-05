@@ -1386,7 +1386,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
 
     // DATATABLES
     $(document).ready(function() {
-        $('#request-table').DataTable( {
+        $('#request-table').DataTable( /*{
             "language": {
                 url: frenchDataTables
             },
@@ -1394,7 +1394,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
             "columnDefs": [
                 { type: 'natural-nohtml', targets: 3 }
             ]
-        });
+        }*/);
     });
 
     // REQUEST FORM

@@ -201,7 +201,7 @@
                                     <th scope="col">Résidences</th>
                                     <th scope="col">Départments</th>
                                     <th scope="col">Villes</th>
-                                    <th scope="col">Gestionnaires</th>
+                                    <th scope="col" width="10%">Gestionnaires</th>
                                     <th scope="col">Manager</th>
                                     <th scope="col">Position départementale</th>
                                     <th scope="col">Position concurrentielle</th>
