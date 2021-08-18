@@ -12,8 +12,8 @@
                               <tr>
                                   <th scope="col"><input type="checkbox" class="all-residenceId"/></th>
                                   <th scope="col">Résidence</th>
-                                  <th scope="col">Ville</th>
-                                  <th scope="col">Gestionnaire</th>
+                                  <th scope="col" width="10%">Ville</th>
+                                  <th scope="col" >Gestionnaire</th>
                                   <th scope="col">Type</th>
                                   <th scope="col">Tarif</th>
                                   <th scope="col">Nbre de logements</th>

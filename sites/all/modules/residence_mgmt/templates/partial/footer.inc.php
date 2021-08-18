@@ -1413,10 +1413,22 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
 
     <?php
 
-    switch($r->field_isehpa_value) {
-        case "0":
+    switch($r->field_isra_value) {
+
+        case "1":
+            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+            break;
+    }
+
+    switch($r->field_isrs_value) {
+
+        case "1":
             echo "markerObject = new H.map.Marker(m, { icon: icon.public });";
             break;
+    }
+
+    switch($r->field_isehpa_value) {
+
         case "1":
             echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
             break;
@@ -1453,11 +1465,19 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     requestMarkers.push(m);
     var markerObject = null;
     <?php
+    switch($r->field_isra_value) {
 
-    switch($r->field_isehpa_value) {
-        case "0":
+        case "1":
+            echo "markerObject = new H.map.Marker(m, { icon: icon.prive });";
+            break;
+    }    switch($r->field_isrs_value) {
+
+        case "1":
             echo "markerObject = new H.map.Marker(m, { icon: icon.public });";
             break;
+    }
+    switch($r->field_isehpa_value) {
+
         case "1":
             echo "markerObject = new H.map.Marker(m, { icon: icon.associatif });";
             break;
@@ -1755,7 +1775,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
             "info": false,
             "order": [[ 1, "asc" ]],
             'columnDefs': [
-                { 'targets': [0,6], 'orderable': false },
+                { 'targets': [0,6,7], 'orderable': false },
                 { type: 'natural-nohtml', targets: 5 },
             ]
         });

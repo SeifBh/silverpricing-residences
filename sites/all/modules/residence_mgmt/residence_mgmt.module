@@ -1545,16 +1545,18 @@ function residence_mgmt_departements()
 
 
     $query->condition('ty.field_type_value', 'notEhpad', '=');
-    $query->isNotNull('tarif.field_pr_prixmin_value');
+    //$query->isNotNull('tarif.field_pr_prixmin_value');
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
     $db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
     $query->condition($db_or);
 
 
