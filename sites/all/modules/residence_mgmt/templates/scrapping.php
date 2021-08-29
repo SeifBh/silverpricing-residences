@@ -526,8 +526,11 @@ function updateAllResidencesFromPersonnesAgeesJson($forceFiness = null, $tarifsF
                     $res->field_location['und'][0]['postal_code'] = $t['coordinates_postcode'];
 
                     $departmentId = findDepartmentByNumber($t['coordinates_deptcode']);
+
+
+
                     //depmod
-                    $res->field_departement['und'][0]['tid'] =$departmentId;
+                   // $res->field_departement['und'][0]['tid'] =$departmentId;
                     $res->field_groupe['und'][0]['tid'] = 102;
                     $res->field_latitude['und'][0]['value'] = $t['coordinates_latitude'];
 

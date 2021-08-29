@@ -751,7 +751,7 @@ if(0){
     return $residenceRanking;
 }
 
-function getResidencesConcurrentesOnAddress($latitude, $longitude, $perimetre = 5, $statut = null)
+function getResidencesConcurrentesOnAddress($latitude, $longitude, $perimetre = 5, $statut )
 {
     /*
                     if($statuses[0] == "ISEHPA"){
@@ -790,11 +790,14 @@ function getResidencesConcurrentesOnAddress($latitude, $longitude, $perimetre = 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
 
-    if ($statut = "Résidence autonomie") {
+   if ($statut == "Résidence autonomie") {
+
         $query->condition('field_isra_value', 1, '=');
-    } elseif ($statut = "Résidence Seniors") {
+    } elseif($statut == "Résidence Seniors") {
+
         $query->condition('field_isrs_value', 1, '=');
-    } else {
+    } elseif($statut == "EHPA") {
+
         $query->condition('field_isehpa_value', 1, '=');
 
     }
@@ -802,19 +805,19 @@ function getResidencesConcurrentesOnAddress($latitude, $longitude, $perimetre = 
 
     $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
     $query->condition('ty.field_type_value', 'notEhpad', '=');
-    $query->isNotNull('cs.field_pr_prixmin_value');
+   // $query->isNotNull('cs.field_pr_prixmin_value');
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
     $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
-    $db_or = db_or();
+    /*$db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
     $db_or->condition('field_isrs_value', 0, '<>');
-    $query->condition($db_or);
+    $query->condition($db_or);*/
 
 
     $query->join('field_data_field_capacite', 'cap', 'cap.entity_id = n.nid', array());
@@ -852,11 +855,11 @@ function getResidencesConcurrentesOnAddress($latitude, $longitude, $perimetre = 
 
     $query->fields('grp_term', array('name'));
     $query->fields('grp_logo', array('field_logo_fid'));
-    $query->addExpression('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude))))', 'distance', array(':latitude' => $latitude, ':longitude' => $longitude));
-    //$query->where('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude)))) <= :perimetre', array( ':perimetre' => $perimetre, ':latitude' => $latitude, ':longitude' => $longitude ));
+    $query->addExpression('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude))))', 'distance', array( ':latitude' => $latitude, ':longitude' => $longitude ));
+    $query->where('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude)))) <= :perimetre', array( ':perimetre' => $perimetre, ':latitude' => $latitude, ':longitude' => $longitude ));
     $query->orderBy('distance', 'ASC');
     #$_ENV['stop']=__FILE__.__line__;
-    $query->range(0, 20);
+
     $residences = fetchAll($query);
 
     return $residences;
@@ -2042,7 +2045,14 @@ and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
     }
 #dans quel ordre sont-elles présentées ?
 #$residenceConcurrent->field_capacite['und'][0]['value'];
+
+
+
+
+
     if (!$statuses) {
+
+
         $sql = "SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,s.field_statut_value AS field_statut_value,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
 FROM node n
 -- INNER JOIN distance_indexation di ON di.secondary_nid = n.nid and di.primary_nid = $residenceNid
@@ -2063,8 +2073,9 @@ left JOIN field_data_field_groupe g on g.entity_id = n.nid
 left JOIN taxonomy_term_data grp on g.field_groupe_tid = grp.tid
 left JOIN field_data_field_logo logo on logo.entity_id  = grp.tid
 
-WHERE n.type = 'residence' and (er.field_isra_value <> 0 OR eh.field_isehpa_value <> 0) and n.nid<>$residenceNid and n.nid in(" . implode(',', $clo) . ") limit $limit";
+WHERE n.type = 'residence' and (er.field_isra_value <> 0 OR eh.field_isehpa_value <> 0) and n.nid in(" . implode(',', $clo) . ") order by FIELD(n.nid,".implode(',',$clo).")  limit $limit";
     } else {
+
         $sql = "SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid, s.field_statut_value AS field_statut_value, eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
 FROM node n
 -- INNER JOIN distance_indexation di ON di.secondary_nid = n.nid and di.primary_nid = $residenceNid
@@ -2085,13 +2096,12 @@ left JOIN field_data_field_groupe g on g.entity_id = n.nid
 left JOIN taxonomy_term_data grp on g.field_groupe_tid = grp.tid
 left JOIN field_data_field_logo logo on logo.entity_id  = grp.tid
 
-WHERE n.type = 'residence' and n.nid<>$residenceNid and n.nid in(" . implode(',', $clo) . ")  limit $limit";
+WHERE n.type = 'residence' and (er.field_isra_value <> 0 OR eh.field_isehpa_value <> 0)  and n.nid in(" . implode(',', $clo) . ") order by FIELD(n.nid,".implode(',',$clo).")  limit $limit";
     }
 
 
     $_ENV['stop'] = __line__ . __file__;
     $residences = Alptech\Wip\fun::sql($sql);#,'mysql','utf'
-
 
     $id2tarif = [];
     foreach ($residences as &$t) {

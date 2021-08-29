@@ -93,7 +93,7 @@ if($images){?>
                     }
                     ?>
                     <?php echo $residence->title; ?>
-                    <?php  if ($defaultResType == "ISRA"){print " - RA";}else{print "- EHPA";} ?>
+                    <?php /*  if ($defaultResType == "ISRA"){print " - RA";}else{print "- EHPA";}*/ ?>
                 </h3>
 
                 <nav aria-label="breadcrumb">

@@ -1696,15 +1696,13 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         $k2=$k+1;
 
 
-        switch($residence->field_isehpa_value) {
-            case "0":
-                echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
-                break;
-            case "1":
-                echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
-                break;
 
-        }?>
+
+
+
+
+
+        ?>
         fs=<?=$fs?>;k=<?=$k2?>;bgColor='<?=$color?>';txtColor='<?=$txtcolor?>';border='<?=$b?>';w=<?=$w?>;h=<?=$h?>;zoom=<?=$zoom?>;
         pngFileName=k+'-'+bgColor+'-'+txtColor+'-'+border+'-'+w+'-'+h+'-'+zoom;
         var final=pngFileName+'.png';
@@ -1712,6 +1710,25 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         var markerObject = null,marker = { lat: <?php echo $residence->field_latitude_value; ?>, lng: <?php echo $residence->field_longitude_value; ?> };
         markers.push(marker);
 
+        <?php
+        switch ($residence->field_isehpa_value) {
+            case "1":
+                echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
+                break;
+        }
+        switch ($residence->field_isrs_value) {
+            case "1":
+
+                echo "markerObject = new H.map.Marker(marker, { icon: icon.public });";
+                break;
+        }
+        switch ($residence->field_isra_value) {
+            case "1":
+
+                echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
+                break;
+        }
+        ?>
         callbacksInc++;//hereMap is a global here :)
         callbacks[callbacksInc]=function(final,marker,callbacksInc,w,h) {
             cl({'loadedImg':callbacksInc,marker,final});

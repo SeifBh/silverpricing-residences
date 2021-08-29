@@ -682,19 +682,19 @@ function residence_mgmt_cron($a = null, $b = null)
 {
 
 
-    $query = db_query("SELECT n.nid FROM {node} n WHERE n.type = :tp and n.title LIKE '%-ok%' ", array(':tp' => 'residence'));
+   /* $query = db_query("SELECT n.nid FROM {node} n WHERE n.type = :tp and n.title LIKE '%-ok%' ", array(':tp' => 'residence'));
     foreach ($query as $n) {
         $residence = node_load($n->nid);
 
 
         $residence->title = substr($residence->title, 0, strlen($residence->title) -3);
         node_save($residence);
-        //node_delete($n->nid);
-    }
+        node_delete($n->nid);
+    }*/
 
-    /*
+
         updateAllResidencesFromPersonnesAgeesJson();
-    */
+
 
 }
 
@@ -2041,6 +2041,7 @@ function residence_mgmt_get_residence_details($residenceId = null, $limit = 10)
 
 
     $residencesConcurrentes['direct'] = getResidencesProchesByStatus($residenceId, [$sameStatut], $limit, 0, 1, $clo);
+  
 #indirect : liste bcp plus longue ici
     $residencesConcurrentes['indirect'] = getResidencesProchesByStatus($residenceId, [], $limit, 0, 1, $clo2, 'indirect-nostatus');
 
@@ -2339,6 +2340,7 @@ function residence_mgmt_recherche_silverex()
             $lon = $_POST['longitude'];
             $perimetre = $_POST['perimetre'];#
             $selectedStatut = ($_POST['statut'] != "aucun") ? $_POST['statut'] : null;#
+       
             $residences = getResidencesConcurrentesOnAddress($_POST['latitude'], $_POST['longitude'], $_POST['perimetre'], $selectedStatut);
             $name = trim($selectedStatut . ' ' . implode('-', $_POST['categories']) . ' ' . $_POST['perimetre'] . 'km autour de ' . $adr);
             $healthOrganizations = [];
