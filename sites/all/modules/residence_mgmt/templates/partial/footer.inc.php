@@ -320,12 +320,12 @@
     $mesPrixParVille=[];$detailParVille='';
 
     foreach( $mesResidences as $t ){
-    if($t->field_pr_prixmin_value != null){
-            
+        if($t->field_pr_prixmin_value != null){
+
             $mesPrixParVille[strtolower($t->field_location_locality)][$t->title]=$t->field_pr_prixmin_value;
         }else{
-        $t->field_pr_prixmin_value = 0;
-      }
+            $t->field_pr_prixmin_value = 0;
+        }
     }
 
     foreach ($departementChartData as $k => $data) {
@@ -551,7 +551,7 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
     if( isset($dataMarker->field_logo_fid) ) {
         $groupeLogo = "<img src='" . file_create_url(file_load($dataMarker->field_logo_fid)->uri) . "' width='16' alt='' />";
     }
-    
+
     switch($dataMarker->field_isehpa_value) {
 
         case "1":
@@ -1694,12 +1694,26 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         $desc=" #$k2 $groupeLogo <a href='/residence/$residence->nid'>" . htmlspecialchars($residence->title) . "</a><br />$residence->field_location_postal_code, $residence->field_location_locality <br />Nb lits :$residence->field_capacite_value <br /><b>$residence->field_pr_prixmin_value €</b>";
 
         $k2=$k+1;
+        switch ($residence->field_isehpa_value) {
+            case "1":
+                $color='EB9B6C';$txtcolor='000';$b='FFF';break;
+        }
+        switch ($residence->field_isrs_value) {
+            case "1":
 
+                $color='836983';$txtcolor='FFF';$b='000';break;#gris bof
+        }
+        switch ($residence->field_isra_value) {
+            case "1":
 
-
-
-
-
+                $color='584AB9';$txtcolor='FFF';$b='000';break;
+        }
+      /*  switch($residence->field_statut_value) {
+            case "Associatif":$color='EB9B6C';$txtcolor='000';$b='FFF';break;
+            case "Public":$color='836983';$txtcolor='FFF';$b='000';break;#gris bof
+            case "Privé":$color='584AB9';$txtcolor='FFF';$b='000';break;
+            default:$color='FFF';$txtcolor='000';$b='FFF';break;
+        }*/
 
 
         ?>
@@ -1710,25 +1724,6 @@ http://www.chartjs.org/samples/latest/tooltips/custom-points.html
         var markerObject = null,marker = { lat: <?php echo $residence->field_latitude_value; ?>, lng: <?php echo $residence->field_longitude_value; ?> };
         markers.push(marker);
 
-        <?php
-        switch ($residence->field_isehpa_value) {
-            case "1":
-                echo "markerObject = new H.map.Marker(marker, { icon: icon.associatif });";
-                break;
-        }
-        switch ($residence->field_isrs_value) {
-            case "1":
-
-                echo "markerObject = new H.map.Marker(marker, { icon: icon.public });";
-                break;
-        }
-        switch ($residence->field_isra_value) {
-            case "1":
-
-                echo "markerObject = new H.map.Marker(marker, { icon: icon.prive });";
-                break;
-        }
-        ?>
         callbacksInc++;//hereMap is a global here :)
         callbacks[callbacksInc]=function(final,marker,callbacksInc,w,h) {
             cl({'loadedImg':callbacksInc,marker,final});
