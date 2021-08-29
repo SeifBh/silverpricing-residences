@@ -4,7 +4,8 @@
  * Residences
  */
 
-function findAllResidences() {
+function findAllResidences()
+{
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
@@ -14,7 +15,7 @@ function findAllResidences() {
     $query->leftjoin('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
     $query->leftjoin('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
     $query->leftjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->leftjoin('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid and t.field_tarif_chambre_simple_value != :tarif', array( ':tarif' => 'NA' ));
+    $query->leftjoin('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid and t.field_tarif_chambre_simple_value != :tarif', array(':tarif' => 'NA'));
     $query->fields('n', array('nid', 'title'));
     $query->fields('ff', array('field_finess_value'));
     $query->fields('l', array('field_location_locality'));
@@ -28,11 +29,12 @@ function findAllResidences() {
     return $residences;
 }
 
-function findResidenceByDepartment($departmentId) {
+function findResidenceByDepartment($departmentId)
+{
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
-    $query->innerjoin('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departmentId', array( ':departmentId' => $departmentId ));
+    $query->innerjoin('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departmentId', array(':departmentId' => $departmentId));
     $query->leftjoin('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->leftjoin('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->leftjoin('field_data_field_statut', 's', 's.entity_id = n.nid', array());
@@ -40,14 +42,14 @@ function findResidenceByDepartment($departmentId) {
     $query->leftjoin('field_data_field_url_source', 'src', 'src.entity_id = n.nid', array());
     $query->leftjoin('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
     $query->leftjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->leftjoin('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid and t.field_tarif_chambre_simple_value != :tarif', array( ':tarif' => 'NA' ));
+    $query->leftjoin('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid and t.field_tarif_chambre_simple_value != :tarif', array(':tarif' => 'NA'));
     $query->fields('n', array('nid', 'title'));
     $query->fields('ff', array('field_finess_value'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
     $query->fields('s', array('field_statut_value'));
     $query->fields('g', array('field_gestionnaire_value'));
     $query->fields('src', array('field_url_source_value'));
-    $query->fields('c', array('nid','title'));
+    $query->fields('c', array('nid', 'title'));
     $query->fields('t', array('field_tarif_chambre_simple_value'));
 
     $residences = fetchAll($query);
@@ -55,12 +57,31 @@ function findResidenceByDepartment($departmentId) {
     return $residences;
 }
 
-function findResidencesByGroup( $groupId ) {
-    
+function findResidencesByGroup($groupId)
+{
+
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
-    $query->join('field_data_field_groupe', 'grp', 'grp.entity_id = n.nid and grp.field_groupe_tid = :groupId', array( ':groupId' => $groupId ));
+    $query->isNotNull('t.field_pr_prixmin_value');
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
+    $query->join('field_data_field_groupe', 'grp', 'grp.entity_id = n.nid and grp.field_groupe_tid = :groupId', array(':groupId' => $groupId));
     $query->join('field_data_field_type', 's', 's.entity_id = n.nid', array());
+    $query->join('field_data_field_statut', 'ss', 'ss.entity_id = n.nid', array());
+
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
@@ -71,7 +92,13 @@ function findResidencesByGroup( $groupId ) {
     $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = rc.entity_id', array());
 
 #$query->leftjoin('taxonomy_term_data', 'grpt', 'grp.field_groupe_tid = grpt.tid',[]);$query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grpt.tid',[]);$query->fields('logo',['field_logo_fid']);
-    $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.field_groupe_tid',[]);$query->fields('logo',['field_logo_fid']);
+    $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.field_groupe_tid', []);
+    $query->fields('logo', ['field_logo_fid']);
+
+
+    $query->fields('er', array('field_isra_value'));
+
+    $query->fields('eh', array('field_isehpa_value'));
 
 
     $query->fields('n', array('nid', 'title'));
@@ -79,6 +106,8 @@ function findResidencesByGroup( $groupId ) {
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('lng', array('field_longitude_value'));
+    $query->fields('ss', array('field_statut_value'));
+
     $query->fields('t', array('field_pr_prixmin_value'));
     $query->fields('capacite', array('field_capacite_value'));
 
@@ -87,11 +116,28 @@ function findResidencesByGroup( $groupId ) {
     return $residences;
 }
 
-function searchResidencesByGroup($groupeId = null, $dataForm = array()) {
+function searchResidencesByGroup($groupeId = null, $dataForm = array())
+{
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
-    $query->join('field_data_field_groupe', 'g', 'g.entity_id = n.nid and g.field_groupe_tid = :groupeId', [ ':groupeId' => $groupeId ]);
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+    $query->isNotNull('t.field_pr_prixmin_value');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
+    $query->join('field_data_field_groupe', 'g', 'g.entity_id = n.nid and g.field_groupe_tid = :groupeId', [':groupeId' => $groupeId]);
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
@@ -100,15 +146,17 @@ function searchResidencesByGroup($groupeId = null, $dataForm = array()) {
     $query->join('field_data_field_capacite', 'capacite', 'capacite.entity_id =  n.nid', array());
     $query->join('field_data_field_departement', 'dn', 'dn.entity_id = n.nid', array());
     $query->join('taxonomy_term_data', 'd', 'd.tid = dn.field_departement_tid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 't', 't.entity_id = rc.entity_id', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = rc.entity_id', array());
 
     #$query->leftjoin('field_data_field_groupe', 'g', 'g.entity_id = n.nid',[]);
     #$query->leftjoin('taxonomy_term_data', 'grp', 'g.field_groupe_tid =:groupeId', array());
-    $query->leftjoin('taxonomy_term_data', 'grp', 'g.field_groupe_tid = grp.tid',[ ':groupeId' => $groupeId ]);
+    $query->leftjoin('taxonomy_term_data', 'grp', 'g.field_groupe_tid = grp.tid', [':groupeId' => $groupeId]);
     $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid', array());
 
     $query->fields('n', array('nid', 'title'));
+    $query->fields('eh', array());
+    $query->fields('er', array());
     $query->fields('ff', array('field_finess_value'));
     $query->fields('d', array('name'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
@@ -117,18 +165,18 @@ function searchResidencesByGroup($groupeId = null, $dataForm = array()) {
     $query->fields('s', array('field_statut_value'));
     $query->fields('grp', array('name'));
     $query->fields('logo', array('field_logo_fid'));
-    $query->fields('t', array('field_tarif_chambre_simple_value'));
+    $query->fields('t', array('field_pr_prixmin_value'));
     $query->fields('capacite', array('field_capacite_value'));
 
-    if( isset($dataForm['residence']) && !empty($dataForm['residence']) ) {
+    if (isset($dataForm['residence']) && !empty($dataForm['residence'])) {
         $query->condition('n.title', '%' . $dataForm['residence'] . '%', 'LIKE');
     }
 
-    if(  isset($dataForm['ville']) && !empty($dataForm['ville']) ) {
+    if (isset($dataForm['ville']) && !empty($dataForm['ville'])) {
         $query->condition('l.field_location_locality', '%' . $dataForm['ville'] . '%', 'LIKE');
     }
 
-    if( isset($dataForm['departement']) && !empty($dataForm['departement']) ) {
+    if (isset($dataForm['departement']) && !empty($dataForm['departement'])) {
         $query->condition('dn.field_departement_tid', $dataForm['departement'], 'IN');
     }
 
@@ -138,28 +186,27 @@ function searchResidencesByGroup($groupeId = null, $dataForm = array()) {
 
 }
 
-function findResidenceById($residenceId) {
+function findResidenceById($residenceId)
+{
     $residence = null;
-    if( $residenceId != null ) {
-        $residence = entity_load('node', array($residenceId), array( 'type' => 'residence' ));
+    if ($residenceId != null) {
+        $residence = entity_load('node', array($residenceId), array('type' => 'residence'));
     }
     return $residence;
 }
 
-function addResidenceByJsonObject( $residenceData = null ) {
+function addResidenceByJsonObject($residenceData = null)
+{
 
     try {
         $finess = $residenceData->noFinesset;
-
-
-
 
 
         $statuses = array("Privé commercial" => "Privé", "Privé non lucratif" => "Associatif", "Public" => "Public");
 
         $newResidence = new stdClass();
         $newResidence->type = 'residence';
-        $newResidence->title = $residenceData->title ;
+        $newResidence->title = $residenceData->title;
         $newResidence->body = "";
         $newResidence->language = LANGUAGE_NONE;
         $newResidence->status = 1;
@@ -175,23 +222,21 @@ function addResidenceByJsonObject( $residenceData = null ) {
         $newResidence->field_telephone[$newResidence->language][0]['value'] = $residenceData->coordinates->phone;
         $newResidence->field_gestionnaire[$newResidence->language][0]['value'] = $residenceData->coordinates->gestionnaire;
 
-        $newResidence->field_isehpa[$newResidence->language][0]['value'] = (int) $residenceData->IsEHPA;
-        $newResidence->field_isra[$newResidence->language][0]['value'] = (int) $residenceData->IsRA;
+        $newResidence->field_isehpa[$newResidence->language][0]['value'] = (int)$residenceData->IsEHPA;
+        $newResidence->field_isra[$newResidence->language][0]['value'] = (int)$residenceData->IsRA;
         // $newResidence->field_isrs[$newResidence->language][0]['value'] = (int) $residenceData->IsEHPA;
-        $newResidence->field_isesld[$newResidence->language][0]['value'] = (int) $residenceData->IsESLD;
-        $newResidence->field_isaja[$newResidence->language][0]['value'] = (int) $residenceData->IsAJA;
-        $newResidence->field_ishcompl[$newResidence->language][0]['value'] = (int) $residenceData->IsHCOMPL;
-        $newResidence->field_ishtempo[$newResidence->language][0]['value'] = (int) $residenceData->IsHTEMPO;
-        $newResidence->field_isacc_jour[$newResidence->language][0]['value'] = (int) $residenceData->IsACC_JOUR;
-        $newResidence->field_isacc_nuit[$newResidence->language][0]['value'] = (int) $residenceData->IsACC_NUIT;
-        $newResidence->field_ishab_aide_soc[$newResidence->language][0]['value'] = (int) $residenceData->IsHAB_AIDE_SOC;
+        $newResidence->field_isesld[$newResidence->language][0]['value'] = (int)$residenceData->IsESLD;
+        $newResidence->field_isaja[$newResidence->language][0]['value'] = (int)$residenceData->IsAJA;
+        $newResidence->field_ishcompl[$newResidence->language][0]['value'] = (int)$residenceData->IsHCOMPL;
+        $newResidence->field_ishtempo[$newResidence->language][0]['value'] = (int)$residenceData->IsHTEMPO;
+        $newResidence->field_isacc_jour[$newResidence->language][0]['value'] = (int)$residenceData->IsACC_JOUR;
+        $newResidence->field_isacc_nuit[$newResidence->language][0]['value'] = (int)$residenceData->IsACC_NUIT;
+        $newResidence->field_ishab_aide_soc[$newResidence->language][0]['value'] = (int)$residenceData->IsHAB_AIDE_SOC;
 
 
-
-
-        $newResidence->field_alzheimer[$newResidence->language][0]['value'] = (int) $residenceData->IsALZH;
-        $newResidence->field_accueil_de_jour[$newResidence->language][0]['value'] = (int) $residenceData->IsACC_JOUR;
-        $newResidence->field_aide_sociale[$newResidence->language][0]['value'] = (int) $residenceData->IsHAB_AIDE_SOC;
+        $newResidence->field_alzheimer[$newResidence->language][0]['value'] = (int)$residenceData->IsALZH;
+        $newResidence->field_accueil_de_jour[$newResidence->language][0]['value'] = (int)$residenceData->IsACC_JOUR;
+        $newResidence->field_aide_sociale[$newResidence->language][0]['value'] = (int)$residenceData->IsHAB_AIDE_SOC;
 
         $newResidence->field_capacite[$newResidence->language][0]['value'] = $residenceData->capacity;
         $newResidence->field_statut[$newResidence->language][0]['value'] = $statuses[$residenceData->legal_status];
@@ -201,7 +246,7 @@ function addResidenceByJsonObject( $residenceData = null ) {
         $newResidence->field_tarif_gir_5_6[$newResidence->language][0]['value'] = $residenceData->ehpadPrice->tarifGir56;
 
         $newResidence->field_location[$newResidence->language][0]['country'] = "FR";
-        $newResidence->field_location[$newResidence->language][0]["thoroughfare"] =$residenceData->coordinates->street;
+        $newResidence->field_location[$newResidence->language][0]["thoroughfare"] = $residenceData->coordinates->street;
         $newResidence->field_location[$newResidence->language][0]['locality'] = $residenceData->coordinates->city;
         $newResidence->field_location[$newResidence->language][0]['postal_code'] = $residenceData->coordinates->postcode;
         $newResidence->field_latitude[$newResidence->language][0]['value'] = $residenceData->coordinates->latitude;
@@ -216,7 +261,7 @@ function addResidenceByJsonObject( $residenceData = null ) {
 
         $newPrixResidence = new stdClass();
         $newPrixResidence->type = 'prixresidences';
-        $newPrixResidence->title = 'prix::'.$residenceData->title;
+        $newPrixResidence->title = 'prix::' . $residenceData->title;
         $newPrixResidence->language = LANGUAGE_NONE;
         $newPrixResidence->status = 1;
 
@@ -235,7 +280,10 @@ function addResidenceByJsonObject( $residenceData = null ) {
         $newPrixResidence->field_pr_cerfa[LANGUAGE_NONE][0]['value'] = $residenceData->cerfa;
         $newPrixResidence->field_pr_prixmin[LANGUAGE_NONE][0]['value'] = $residenceData->prixMin;
 
-        if( $residenceData->raPrice->updatedAt != "NA" ) {
+        $newPrixResidence->field_pr_uuid[LANGUAGE_NONE][0]['value'] = uniqid();
+
+
+        if ($residenceData->raPrice->updatedAt != "NA") {
             $newPrixResidence->field_updatedat[LANGUAGE_NONE][0]["value"]["date"] = date_format(date_create($residenceData->raPrice->updatedAt), 'Y-m-d H:i:s');
         } else {
             $newPrixResidence->field_updatedat[LANGUAGE_NONE][0]["value"]["date"] = date('Y-m-d H:i:s');
@@ -259,7 +307,7 @@ function addResidenceByJsonObject( $residenceData = null ) {
         $newChambre->field_tarif_chambre_double_tempo[LANGUAGE_NONE][0]['value'] = $residenceData->ehpadPrice->prixHebTempCd;
         $newChambre->field_residence[LANGUAGE_NONE][0]['target_id'] = $newResidence->nid;
 
-        if( $residenceData->ehpadPrice->updatedAt != "NA" ) {
+        if ($residenceData->ehpadPrice->updatedAt != "NA") {
             $newChambre->field_date_de_modification[LANGUAGE_NONE][0]["value"]["date"] = date_format(date_create($residenceData->ehpadPrice->updatedAt), 'Y-m-d H:i:s');
         } else {
             $newChambre->field_date_de_modification[LANGUAGE_NONE][0]["value"]["date"] = date('Y-m-d H:i:s');
@@ -268,16 +316,15 @@ function addResidenceByJsonObject( $residenceData = null ) {
 
         node_save($newChambre);
 
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
         echo "Error lors de l'insertion d'ehpad";
     }
 
 
-
 }
 
-function addResidenceSrcXls( $residenceData = null ) {
+function addResidenceSrcXls($residenceData = null)
+{
 
     $statuses = array("Privé commercial" => "Privé", "Privé non lucratif" => "Associatif", "Public" => "Public");
 
@@ -328,7 +375,7 @@ function addResidenceSrcXls( $residenceData = null ) {
     $newChambre->field_tarif_chambre_double_tempo[LANGUAGE_NONE][0]['value'] = $residenceData['prixHebTempCd'];
     $newChambre->field_residence[LANGUAGE_NONE][0]['target_id'] = $newResidence->nid;
 
-    if( $residenceData['dateMaj'] != "NA" ) {
+    if ($residenceData['dateMaj'] != "NA") {
         $newChambre->field_date_de_modification[LANGUAGE_NONE][0]["value"]["date"] = date('Y-m-d H:i:s', $residenceData['dateMaj']);
     } else {
         $newChambre->field_date_de_modification[LANGUAGE_NONE][0]["value"]["date"] = date('Y-m-d H:i:s');
@@ -338,7 +385,8 @@ function addResidenceSrcXls( $residenceData = null ) {
 
 }
 
-function addResidence($residenceData = null, $departmentNumber) {
+function addResidence($residenceData = null, $departmentNumber)
+{
 
     $departmentId = findDepartmentByNumber($departmentNumber);
 
@@ -348,10 +396,10 @@ function addResidence($residenceData = null, $departmentNumber) {
     $newResidence->body = "";
     $newResidence->language = LANGUAGE_NONE;#und
     node_object_prepare($newResidence);
-    if($residenceData->finess){
+    if ($residenceData->finess) {
         $newResidence->field_finess[$newResidence->language][0]['value'] = $residenceData->finess;
     }
-    if($residenceData->groupe) {
+    if ($residenceData->groupe) {
         $newResidence->field_groupe[$newResidence->language][0]['tid'] = 102;#residenceData->groupe
     }
 
@@ -381,14 +429,16 @@ function addResidence($residenceData = null, $departmentNumber) {
     return $newResidence;
 }
 
-function updateResidence($entityId  = null) {
+function updateResidence($entityId = null)
+{
     $residence = node_load($entityId);
 
     varDebug($residence);
     exit();
 }
 
-function addChambre($chambreData = null, $residence = null) {
+function addChambre($chambreData = null, $residence = null)
+{
 
     $newChambre = new stdClass();
     $newChambre->type = 'chambre';
@@ -408,39 +458,30 @@ function addChambre($chambreData = null, $residence = null) {
 
 }
 
-function updateChambre($entityId = null, $data) {
+function updateChambre($entityId = null, $data)
+{
     $chambre = node_load($entityId);
 
-    if( !empty($data) ) {
+
+    if (!empty($data)) {
         // Tarifs
-        if($chambre->field_tarif_chambre_simple[LANGUAGE_NONE][0]['value'] != $data['tarif_chambre_simple']){
-            $k2v=[];
-            $k2v['date']=$k2v['btime']=time();
-            $k2v['rid']=$chambre->field_residence['und'][0]['target_id'];
-            $k2v['cs_0']=$chambre->field_tarif_chambre_simple[LANGUAGE_NONE][0]['value'];
-            $k2v['cs_1']=$data['tarif_chambre_simple'];
-            $sql='insert into z_variations '.Alptech\Wip\fun::insertValues($k2v);
-            $insertId=Alptech\Wip\fun::sql($sql);#
-            $b=1;
+        if ($chambre->field_pr_prixmin[LANGUAGE_NONE][0]['value'] != $data['field_pr_prixmin']) {
+
+            $k2v['date'] = $k2v['btime'] = time();
+            $k2v['rid'] = $chambre->field_residence_id['und'][0]['value'];
+            $k2v['cs_0'] = $chambre->field_pr_prixmin[LANGUAGE_NONE][0]['value'];
+            $k2v['cs_1'] = $data['field_pr_prixmin'];
+            $sql = 'insert into z_variations ' . Alptech\Wip\fun::insertValues($k2v);
+            $insertId = Alptech\Wip\fun::sql($sql);#
+            $b = 1;
         }
-        $chambre->field_tarif_chambre_simple[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple'];
+        $chambre->field_pr_prixmin[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple'];
 
 
-        $chambre->field_tarif_chambre_double[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double'];
-        $chambre->field_tarif_chambre_simple_tempo[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple_temporaire'];
-        $chambre->field_tarif_chambre_double_tempo[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double_temporaire'];
-        $chambre->field_tarif_cs_aide_sociale[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple_aide_sociale'];
-        $chambre->field_tarif_cd_aide_sociale[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double_aide_sociale'];
+        $chambre->field_pr_prixf1[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double'];
+        $chambre->field_pr_prixf1bis[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_simple_temporaire'];
+        $chambre->field_pr_prixf2[LANGUAGE_NONE][0]['value'] = $data['tarif_chambre_double_temporaire'];
 
-        // Nombre de chambres
-        $chambre->field_nombre_cs_entre_de_gamme[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_entree_de_gamme']);
-        $chambre->field_nombre_cs_standard[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_standard']);
-        $chambre->field_nombre_cs_superieur[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_superieur']);
-        $chambre->field_nombre_cs_luxe[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_luxe']);
-        $chambre->field_nombre_cs_alzheimer[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_alzheimer']);
-        $chambre->field_nombre_cs_aide_sociale[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cs_aide_sociale']);
-        $chambre->field_nombre_cd_standard[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cd_standard']);
-        $chambre->field_nombre_cd_aide_sociale[LANGUAGE_NONE][0]['value'] = intval($data['nombre_cd_aide_sociale']);
 
         // Date de modification
         $chambre->field_date_de_modification[LANGUAGE_NONE][0]['value'] = date("Y-m-d H:i:s");
@@ -457,23 +498,24 @@ function updateChambre($entityId = null, $data) {
 
 }
 
-function synchronizeChambre( $entityId, $data,$finess=null) {
-    $residence=null;
+function synchronizeChambre($entityId, $data, $finess = null)
+{
+    $residence = null;
     $chambre = node_load($entityId);
 
-    if( !empty($data) ) {
+    if (!empty($data)) {
         // Tarifs
         #if(isset($data->tarif['csa']))$chambre->field_tarif_cs_aide_sociale[LANGUAGE_NONE][0]['value'] = $data->tarif['csa'];
         #if(isset($data->tarif['cda']))$chambre->field_tarif_cd_aide_sociale[LANGUAGE_NONE][0]['value'] = $data->tarif['cda'];
 
-        $chambre->field_tarif_chambre_simple[LANGUAGE_NONE][0]['value'] = ( is_numeric($data->tarif[0]['chambre-seule']) ) ? $data->tarif[0]['chambre-seule'] : "NA";
-        $chambre->field_tarif_chambre_double[LANGUAGE_NONE][0]['value'] = ( is_numeric($data->tarif[0]['chambre-double']) ) ? $data->tarif[0]['chambre-double'] : "NA";
+        $chambre->field_tarif_chambre_simple[LANGUAGE_NONE][0]['value'] = (is_numeric($data->tarif[0]['chambre-seule'])) ? $data->tarif[0]['chambre-seule'] : "NA";
+        $chambre->field_tarif_chambre_double[LANGUAGE_NONE][0]['value'] = (is_numeric($data->tarif[0]['chambre-double'])) ? $data->tarif[0]['chambre-double'] : "NA";
 
-        $chambre->field_tarif_chambre_simple_tempo[LANGUAGE_NONE][0]['value'] = ( is_numeric($data->tarif[1]['chambre-seule']) ) ? $data->tarif[1]['chambre-seule'] : "NA";
-        $chambre->field_tarif_chambre_double_tempo[LANGUAGE_NONE][0]['value'] = ( is_numeric($data->tarif[1]['chambre-double']) ) ? $data->tarif[1]['chambre-double'] : "NA";
+        $chambre->field_tarif_chambre_simple_tempo[LANGUAGE_NONE][0]['value'] = (is_numeric($data->tarif[1]['chambre-seule'])) ? $data->tarif[1]['chambre-seule'] : "NA";
+        $chambre->field_tarif_chambre_double_tempo[LANGUAGE_NONE][0]['value'] = (is_numeric($data->tarif[1]['chambre-double'])) ? $data->tarif[1]['chambre-double'] : "NA";
 
         // Date de modification
-        if( empty($chambre->field_date_de_modification[LANGUAGE_NONE][0]['value']) || (!empty($data->modificationDate) && (strtotime($data->modificationDate) >= strtotime($chambre->field_date_de_modification[LANGUAGE_NONE][0]['value']))) ) {
+        if (empty($chambre->field_date_de_modification[LANGUAGE_NONE][0]['value']) || (!empty($data->modificationDate) && (strtotime($data->modificationDate) >= strtotime($chambre->field_date_de_modification[LANGUAGE_NONE][0]['value'])))) {
 
             $chambre->field_date_de_modification[LANGUAGE_NONE][0]['value'] = $data->modificationDate;
 
@@ -483,7 +525,7 @@ function synchronizeChambre( $entityId, $data,$finess=null) {
             node_save($chambre);
 
             $residence = node_load($chambre->field_residence[LANGUAGE_NONE][0]['target_id']);
-            if( empty($residence->field_url_source[LANGUAGE_NONE][0]['value']) and isset($data->urlSource) ) {
+            if (empty($residence->field_url_source[LANGUAGE_NONE][0]['value']) and isset($data->urlSource)) {
                 $residence->field_url_source[LANGUAGE_NONE][0]['value'] = $data->urlSource;
                 node_save($residence);
             }
@@ -522,37 +564,34 @@ function synchronizeChambre( $entityId, $data,$finess=null) {
 //     return $residences;
 
 // }
-function getRankingResidenceConcurrente($residenceId) {return getRankingOfResidence($residenceId);}
+function getRankingResidenceConcurrente($residenceId)
+{
+    return getRankingOfResidence($residenceId);
+}
 
-function getRankingOfResidence( $residenceNid, $rankingTypes = array() ) {
-
+function getRankingOfResidence($residenceNid, $rankingTypes = array())
+{
 
 
     // $types = array( "CONCURRENCE_DIRECTE", "DEPARTEMENT" );
     // $residence = entity_load('node', array($residenceNid), array( 'type' => 'residence' ));
-    $residenceRanking = array( 'departement' => 'NA', 'concurrence_directe' => 'NA' );
+    $residenceRanking = array('departement' => 'NA', 'concurrence_directe' => 'NA');
 
-    if('elle même'){// RANKED RESIDENCE
-
+    if ('elle même') {// RANKED RESIDENCE
 
 
         $query = db_select('node', 'n');
         $query->condition('n.type', "residence", '=');
         $query->condition('n.nid', $residenceNid, '=');
-        $query->condition('field_type_value','notEhpad','=');
+        $query->condition('field_type_value', 'notEhpad', '=');
         $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
         $query->join('field_data_field_type', 's', 's.entity_id = n.nid', array());
 
-        $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-        $query->leftJoin('field_data_field_residence_id', 'k','k.field_residence_id_value = n.nid', array());
+        $query->leftJoin('field_data_field_residence_id', 'k', 'k.field_residence_id_value = n.nid', array());
 
 
-        $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = k.entity_id ',array());
+        $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = k.entity_id ', array());
         $query->isNotNull('cs.field_pr_prixmin_value');
-
-
-
-
 
 
         $query->fields('n', array('nid'));
@@ -563,62 +602,61 @@ function getRankingOfResidence( $residenceNid, $rankingTypes = array() ) {
         $query->addExpression(0, 'distance', array());
 
 
-
         $rankedResidence = fetchObject($query);
     }
 
 
-    if( in_array("CONCURRENCE_DIRECTE", $rankingTypes) ) {
+    if (in_array("CONCURRENCE_DIRECTE", $rankingTypes)) {
 
 
 #todo: greffer z_geo
-        $x=Alptech\Wip\fun::sql("select list from z_geo where rid=".$residenceNid);#
-        $closests=trim($x[0]['list'],',');
-        if(!$closests){
+        $x = Alptech\Wip\fun::sql("select list from z_geo where rid=" . $residenceNid);#
+        $closests = trim($x[0]['list'], ',');
+        if (!$closests) {
 
 
-            \Alptech\Wip\fun::dbm('missing zgeo for:'.$residenceNid,'zgeo');
+            \Alptech\Wip\fun::dbm('missing zgeo for:' . $residenceNid, 'zgeo');
             return [];
-        }else{
+        } else {
 
 
-            if(0 and 'oldway'){// POSITION PAR RAPPORT A LA CONCURRENCE
+            if (0 and 'oldway') {// POSITION PAR RAPPORT A LA CONCURRENCE
 
                 $query = db_select('distance_indexation', 'di');
                 $query->join('node', 'r', 'di.secondary_nid = r.nid', array());
-                $query->join('field_data_field_statut', 's', 's.entity_id = r.nid and s.field_statut_value = :statut', array(':statut'=> $rankedResidence->field_statut_value ));
-                $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = r.nid', array());
-                $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array( ':tarif' => 'NA' ));
+                $query->join('field_data_field_statut', 's', 's.entity_id = r.nid and s.field_statut_value = :statut', array(':statut' => $rankedResidence->field_statut_value));
+                $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = r.nid', array());
+                $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id ', array());
                 $query->fields('r', array('nid'));
-                $query->fields('cs', array('field_tarif_chambre_simple_value'));
+                $query->fields('cs', array('field_pr_prixmin_value'));
                 $query->fields('di', array('distance'));
                 $query->orderBy('distance', 'ASC');
                 $query->range(0, 10);
                 $residences = fetchAll($query);
-                $limit10a="SELECT r.nid AS nid, cs.field_tarif_chambre_simple_value AS field_tarif_chambre_simple_value, di.distance AS distance FROM distance_indexation di INNER JOIN node r ON di.secondary_nid = r.nid
-INNER JOIN field_data_field_statut s ON s.entity_id = r.nid and s.field_statut_value = 'Privé'
+                $limit10a = "SELECT r.nid AS nid, cs.field_pr_prixmin_value AS field_pr_prixmin_value, di.distance AS distance FROM distance_indexation di INNER JOIN node r ON di.secondary_nid = r.nid
+INNER JOIN field_data_field_statut s ON s.entity_id = r.nid
 INNER JOIN field_data_field_residence rc ON rc.field_residence_target_id = r.nid
-INNER JOIN field_data_field_tarif_chambre_simple cs ON cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> 'NA'
+INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id 
 WHERE  (di.primary_nid = 40233) 
 ORDER BY distance ASC
 LIMIT 10 OFFSET 0";
             }
 
-            $a="select s.entity_id from field_data_field_type s
+            $a = "select s.entity_id from field_data_field_type s
  INNER JOIN field_data_field_residence_id rc ON rc.field_residence_id_value = s.entity_id
  INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id and cs.field_pr_prixmin_value IS NOT NULL
 
- where s.entity_id in(".$closests.") ORDER BY FIELD(s.entity_id,$closests) limit 0,10";
+ where s.entity_id in(" . $closests . ") ORDER BY FIELD(s.entity_id,$closests) limit 0,10";
 
 
+            $having = [];
 
-            $having=[];
-
-            $x=Alptech\Wip\fun::sql($a);
-
+            $x = Alptech\Wip\fun::sql($a);
 
 
-            foreach($x as $t){$having[]=$t['entity_id'];}###"
+            foreach ($x as $t) {
+                $having[] = $t['entity_id'];
+            }###"
 #field_departement_tid
             /*
             $limit10c="SELECT r.nid AS nid, cs.field_tarif_chambre_simple_value AS field_tarif_chambre_simple_value FROM node r
@@ -635,29 +673,29 @@ LIMIT 10 OFFSET 0";
             */
 
 
-            $limit10b="SELECT r.nid AS nid, cs.field_pr_prixmin_value AS field_pr_prixmin_value FROM  node r 
+            $limit10b = "SELECT r.nid AS nid, cs.field_pr_prixmin_value AS field_pr_prixmin_value FROM  node r 
 INNER JOIN field_data_field_residence_id rc ON rc.field_residence_id_value = r.nid
 INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id and cs.field_pr_prixmin_value IS NOT NULL
-WHERE r.nid in (".implode(',',$having).",".$rankedResidence->nid.") order by field_pr_prixmin_value * 1 desc";#order by id
+WHERE r.nid in (" . implode(',', $having) . "," . $rankedResidence->nid . ") order by field_pr_prixmin_value * 1 desc";#order by id
 
 
-            $residences=Alptech\Wip\fun::sql($limit10b);##
+            $residences = Alptech\Wip\fun::sql($limit10b);##
 
 
+            $classement = 0;
+            foreach ($residences as $k => $t) {
+                if ($t['nid'] == $rankedResidence->nid) {
 
-
-            $classement=0;
-            foreach($residences as $k=>$t){
-                if($t['nid']==$rankedResidence->nid){
-
-                    $residenceRanking["concurrence_directe"]=$classement=$k+1;
-                    $t=null;
+                    $residenceRanking["concurrence_directe"] = $classement = $k + 1;
+                    $t = null;
                     continue;
                 }
-                $t=(object)$t;
+                $t = (object)$t;
 
 
-            }unset($t);$t=array_filter($t);
+            }
+            unset($t);
+            $t = array_filter($t);
 
 #array_unshift($residences, $rankedResidence);#remove::self
 #['distance'=>0,'field_departement_tid'=>60,'field_statut_value'=>'privé','field_tarif_chambre_value'=>1,'nid'=>1];
@@ -683,26 +721,24 @@ if(0){
         }
     }
 
-    if( in_array("DEPARTEMENT", $rankingTypes) ) {
-
-
+    if (in_array("DEPARTEMENT", $rankingTypes)) {
 
 
         // POSITION PAR RAPPORT AU DEPARTEMENT
         $query = db_select('node', 'n');
         $query->condition('n.type', "residence", '=');
 
-        $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departement', array( ':departement' => $rankedResidence->field_departement_tid ));
+        $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departement', array(':departement' => $rankedResidence->field_departement_tid));
         $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
-        $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id ', array( ));
+        $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id ', array());
         $query->fields('n', array('nid'));
         $query->fields('cs', array('field_pr_prixmin_value'));
         $query->orderBy('CAST(cs.field_pr_prixmin_value AS DECIMAL(6, 2) )', 'DESC');
         $residences = fetchAll($query);
 
 
-        foreach( $residences as $position => $r ) {
-            if( $r->nid == $residenceNid ) {
+        foreach ($residences as $position => $r) {
+            if ($r->nid == $residenceNid) {
 
                 $residenceRanking["departement"] = $position + 1;
                 break;
@@ -712,63 +748,76 @@ if(0){
     }
 
 
-
     return $residenceRanking;
 }
 
-function getResidencesConcurrentesOnAddress($latitude, $longitude, $perimetre = 5, $statut = null) {
-/*
-                if($statuses[0] == "ISEHPA"){
+function getResidencesConcurrentesOnAddress($latitude, $longitude, $perimetre = 5, $statut )
+{
+    /*
+                    if($statuses[0] == "ISEHPA"){
 
 
 
-$s = "
-select eh.entity_id
-from field_data_field_isehpa eh,field_data_field_isra ra
-where eh.entity_id = ra.entity_id
-and eh.field_isehpa_value = 1
-and ra.field_isra_value = 0";
+    $s = "
+    select eh.entity_id
+    from field_data_field_isehpa eh,field_data_field_isra ra
+    where eh.entity_id = ra.entity_id
+    and eh.field_isehpa_value = 1
+    and ra.field_isra_value = 0";
 
 
 
 
-               }
-               //ra
-               else{
+                   }
+                   //ra
+                   else{
 
-                   $s = "
-select ra.entity_id
-from field_data_field_isehpa eh,field_data_field_isra ra
-where eh.entity_id = ra.entity_id
-and eh.field_isehpa_value = 0
-and ra.field_isra_value = 1
-and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
-
-
-//$s = "select entity_id from field_data_field_isra where field_isra_value = 1 and entity_id in($clo) ORDER BY FIELD(entity_id,$clo)";# limit $limit on limite ensuite
-
-               }
- */
+                       $s = "
+    select ra.entity_id
+    from field_data_field_isehpa eh,field_data_field_isra ra
+    where eh.entity_id = ra.entity_id
+    and eh.field_isehpa_value = 0
+    and ra.field_isra_value = 1
+    and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
 
 
+    //$s = "select entity_id from field_data_field_isra where field_isra_value = 1 and entity_id in($clo) ORDER BY FIELD(entity_id,$clo)";# limit $limit on limite ensuite
+
+                   }
+     */
 
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
 
+   if ($statut == "Résidence autonomie") {
+
+        $query->condition('field_isra_value', 1, '=');
+    } elseif($statut == "Résidence Seniors") {
+
+        $query->condition('field_isrs_value', 1, '=');
+    } elseif($statut == "EHPA") {
+
+        $query->condition('field_isehpa_value', 1, '=');
+
+    }
+
+
     $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
     $query->condition('ty.field_type_value', 'notEhpad', '=');
-    $query->isNotNull('cs.field_pr_prixmin_value');
+   // $query->isNotNull('cs.field_pr_prixmin_value');
 
     $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
     $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
 
-    $db_or = db_or();
+    /*$db_or = db_or();
 
 
     $db_or->condition('field_isehpa_value', 0, '<>');
     $db_or->condition('field_isra_value', 0, '<>');
-    $query->condition($db_or);
+    $db_or->condition('field_isrs_value', 0, '<>');
+    $query->condition($db_or);*/
 
 
     $query->join('field_data_field_capacite', 'cap', 'cap.entity_id = n.nid', array());
@@ -782,6 +831,7 @@ and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
     // DEPARTEMENT
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
     $query->join('taxonomy_term_data', 't', 'd.field_departement_tid = t.tid', array());
+    $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
 
     // GROUPE
     $query->join('field_data_field_groupe', 'grp', 'grp.entity_id = n.nid', array());
@@ -796,33 +846,37 @@ and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('lng', array('field_longitude_value'));
     $query->fields('t', array('name'));
+    $query->fields('s', array('field_statut_value'));
 
-    $query->fields('eh', array('field_isehpa_value'));
-    $query->fields('er', array('field_isra_value'));
+    $query->fields('eh', array());
+    $query->fields('er', array());
+    $query->fields('rs', array());
 
 
     $query->fields('grp_term', array('name'));
     $query->fields('grp_logo', array('field_logo_fid'));
-
     $query->addExpression('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude))))', 'distance', array( ':latitude' => $latitude, ':longitude' => $longitude ));
     $query->where('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude)))) <= :perimetre', array( ':perimetre' => $perimetre, ':latitude' => $latitude, ':longitude' => $longitude ));
     $query->orderBy('distance', 'ASC');
     #$_ENV['stop']=__FILE__.__line__;
+
     $residences = fetchAll($query);
+
     return $residences;
 }
 
-function getAllDepartmentsRelatedToResidences($groupes, $residenceIds) {
+function getAllDepartmentsRelatedToResidences($groupes, $residenceIds)
+{
 
-    $groupes = ( count($groupes) >= 1 ) ? $groupes : null;
-    $residenceIds = ( count($residenceIds) >= 1 ) ? $residenceIds : null;
+    $groupes = (count($groupes) >= 1) ? $groupes : null;
+    $residenceIds = (count($residenceIds) >= 1) ? $residenceIds : null;
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
     $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
     $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid', array());
     $query->fields('d', array('field_departement_tid'));
-    $query->where("n.nid IN (:residenceIds) or gr.field_groupe_tid IN (:groupes)", array( ':residenceIds' => $residenceIds, ':groupes' => $groupes ));
+    $query->where("n.nid IN (:residenceIds) or gr.field_groupe_tid IN (:groupes)", array(':residenceIds' => $residenceIds, ':groupes' => $groupes));
     $query->distinct();
 
     $departments = $query->execute()->fetchCol();
@@ -831,60 +885,132 @@ function getAllDepartmentsRelatedToResidences($groupes, $residenceIds) {
 
 }
 
-function findResidencesByUserAccess($groupes, $residenceIds, $departement = null) {
+function findResidencesByUserAccess($groupes, $residenceIds, $departement = null)
+{
 
-    $groupes = ( count($groupes) >= 1 ) ? $groupes : null;
-    $residenceIds = ( count($residenceIds) >= 1 ) ? $residenceIds : null;
+    $groupes = (count($groupes) >= 1) ? $groupes : null;
+
+    $residenceIds = (count($residenceIds) >= 1) ? $residenceIds : null;
+
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+    // $query->isNotNull('cs.field_pr_prixmin_value');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
+    $query->condition($db_or);
+
+
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
     $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
     $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+    $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id', array());
 
-    if( $departement != null ) {
-        $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array( ':departementId' => $departement ));
+    if ($departement != null) {
+        $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array(':departementId' => $departement));
     }
 
-    // LEFT JOIN / NOMBRE TOTAL DE CHAMBRES
-    // $query->leftjoin('field_data_field_nombre_cs_entre_de_gamme', 'nombre_cs_entre_de_gamme', 'nombre_cs_entre_de_gamme.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_standard', 'nombre_cs_standard', 'nombre_cs_standard.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_superieur', 'nombre_cs_superieur', 'nombre_cs_superieur.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_luxe', 'nombre_cs_luxe', 'nombre_cs_luxe.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_alzheimer', 'nombre_cs_alzheimer', 'nombre_cs_alzheimer.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cs_aide_sociale', 'nombre_cs_aide_sociale', 'nombre_cs_aide_sociale.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cd_standard', 'nombre_cd_standard', 'nombre_cd_standard.entity_id = rc.entity_id', array());
-    // $query->leftjoin('field_data_field_nombre_cd_aide_sociale', 'nombre_cd_aide_sociale', 'nombre_cd_aide_sociale.entity_id = rc.entity_id', array());
-
+    $query->fields('gr', array());
     $query->fields('n', array('nid', 'title'));
     $query->fields('s', array('field_statut_value'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
-    $query->fields('cs', array('field_tarif_chambre_simple_value'));
+    $query->fields('cs', array('field_pr_prixmin_value'));
     $query->fields('g', array('field_gestionnaire_value'));
     $query->fields('c', array('field_capacite_value'));
-    // $query->addExpression('nombre_cs_entre_de_gamme.field_nombre_cs_entre_de_gamme_value + nombre_cs_standard.field_nombre_cs_standard_value + nombre_cs_superieur.field_nombre_cs_superieur_value + nombre_cs_luxe.field_nombre_cs_luxe_value + nombre_cs_alzheimer.field_nombre_cs_alzheimer_value + nombre_cs_aide_sociale.field_nombre_cs_aide_sociale_value + nombre_cd_standard.field_nombre_cd_standard_value * 2 + nombre_cd_aide_sociale.field_nombre_cd_aide_sociale_value * 2', 'nombre_lits');
 
-    $query->where("n.nid IN (:residenceIds) or gr.field_groupe_tid IN (:groupes)", array( ':residenceIds' => $residenceIds, ':groupes' => $groupes ));
-    #$_ENV['stop']=__line__.__FILE__;
+    $query->fields('eh', array('field_isehpa_value'));
+    $query->fields('er', array('field_isra_value'));
+    $query->fields('rs', array('field_isrs_value'));
+
+    $query->where("n.nid IN (:residenceIds) or gr.field_groupe_tid IN (:groupes)", array(':residenceIds' => $residenceIds, ':groupes' => $groupes));
+
     $residences = fetchAll($query);
+
 
     return $residences;
 }
 
-function getResidencesByUser( $userId ) {
+function findResidencesByUserAccessNull($groupes, $residenceIds, $departement = null)
+{
+
+    $groupes = (count($groupes) >= 1) ? $groupes : null;
+
+    $residenceIds = (count($residenceIds) >= 1) ? $residenceIds : null;
+
+    $query = db_select('node', 'n');
+    $query->condition('n.type', "residence", '=');
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+    //$query->isNotNull('cs.field_pr_prixmin_value');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $query->condition($db_or);
+
+
+    $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
+    $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
+    $query->join('field_data_field_gestionnaire', 'g', 'g.entity_id = n.nid', array());
+    $query->join('field_data_field_capacite', 'c', 'c.entity_id = n.nid', array());
+    $query->join('field_data_field_groupe', 'gr', 'gr.entity_id = n.nid', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
+    $query->join('field_data_field_pr_prixmin', 'cs', 'cs.entity_id = rc.entity_id', array());
+
+    if ($departement != null) {
+        $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array(':departementId' => $departement));
+    }
+
+    $query->fields('gr', array());
+    $query->fields('n', array('nid', 'title'));
+    $query->fields('s', array('field_statut_value'));
+    $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
+    $query->fields('cs', array('field_pr_prixmin_value'));
+    $query->fields('g', array('field_gestionnaire_value'));
+    $query->fields('c', array('field_capacite_value'));
+
+    $query->fields('eh', array('field_isehpa_value'));
+    $query->fields('er', array('field_isra_value'));
+
+    $query->where("n.nid IN (:residenceIds) or gr.field_groupe_tid IN (:groupes)", array(':residenceIds' => $residenceIds, ':groupes' => $groupes));
+
+    $residences = fetchAll($query);
+
+    return array();
+    // return $residences;
+}
+
+
+function getResidencesByUser($userId)
+{
 
     $queryAccessResidence = db_select('node', 'r');
     $queryAccessResidence->condition('r.type', 'residence', '=');
-    $queryAccessResidence->join('field_data_field_acces_residences', 'ar', 'ar.field_acces_residences_target_id = r.nid and ar.entity_id = :currentUser', array( ':currentUser' => $user->uid ));
+    $queryAccessResidence->join('field_data_field_acces_residences', 'ar', 'ar.field_acces_residences_target_id = r.nid and ar.entity_id = :currentUser', array(':currentUser' => $user->uid));
     $queryAccessResidence->fields('r', array('nid', 'title'));
 
     $query = db_select('node', 'r');
     $query->condition('r.type', 'residence', '=');
-    $query->join('field_data_field_acces_groupes', 'ag', 'ag.entity_id = :currentUser', array( ':currentUser' => $userId ));
+    $query->join('field_data_field_acces_groupes', 'ag', 'ag.entity_id = :currentUser', array(':currentUser' => $userId));
     $query->join('field_data_field_groupe', 'g', 'g.field_groupe_tid = ag.field_acces_groupes_target_id and g.entity_id = r.nid', array());
     $query->fields('r', array('nid', 'title'));
     $query->union($queryAccessResidence);
@@ -894,10 +1020,29 @@ function getResidencesByUser( $userId ) {
     return $residences;
 }
 
-function findResidence($departementId = null, $dataForm = array()) {
+function findResidence($departementId = null, $dataForm = array())
+{
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+    // $query->isNotNull('t.field_pr_prixmin_value');
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rs', 'rs.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
+    $query->condition($db_or);
+
+
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
@@ -906,10 +1051,10 @@ function findResidence($departementId = null, $dataForm = array()) {
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
     $query->join('taxonomy_term_data', 'grp', 'g.field_groupe_tid = grp.tid', array());
     $query->leftJoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid', array());
-    $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array( ':departementId' => $departementId ));
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+    $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array(':departementId' => $departementId));
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
     $query->innerjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid and t.field_tarif_chambre_simple_value != :tarif', array( ':tarif' => 'NA' ));
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid ', array());
     $query->join('field_data_field_capacite', 'capacite', 'capacite.entity_id =  n.nid', array());
 
     $query->fields('n', array('nid', 'title'));
@@ -920,45 +1065,64 @@ function findResidence($departementId = null, $dataForm = array()) {
     $query->fields('s', array('field_statut_value'));
     $query->fields('grp', array('name'));
     $query->fields('logo', array('field_logo_fid'));
+    $query->fields('eh', array());
+    $query->fields('er', array());
+    $query->fields('rs', array());
     $query->fields('c', array('title'));
-    $query->fields('t', array('field_tarif_chambre_simple_value'));
+    $query->fields('t', array('field_pr_prixmin_value'));
     $query->fields('capacite', array('field_capacite_value'));
-    if( isset($dataForm['residence']) && !empty($dataForm['residence']) ) {
+    if (isset($dataForm['residence']) && !empty($dataForm['residence'])) {
         $query->condition('n.title', '%' . $dataForm['residence'] . '%', 'LIKE');#
     }
 
-    if(  isset($dataForm['code_postale']) && !empty($dataForm['code_postale']) ) {
+    if (isset($dataForm['code_postale']) && !empty($dataForm['code_postale'])) {
         $query->condition('l.field_location_postal_code', '%' . $dataForm['code_postale'] . '%', 'LIKE');
     }
 
-    if(  isset($dataForm['ville']) && !empty($dataForm['ville']) ) {
+    if (isset($dataForm['ville']) && !empty($dataForm['ville'])) {
         $query->condition('l.field_location_locality', '%' . $dataForm['ville'] . '%', 'LIKE');
     }
 
-    if( $dataForm['statut'] && !empty($dataForm['statut']) ) {
-        $query->condition('s.field_statut_value', $dataForm['statut'], 'IN');
+    if ($dataForm['statut'] && !empty($dataForm['statut'])) {
+        switch ($dataForm['statut'][0]) {
+            case "Résidence autonomie":
+                $query->condition('er.field_isra_value', '1', '=');
+                break;
+
+            case "Résidence Seniors":
+                $query->condition('rs.field_isrs_value', '1', '=');
+                break;
+            case "Ehpa":
+                $query->condition('eh.field_isehpa_value', '1', '=');
+                break;
+
+        }
+
+
     }
 
-    if( $dataForm['tarif_min'] && !empty( $dataForm['tarif_min']) ) {
-        $query->condition('t.field_tarif_chambre_simple_value',  $dataForm['tarif_min'], ">=");
+
+    if ($dataForm['tarif_min'] && !empty($dataForm['tarif_min'])) {
+        $query->condition('t.field_pr_prixmin_value', $dataForm['tarif_min'], ">=");
     }
 
-    if(  $dataForm['tarif_max'] && !empty($dataForm['tarif_max']) ) {
-        $query->condition('t.field_tarif_chambre_simple_value', $dataForm['tarif_max'], "<=");
+    if ($dataForm['tarif_max'] && !empty($dataForm['tarif_max'])) {
+        $query->condition('t.field_pr_prixmin_value', $dataForm['tarif_max'], "<=");
     }
     $residences = fetchAll($query);
     return $residences;
 }
 
-function getMonthlyEvolutionDataChart($residenceId = null) {
+function getMonthlyEvolutionDataChart($residenceId = null)
+{
 
     // RESIDENCE
-    $residence = entity_load('node', array($residenceId), array( 'type' => 'residence' ));
+    $residence = entity_load('node', array($residenceId), array('type' => 'residence'));
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
     $query->condition('n.nid', $residenceId, '=');
     $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array( ':tarif' => 'NA' ));
+    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array(':tarif' => 'NA'));
     $query->fields('n', array('nid'));
     $query->fields('cs', array('field_tarif_chambre_simple_value'));
     $residenceCourante = fetchAll($query);
@@ -967,9 +1131,9 @@ function getMonthlyEvolutionDataChart($residenceId = null) {
     // DEPARTEMENT
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
-    $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departement', array( ':departement' => $residence[$residenceId]->field_departement['und'][0]['tid'] ));
+    $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departement', array(':departement' => $residence[$residenceId]->field_departement['und'][0]['tid']));
     $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array( ':tarif' => 'NA' ));
+    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array(':tarif' => 'NA'));
     $query->fields('n', array('nid'));
     $query->fields('cs', array('field_tarif_chambre_simple_value'));
     //$query->addExpression("DATE_FORMAT(FROM_UNIXTIME(n.created),'%Y-%m')", "created_at");
@@ -980,15 +1144,15 @@ function getMonthlyEvolutionDataChart($residenceId = null) {
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
     $query->condition('n.nid', $residenceId, '<>');
-    $query->join('field_data_field_statut', 's', 's.entity_id = n.nid and s.field_statut_value = :statut', array(':statut'=> $residence[$residenceId]->field_statut['und'][0]['value']));
+    $query->join('field_data_field_statut', 's', 's.entity_id = n.nid and s.field_statut_value = :statut', array(':statut' => $residence[$residenceId]->field_statut['und'][0]['value']));
     $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array( ':tarif' => 'NA' ));
+    $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array(':tarif' => 'NA'));
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
     $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
     $query->fields('n', array('nid'));
     $query->fields('s', array('field_statut_value'));
     $query->fields('cs', array('field_tarif_chambre_simple_value'));
-    $query->addExpression('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude))))', 'distance', array( ':latitude' => $residence[$residenceId]->field_latitude['und'][0]['value'], ':longitude' => $residence[$residenceId]->field_longitude['und'][0]['value'] ));
+    $query->addExpression('(6371 * acos(cos(radians(lat.field_latitude_value)) * cos(radians(:latitude) ) * cos(radians(:longitude) -radians(lng.field_longitude_value)) + sin(radians(lat.field_latitude_value)) * sin(radians(:latitude))))', 'distance', array(':latitude' => $residence[$residenceId]->field_latitude['und'][0]['value'], ':longitude' => $residence[$residenceId]->field_longitude['und'][0]['value']));
     $query->orderBy('distance', 'ASC');
     $query->range(0, 10);
     $residencesConcurrentes = fetchAll($query);
@@ -996,12 +1160,12 @@ function getMonthlyEvolutionDataChart($residenceId = null) {
     $rTarifs = [];
     $rcTarifs = [];
 
-    foreach( $residences as $r ) {
-        $rTarifs[] = (double) $r->field_tarif_chambre_simple_value;
+    foreach ($residences as $r) {
+        $rTarifs[] = (double)$r->field_tarif_chambre_simple_value;
     }
 
-    foreach( $residencesConcurrentes as $r ) {
-        $rcTarifs[] = (double) $r->field_tarif_chambre_simple_value;
+    foreach ($residencesConcurrentes as $r) {
+        $rcTarifs[] = (double)$r->field_tarif_chambre_simple_value;
     }
 
     $dataMonthlyEvolution = array(
@@ -1017,7 +1181,8 @@ function getMonthlyEvolutionDataChart($residenceId = null) {
  * TMH Maquette
  */
 
-function getMaquettesOfResidences( $residenceIds ) {
+function getMaquettesOfResidences($residenceIds)
+{
 
     $query = new EntityFieldQuery();
     $result = $query->entityCondition('entity_type', 'node')
@@ -1035,7 +1200,8 @@ function getMaquettesOfResidences( $residenceIds ) {
     return [];
 }
 
-function countMaquettes( $residenceId ) {
+function countMaquettes($residenceId)
+{
 
     $query = new EntityFieldQuery();
     $result = $query->entityCondition('entity_type', 'node')
@@ -1047,7 +1213,8 @@ function countMaquettes( $residenceId ) {
     return $result;
 }
 
-function getAllMaquettes( $residenceId ) {
+function getAllMaquettes($residenceId)
+{
 
     $query = new EntityFieldQuery();
     $result = $query->entityCondition('entity_type', 'node')
@@ -1065,7 +1232,8 @@ function getAllMaquettes( $residenceId ) {
     return [];
 }
 
-function addTMHMaquette( $maquette, $residenceId ) {
+function addTMHMaquette($maquette, $residenceId)
+{
 
     $newMaquette = new stdClass();
     $newMaquette->type = 'tmh_maquette';
@@ -1097,15 +1265,17 @@ function addTMHMaquette( $maquette, $residenceId ) {
     node_save($newMaquette);
 }
 
-function removeTMHMaquette( $maquetteId ) {
+function removeTMHMaquette($maquetteId)
+{
     $maquette = node_load($maquetteId);
-    if( $maquette->type == "tmh_maquette" ) {
-        node_delete( $maquetteId );
+    if ($maquette->type == "tmh_maquette") {
+        node_delete($maquetteId);
         return $maquette;
     }
 }
 
-function addTMHMaquetteToFavoris( $fieldFavoris, $maquetteId ) {
+function addTMHMaquetteToFavoris($fieldFavoris, $maquetteId)
+{
 
     $maquette = node_load($maquetteId);
 
@@ -1118,8 +1288,8 @@ function addTMHMaquetteToFavoris( $fieldFavoris, $maquetteId ) {
 
     $nids = array_keys($result['node']);
 
-    foreach( $nids as $nid ) {
-        $maquetteUpdated =  node_load($nid);
+    foreach ($nids as $nid) {
+        $maquetteUpdated = node_load($nid);
         $maquetteUpdated->field_favoris[LANGUAGE_NONE][0]['value'] = 0;
         node_save($maquetteUpdated);
     }
@@ -1135,20 +1305,35 @@ function addTMHMaquetteToFavoris( $fieldFavoris, $maquetteId ) {
 
 function addHistory($historyData = [], $organismes = [])
 {
-    $tel=$groupe=$lits=$adresse=$aidesoc=$tarifs=$alz=$ids=[];foreach($historyData['body']['response'] as $t){$ids[]=intval($t->nid);}
+    $tel = $groupe = $lits = $adresse = $aidesoc = $tarifs = $alz = $ids = [];
+    foreach ($historyData['body']['response'] as $t) {
+        $ids[] = intval($t->nid);
+    }
 
-    if($historyData['title']!='prescripteur' and $ids and 'données additionnelles pour création du fichier excel de statistiques'){
+    if ($historyData['title'] != 'prescripteur' and $ids and 'données additionnelles pour création du fichier excel de statistiques') {
 #$r2c=res2ch($ids);$tarifs=chprix($r2c,1);foreach($tarifs as &$t){$t=end($t);}unset($t);#dernière historique $historiquePrix=implode(',',$chp[$rid]);
-        $sql="select entity_id as k,field_telephone_value as v from field_data_field_telephone where entity_id in (".implode(',',$ids).") and bundle='residence'";$x=Alptech\Wip\fun::sql($sql);foreach($x as $t)$tel[$t['k']]=$t['v'];
-        $sql="select entity_id as k,field_alzheimer_value as v from field_data_field_alzheimer where entity_id in (".implode(',',$ids).") and bundle='residence'";$x=Alptech\Wip\fun::sql($sql);foreach($x as $t)$alz[$t['k']]=$t['v'];
-        $sql="select entity_id as k,field_aide_sociale_value as v from field_data_field_aide_sociale where entity_id in (".implode(',',$ids).") and bundle='residence'";$x=Alptech\Wip\fun::sql($sql);foreach($x as $t)$aidesoc[$t['k']]=$t['v'];
-        $sql="select entity_id as k,field_capacite_value as v from field_data_field_capacite where entity_id in (".implode(',',$ids).") and bundle='residence'";$x=Alptech\Wip\fun::sql($sql);foreach($x as $t)$lits[$t['k']]=$t['v'];
-        $sql="select entity_id as k,field_location_thoroughfare as v from field_data_field_location where entity_id in (".implode(',',$ids).") and bundle='residence'";$x=Alptech\Wip\fun::sql($sql);foreach($x as $t)$adresse[$t['k']]=$t['v'];
-        $sql="select entity_id as k,b.name as v from field_data_field_groupe a inner join taxonomy_term_data b on a.field_groupe_tid=b.tid where a.entity_id in (".implode(',',$ids).") and a.bundle='residence'";$x=Alptech\Wip\fun::sql($sql);foreach($x as $t)$groupe[$t['k']]=$t['v'];
+        $sql = "select entity_id as k,field_telephone_value as v from field_data_field_telephone where entity_id in (" . implode(',', $ids) . ") and bundle='residence'";
+        $x = Alptech\Wip\fun::sql($sql);
+        foreach ($x as $t) $tel[$t['k']] = $t['v'];
+        $sql = "select entity_id as k,field_alzheimer_value as v from field_data_field_alzheimer where entity_id in (" . implode(',', $ids) . ") and bundle='residence'";
+        $x = Alptech\Wip\fun::sql($sql);
+        foreach ($x as $t) $alz[$t['k']] = $t['v'];
+        $sql = "select entity_id as k,field_aide_sociale_value as v from field_data_field_aide_sociale where entity_id in (" . implode(',', $ids) . ") and bundle='residence'";
+        $x = Alptech\Wip\fun::sql($sql);
+        foreach ($x as $t) $aidesoc[$t['k']] = $t['v'];
+        $sql = "select entity_id as k,field_capacite_value as v from field_data_field_capacite where entity_id in (" . implode(',', $ids) . ") and bundle='residence'";
+        $x = Alptech\Wip\fun::sql($sql);
+        foreach ($x as $t) $lits[$t['k']] = $t['v'];
+        $sql = "select entity_id as k,field_location_thoroughfare as v from field_data_field_location where entity_id in (" . implode(',', $ids) . ") and bundle='residence'";
+        $x = Alptech\Wip\fun::sql($sql);
+        foreach ($x as $t) $adresse[$t['k']] = $t['v'];
+        $sql = "select entity_id as k,b.name as v from field_data_field_groupe a inner join taxonomy_term_data b on a.field_groupe_tid=b.tid where a.entity_id in (" . implode(',', $ids) . ") and a.bundle='residence'";
+        $x = Alptech\Wip\fun::sql($sql);
+        foreach ($x as $t) $groupe[$t['k']] = $t['v'];
     }
 #£:todo: Date de construction
 # / Groupe /
-    $a=1;
+    $a = 1;
 
     $history = new stdClass();
     $history->type = 'history';
@@ -1156,77 +1341,92 @@ function addHistory($historyData = [], $organismes = [])
     $history->uid = $historyData['creator'];
     $history->language = LANGUAGE_NONE;
     #$history->field_name = $historyData['name'];#[$history->language][0]['value']
-    if($historyData['name']) {$history->field_name[LANGUAGE_NONE][0]['value'] = $historyData['name'];}#
+    if ($historyData['name']) {
+        $history->field_name[LANGUAGE_NONE][0]['value'] = $historyData['name'];
+    }#
     node_object_prepare($history);
 
-    $offsetLignes=2;
+    $offsetLignes = 2;
 
-    if($historyData['name'] and 1 and 'excel'){
+    if ($historyData['name'] and 1 and 'excel') {
 
-        $lines=[];
-        $fn=$historyData['body']['request']['adresse'].'-'.$historyData['body']['request']['perimetre'];
-        $t=(array)$historyData['body']['response'][0];
+        $lines = [];
+        $fn = $historyData['body']['request']['adresse'] . '-' . $historyData['body']['request']['perimetre'];
+        $t = (array)$historyData['body']['response'][0];
 
-        if($historyData['title']=='prescripteur'){#full dump A -- peut s'avérer être très, très, très long !!!!
-            $historyData['name']='prescripteurs '.$historyData['name'];
+        if ($historyData['title'] == 'prescripteur') {#full dump A -- peut s'avérer être très, très, très long !!!!
+            $historyData['name'] = 'prescripteurs ' . $historyData['name'];
             #$f2e[$t->finess_juridique]=$t->raison_sociale;
             #unset($t['nid'],$t['field_logo_fid'],$t['grp_term_name']);
-            $headers=array_keys($t);#array_merge(array_keys($t),['Addresse','Telephone',/*'Tarifs',*/'Alzeihmer','Aide sociale','Lits','Groupe']);
-            $dontDisplay=['id','finess','finess_juridique'];
-            $headers=array_diff($headers,$dontDisplay);
+            $headers = array_keys($t);#array_merge(array_keys($t),['Addresse','Telephone',/*'Tarifs',*/'Alzeihmer','Aide sociale','Lits','Groupe']);
+            $dontDisplay = ['id', 'finess', 'finess_juridique'];
+            $headers = array_diff($headers, $dontDisplay);
 
-            if(0){$translate=['title'=>'Nom','field_statut_value'=>'type','field_location_locality'=>'ville','field_location_postal_code'=>'code postal','field_tarif_chambre_simple_value'=>'tarif chambre','field_gestionnaire_value'=>'gestionnaire','field_latitude_value'=>'latitude','field_longitude_value'=>'longitude','name'=>'département','distance'=>'distance en km'];
-                foreach($headers as &$v){
-                    if(isset($translate[$v])){$v=$translate[$v];}
-                    $v=str_replace(['field_','_value',],'',$v);
-                }unset($v);}
-            $lines=[$headers];#2nde ligne :: fields
-            $f2e=[];
-            foreach($historyData['body']['response'] as $k=>$t){
-                $f2e[$t->finess]=$t->raison_sociale;
-                if(is_object($t))$t=(array)$t;
-                $t2=$t;
-                foreach($dontDisplay as $hide)unset($t2[$hide]);
+            if (0) {
+                $translate = ['title' => 'Nom', 'field_statut_value' => 'type', 'field_location_locality' => 'ville', 'field_location_postal_code' => 'code postal', 'field_tarif_chambre_simple_value' => 'tarif chambre', 'field_gestionnaire_value' => 'gestionnaire', 'field_latitude_value' => 'latitude', 'field_longitude_value' => 'longitude', 'name' => 'département', 'distance' => 'distance en km'];
+                foreach ($headers as &$v) {
+                    if (isset($translate[$v])) {
+                        $v = $translate[$v];
+                    }
+                    $v = str_replace(['field_', '_value',], '', $v);
+                }
+                unset($v);
+            }
+            $lines = [$headers];#2nde ligne :: fields
+            $f2e = [];
+            foreach ($historyData['body']['response'] as $k => $t) {
+                $f2e[$t->finess] = $t->raison_sociale;
+                if (is_object($t)) $t = (array)$t;
+                $t2 = $t;
+                foreach ($dontDisplay as $hide) unset($t2[$hide]);
                 #unset($t2['finess'],$t2['finess_juridique']);#keep it for display !!!
-                $lines[]=array_values($t2);
+                $lines[] = array_values($t2);
             }
 
-        }else{#résidence request
-            unset($t['nid'],$t['field_logo_fid'],$t['grp_term_name']);
-            $headers=array_merge(array_keys($t),['Addresse','Telephone',/*'Tarifs',*/'Alzeihmer','Aide sociale','Lits','Groupe']);#
-            $translate=['title'=>'Nom','field_statut_value'=>'type','field_location_locality'=>'ville','field_location_postal_code'=>'code postal','field_tarif_chambre_simple_value'=>'tarif chambre','field_gestionnaire_value'=>'gestionnaire','field_latitude_value'=>'latitude','field_longitude_value'=>'longitude','name'=>'département','distance'=>'distance en km'];
-            foreach($headers as &$v){
-                if(isset($translate[$v])){$v=$translate[$v];}
-                $v=str_replace(['field_','_value',],'',$v);
-            }unset($v);
-
-            $lines=[$headers];#2nde ligne
-
-            foreach($historyData['body']['response'] as $k=>$t){
-                if(is_object($t))$t=(array)$t;$id=$t['nid'];
-                unset($t['nid'],$t['field_logo_fid'],$t['grp_term_name']);
-                if('inject drupal sql data'){
-                    $t['adresse']=(isset($adresse[$id])?$adresse[$id]:'');
-                    $t['tel']=(isset($tel[$id])?$tel[$id]:'');
-                    #$t['tarif']=(isset($tarifs[$id])?$tarifs[$id]:'');#déjà listés
-                    $t['alz']=(isset($alz[$id])?($alz[$id]==1?'oui':'non'):'');
-                    $t['aids']=(isset($adresse[$id])?($aidesoc[$id]==1?'oui':'non'):'');
-                    $t['lits']=(isset($lits[$id])?$lits[$id]:'');
-                    $t['groupe']=(isset($groupe[$id])?$groupe[$id]:'');
+        } else {#résidence request
+            unset($t['nid'], $t['field_logo_fid'], $t['grp_term_name']);
+            $headers = array_merge(array_keys($t), ['Addresse', 'Telephone',/*'Tarifs',*/ 'Alzeihmer', 'Aide sociale', 'Lits', 'Groupe']);#
+            $translate = ['title' => 'Nom', 'field_statut_value' => 'type', 'field_location_locality' => 'ville', 'field_location_postal_code' => 'code postal', 'field_tarif_chambre_simple_value' => 'tarif chambre', 'field_gestionnaire_value' => 'gestionnaire', 'field_latitude_value' => 'latitude', 'field_longitude_value' => 'longitude', 'name' => 'département', 'distance' => 'distance en km'];
+            foreach ($headers as &$v) {
+                if (isset($translate[$v])) {
+                    $v = $translate[$v];
                 }
-                $lines[]=array_values($t);
+                $v = str_replace(['field_', '_value',], '', $v);
+            }
+            unset($v);
+
+            $lines = [$headers];#2nde ligne
+
+            foreach ($historyData['body']['response'] as $k => $t) {
+                if (is_object($t)) $t = (array)$t;
+                $id = $t['nid'];
+                unset($t['nid'], $t['field_logo_fid'], $t['grp_term_name']);
+                if ('inject drupal sql data') {
+                    $t['adresse'] = (isset($adresse[$id]) ? $adresse[$id] : '');
+                    $t['tel'] = (isset($tel[$id]) ? $tel[$id] : '');
+                    #$t['tarif']=(isset($tarifs[$id])?$tarifs[$id]:'');#déjà listés
+                    $t['alz'] = (isset($alz[$id]) ? ($alz[$id] == 1 ? 'oui' : 'non') : '');
+                    $t['aids'] = (isset($adresse[$id]) ? ($aidesoc[$id] == 1 ? 'oui' : 'non') : '');
+                    $t['lits'] = (isset($lits[$id]) ? $lits[$id] : '');
+                    $t['groupe'] = (isset($groupe[$id]) ? $groupe[$id] : '');
+                }
+                $lines[] = array_values($t);
             }
         }
 
-        $lines=array_filter($lines);
+        $lines = array_filter($lines);
 
-        if($lines){
-            try{
+        if ($lines) {
+            try {
 #1ère ligne:nom complet de la recherche
                 $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
-                $sheet->setTitle(substr(preg_replace('~[^a-z0-9 \.]+~is','',$historyData['body']['request']['adresse'].'-'.$historyData['body']['request']['latitude'].'-'.$historyData['body']['request']['longitude'].'-'),0,31));#31 max chars '.$historyData['body']['request']['adresse'].','.$historyData['body']['request']['perimetre']);
-                $cols=[];$letter = 'A';while ($letter !== 'AAA') {$cols[] = $letter++;}
+                $sheet->setTitle(substr(preg_replace('~[^a-z0-9 \.]+~is', '', $historyData['body']['request']['adresse'] . '-' . $historyData['body']['request']['latitude'] . '-' . $historyData['body']['request']['longitude'] . '-'), 0, 31));#31 max chars '.$historyData['body']['request']['adresse'].','.$historyData['body']['request']['perimetre']);
+                $cols = [];
+                $letter = 'A';
+                while ($letter !== 'AAA') {
+                    $cols[] = $letter++;
+                }
                 $sheet->getCell('A1')->setValue($historyData['name']);
                 if ('parcours des données') {
                     foreach ($lines as $l => $t) {
@@ -1239,69 +1439,76 @@ function addHistory($historyData = [], $organismes = [])
                 }
 
                 $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-                $rp='z/xls/'.$fn.'-'.$GLOBALS['user']->uid.'-'.$GLOBALS['user']->name.'-'.uniqid().'.xlsx';
+                $rp = 'z/xls/' . $fn . '-' . $GLOBALS['user']->uid . '-' . $GLOBALS['user']->name . '-' . uniqid() . '.xlsx';
 #could not close
-                $writer->save(rtrim($_SERVER['DOCUMENT_ROOT'],'/').'/'.$rp);#$GLOBALS['user']???
-                $history->field_excel['und'][0]['value'] =  '/'.$rp;##
-                $a=1;
-            }catch(\Exception $__e){
-                file_put_contents(ini_get('error_log'),"\n\n}{".print_r($__e,1),8);#AG4
-                $err=1;
+                $writer->save(rtrim($_SERVER['DOCUMENT_ROOT'], '/') . '/' . $rp);#$GLOBALS['user']???
+                $history->field_excel['und'][0]['value'] = '/' . $rp;##
+                $a = 1;
+            } catch (\Exception $__e) {
+                file_put_contents(ini_get('error_log'), "\n\n}{" . print_r($__e, 1), 8);#AG4
+                $err = 1;
             }
 
 
-            if(1 and $organismes){#second excel : personnes ou organismes de recherche résidence ..
-                try{
-                    $lines=$cats=[];#$letter = 'A';while ($letter !== 'AAA') {$cols[] = $letter++;}
-                    foreach($_POST['categories'] as $cat){$cats[]=$_ENV['id2cat'][$cat];}
+            if (1 and $organismes) {#second excel : personnes ou organismes de recherche résidence ..
+                try {
+                    $lines = $cats = [];#$letter = 'A';while ($letter !== 'AAA') {$cols[] = $letter++;}
+                    foreach ($_POST['categories'] as $cat) {
+                        $cats[] = $_ENV['id2cat'][$cat];
+                    }
 
                     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
                     $sheet = $spreadsheet->getActiveSheet();
-                    $sheet->setTitle(substr(preg_replace('~[^a-z0-9 \.]+~is','','organismes '.implode(',',$cats)).'-',0,31));#31 max chars '.$historyData['body']['request']['adresse'].','.$historyData['body']['request']['perimetre']);
+                    $sheet->setTitle(substr(preg_replace('~[^a-z0-9 \.]+~is', '', 'organismes ' . implode(',', $cats)) . '-', 0, 31));#31 max chars '.$historyData['body']['request']['adresse'].','.$historyData['body']['request']['perimetre']);
 
-                    if($historyData['title']=='prescripteur'){
-                        $fields=array_diff(array_keys(reset($organismes)[0]),['md5','json','id','updated']);
+                    if ($historyData['title'] == 'prescripteur') {
+                        $fields = array_diff(array_keys(reset($organismes)[0]), ['md5', 'json', 'id', 'updated']);
                         #array_unshift($fields,'finess');
-                        array_unshift($fields,'etablissement');
-                    }
-                    else $fields=array_keys((array)reset($organismes));
+                        array_unshift($fields, 'etablissement');
+                    } else $fields = array_keys((array)reset($organismes));
 
-                    $lines=array_filter(array_merge([$historyData['name'].'- organismes : '.implode(',',$cats)],[$fields]));
-                    foreach($organismes as $finess=>$t){
-                        if($historyData['title']=='prescripteur' and is_array($t)){
-                            foreach($t as $t2){
-                                unset($t2['md5'],$t2['json'],$t2['id'],$t2['updated']);
-                                array_unshift($t2,$f2e[$finess]/*$finess*/);
-                                $lines[]=$t2;
+                    $lines = array_filter(array_merge([$historyData['name'] . '- organismes : ' . implode(',', $cats)], [$fields]));
+                    foreach ($organismes as $finess => $t) {
+                        if ($historyData['title'] == 'prescripteur' and is_array($t)) {
+                            foreach ($t as $t2) {
+                                unset($t2['md5'], $t2['json'], $t2['id'], $t2['updated']);
+                                array_unshift($t2, $f2e[$finess]/*$finess*/);
+                                $lines[] = $t2;
                             }
-                        }else{
-                            $lines[]=$t;
+                        } else {
+                            $lines[] = $t;
                         }
                     }
 #$lines=array_merge([[$historyData['name'].'- organismes : '.implode(',',$cats)],$fields],$organismes);
-                    $a=$offsetLignes=1;
+                    $a = $offsetLignes = 1;
 
-                    if('doesnotwork' and 0){
+                    if ('doesnotwork' and 0) {
                         $sheet->fromArray([$lines], NULL, 'A1');
-                    } else{
+                    } else {
                         /*if(0 and $historyData['title']=='prescripteur')$sheet->getCell('A1')->setValue($historyData['name'].'- organismes : '.implode(',',$cats));
                         else $sheet->getCell('A1')->setValue($historyData['name'].'- organismes : '.implode(',',$cats));*/
                         if ('organismes') {
                             foreach ($lines as $l => $t) {
-                                if(!is_array($t))$t=(array)$t;
-                                $c=0;foreach ($t as $v) {$x = $cols[$c];$c++;$coord = $x . '' . ($l+$offsetLignes);$sheet->getCell($coord)->setValue($v);}
+                                if (!is_array($t)) $t = (array)$t;
+                                $c = 0;
+                                foreach ($t as $v) {
+                                    $x = $cols[$c];
+                                    $c++;
+                                    $coord = $x . '' . ($l + $offsetLignes);
+                                    $sheet->getCell($coord)->setValue($v);
+                                }
                             }
                         }
                     }
                     $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-                    $rp='z/xls/org-'.$fn.'-'.implode('-',$_POST['categories']).'-'.$GLOBALS['user']->uid.'-'.$GLOBALS['user']->name.'-'.uniqid().'.xlsx';
+                    $rp = 'z/xls/org-' . $fn . '-' . implode('-', $_POST['categories']) . '-' . $GLOBALS['user']->uid . '-' . $GLOBALS['user']->name . '-' . uniqid() . '.xlsx';
 #could not close
-                    $writer->save(rtrim($_SERVER['DOCUMENT_ROOT'],'/').'/'.$rp);#$GLOBALS['user']???persister ???????
-                    $history->field_excelorganismes['und'][0]['value'] =  '/'.$rp;#a pas vouloire
-                    $a=1;
-                }catch(\Exception $__e){
-                    $err=1;
-                    file_put_contents(ini_get('error_log'),"\n\n}{".print_r($__e,1),8);
+                    $writer->save(rtrim($_SERVER['DOCUMENT_ROOT'], '/') . '/' . $rp);#$GLOBALS['user']???persister ???????
+                    $history->field_excelorganismes['und'][0]['value'] = '/' . $rp;#a pas vouloire
+                    $a = 1;
+                } catch (\Exception $__e) {
+                    $err = 1;
+                    file_put_contents(ini_get('error_log'), "\n\n}{" . print_r($__e, 1), 8);
                 }
             }
         }
@@ -1310,11 +1517,12 @@ function addHistory($historyData = [], $organismes = [])
 
     $history->field_balance_consumed[$history->language][0]['value'] = $historyData['balance_consumed'];
     node_save($history);
-    $_SESSION['public']=['hid'=>$history->nid];
-    $_SESSION['hid']=$history->nid;
+    $_SESSION['public'] = ['hid' => $history->nid];
+    $_SESSION['hid'] = $history->nid;
 }
 
-function getHistories() {
+function getHistories()
+{
 
     global $user;
 
@@ -1333,10 +1541,10 @@ function getHistories() {
     $query->leftjoin('field_data_field_excel', 'excel', 'excel.entity_id = n.nid', array());
     $query->leftjoin('field_data_field_excelorganismes', 'exo', 'exo.entity_id = n.nid', []);
 
-    $query->fields('excel', array('excel'=>'field_excel_value'));
-    $query->fields('exo', array('excel'=>'field_excelorganismes_value'));
-    $query->fields('map', array('name'=>'field_map_value'));
-    $query->fields('name', array('name'=>'field_name_value'));
+    $query->fields('excel', array('excel' => 'field_excel_value'));
+    $query->fields('exo', array('excel' => 'field_excelorganismes_value'));
+    $query->fields('map', array('name' => 'field_map_value'));
+    $query->fields('name', array('name' => 'field_name_value'));
 
     $query->orderBy('n.created', 'DESC');
 
@@ -1350,11 +1558,12 @@ function getHistories() {
  * Departments
  */
 
-function getAllDepartments() {
+function getAllDepartments()
+{
     $vocabulary = taxonomy_vocabulary_machine_name_load('departement');
     $tree = taxonomy_get_tree($vocabulary->vid);
-    $departments=[];
-    foreach($tree as $term) {
+    $departments = [];
+    foreach ($tree as $term) {
         #$numDepartment = substr($term->name, 0, stripos($term->name, " - "));$departments[$numDepartment] = $term;#
         $departments[$term->tid] = $term;
     }
@@ -1362,12 +1571,13 @@ function getAllDepartments() {
     return $departments;#
 }
 
-function getAllDepartmentsByNumberAndName() {
+function getAllDepartmentsByNumberAndName()
+{
     $departments = array();
     $vocabulary = taxonomy_vocabulary_machine_name_load('departement');
     $tree = taxonomy_get_tree($vocabulary->vid);
 
-    foreach($tree as $term) {
+    foreach ($tree as $term) {
         $numDepartment = substr($term->name, 0, stripos($term->name, " - "));
         $departments[$numDepartment] = $term->name;
     }
@@ -1377,7 +1587,8 @@ function getAllDepartmentsByNumberAndName() {
     return $departments;
 }
 
-function findDepartmentsByGroup($groupId) {
+function findDepartmentsByGroup($groupId)
+{
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
@@ -1386,7 +1597,7 @@ function findDepartmentsByGroup($groupId) {
     $query->join('taxonomy_term_data', 't', 't.tid = d.field_departement_tid', array());
     $query->fields('d', array('field_departement_tid'));
     $query->fields('t', array('name'));
-    $query->where("gr.field_groupe_tid = :groupId", array( ':groupId' => $groupId ));
+    $query->where("gr.field_groupe_tid = :groupId", array(':groupId' => $groupId));
     $query->groupBy("d.field_departement_tid");
     $query->orderBy("d.field_departement_tid");
 
@@ -1395,17 +1606,19 @@ function findDepartmentsByGroup($groupId) {
     return $results;
 }
 
-function findDepartmentById($departmentId) {
+function findDepartmentById($departmentId)
+{
     return taxonomy_term_load($departementId);
 }
 
-function findDepartmentByNumber($departmentNumber) {
+function findDepartmentByNumber($departmentNumber)
+{
     $vocabulary = taxonomy_vocabulary_machine_name_load('departement');
     $tree = taxonomy_get_tree($vocabulary->vid);
 
-    foreach($tree as $term) {
+    foreach ($tree as $term) {
         $numDepartment = substr($term->name, 0, stripos($term->name, " - "));
-        if( $numDepartment == $departmentNumber ) {
+        if ($numDepartment == $departmentNumber) {
             return $term->tid;
         }
     }
@@ -1413,31 +1626,33 @@ function findDepartmentByNumber($departmentNumber) {
     return FALSE;
 }
 
-function codepostalExist() {
+function codepostalExist()
+{
 
 }
 
-function convertPostalCodeToDepartment( $postalCode = null ) {
+function convertPostalCodeToDepartment($postalCode = null)
+{
     $codePostal = null;
     $departementId = null;
     $numDepartement = null;
     $otherDepartments = array(
-        '2A' => ["20167","20000","20090","20167","20167","20128","20112","20151","20167","20110","20160","20140","20151","20116","20190","20121","20160","20119","20129","20110","20100","20166","20136","20169","20111","20142","20151","20170","20133","20190","20130","20164","20111","20140","20117","20134","20160","20118","20123","20135","20168","20138","20148","20126","20167","20117","20126","20144","20114","20100","20190","20143","20157","20100","20100","20100","20128","20160","20128","20153","20137","20160","20170","20139","20165","20141","20112","20140","20171","20160","20117","20140","20113","20113","20112","20125","20147","20134","20147","20121","20167","20140","20115","20131","20166","20123","20144","20117","20125","20166","20138","20150","20140","20137","20110","20142","20122","20160","20121","20121","20118","20144","20112","20190","20121","20134","20170","20151","20137","20143","20151","20145","20167","20100","20140","20127","20147","20125","20140","20152","20146","20135","20134","20167","20163","20100","20117","20133","20128","20167","20172","20160","20118","20110","20167","20116","20173","20132","20190","20124","20112"],
-        '2B' => ["20243","20270","20243","20244","20212","20224","20270","20220","20230","20270","20212","20272","20270","20220","20260","20276","20225","20253","20290","20228","20200","20600","20226","20252","20620","20235","20290","20222","20230","20212","20228","20224","20214","20260","20244","20229","20270","20290","20252","20230","20217","20235","20229","20229","20244","20237","20215","20224","20290","20250","20620","20270","20217","20213","20212","20235","20218","20218","20218","20236","20225","20238","20221","20230","20240","20256","20224","20250","20226","20237","20290","20212","20244","20275","20253","20212","20234","20225","20237","20230","20212","20213","20236","20600","20245","20218","20240","20227","20237","20251","20243","20220","20237","20218","20244","20225","20252","20230","20215","20224","20290","20240","20260","20228","20248","20245","20270","20259","20212","20287","20240","20200","20270","20218","20229","20214","20290","20214","20220","20230","20230","20218","20238","20243","20219","20239","20225","20225","20229","20219","20217","20234","20226","20226","20217","20217","20232","20217","20232","20259","20290","20236","20234","20290","20226","20251","20229","20253","20290","20213","20234","20230","20272","20270","20215","20234","20229","20229","20251","20229","20218","20229","20230","20233","20218","20200","20243","20251","20234","20242","20246","20220","20290","20228","20234","20259","20232","20240","20250","20237","20230","20229","20218","20290","20215","20218","20290","20243","20221","20213","20237","20229","20246","20250","20247","20248","20219","20244","20239","20260","20240","20217","20218","20213","20213","20243","20246","20230","20230","20244","20200","20230","20212","20221","20220","20250","20230","20200","20221","20220","20230","20228","20246","20250","20213","20290","20212","20243","20215","20233","20240","20213","20246","20250","20226","20229","20230","20230","20270","20234","20219","20248","20270","20250","20240","20218","20234","20229","20221","20235","20232","20259","20290","20230","20231","20240","20215","20229","20224","20215","20242","20290","20279","20200","20219","20219","20290","20272","20214","20272"]
+        '2A' => ["20167", "20000", "20090", "20167", "20167", "20128", "20112", "20151", "20167", "20110", "20160", "20140", "20151", "20116", "20190", "20121", "20160", "20119", "20129", "20110", "20100", "20166", "20136", "20169", "20111", "20142", "20151", "20170", "20133", "20190", "20130", "20164", "20111", "20140", "20117", "20134", "20160", "20118", "20123", "20135", "20168", "20138", "20148", "20126", "20167", "20117", "20126", "20144", "20114", "20100", "20190", "20143", "20157", "20100", "20100", "20100", "20128", "20160", "20128", "20153", "20137", "20160", "20170", "20139", "20165", "20141", "20112", "20140", "20171", "20160", "20117", "20140", "20113", "20113", "20112", "20125", "20147", "20134", "20147", "20121", "20167", "20140", "20115", "20131", "20166", "20123", "20144", "20117", "20125", "20166", "20138", "20150", "20140", "20137", "20110", "20142", "20122", "20160", "20121", "20121", "20118", "20144", "20112", "20190", "20121", "20134", "20170", "20151", "20137", "20143", "20151", "20145", "20167", "20100", "20140", "20127", "20147", "20125", "20140", "20152", "20146", "20135", "20134", "20167", "20163", "20100", "20117", "20133", "20128", "20167", "20172", "20160", "20118", "20110", "20167", "20116", "20173", "20132", "20190", "20124", "20112"],
+        '2B' => ["20243", "20270", "20243", "20244", "20212", "20224", "20270", "20220", "20230", "20270", "20212", "20272", "20270", "20220", "20260", "20276", "20225", "20253", "20290", "20228", "20200", "20600", "20226", "20252", "20620", "20235", "20290", "20222", "20230", "20212", "20228", "20224", "20214", "20260", "20244", "20229", "20270", "20290", "20252", "20230", "20217", "20235", "20229", "20229", "20244", "20237", "20215", "20224", "20290", "20250", "20620", "20270", "20217", "20213", "20212", "20235", "20218", "20218", "20218", "20236", "20225", "20238", "20221", "20230", "20240", "20256", "20224", "20250", "20226", "20237", "20290", "20212", "20244", "20275", "20253", "20212", "20234", "20225", "20237", "20230", "20212", "20213", "20236", "20600", "20245", "20218", "20240", "20227", "20237", "20251", "20243", "20220", "20237", "20218", "20244", "20225", "20252", "20230", "20215", "20224", "20290", "20240", "20260", "20228", "20248", "20245", "20270", "20259", "20212", "20287", "20240", "20200", "20270", "20218", "20229", "20214", "20290", "20214", "20220", "20230", "20230", "20218", "20238", "20243", "20219", "20239", "20225", "20225", "20229", "20219", "20217", "20234", "20226", "20226", "20217", "20217", "20232", "20217", "20232", "20259", "20290", "20236", "20234", "20290", "20226", "20251", "20229", "20253", "20290", "20213", "20234", "20230", "20272", "20270", "20215", "20234", "20229", "20229", "20251", "20229", "20218", "20229", "20230", "20233", "20218", "20200", "20243", "20251", "20234", "20242", "20246", "20220", "20290", "20228", "20234", "20259", "20232", "20240", "20250", "20237", "20230", "20229", "20218", "20290", "20215", "20218", "20290", "20243", "20221", "20213", "20237", "20229", "20246", "20250", "20247", "20248", "20219", "20244", "20239", "20260", "20240", "20217", "20218", "20213", "20213", "20243", "20246", "20230", "20230", "20244", "20200", "20230", "20212", "20221", "20220", "20250", "20230", "20200", "20221", "20220", "20230", "20228", "20246", "20250", "20213", "20290", "20212", "20243", "20215", "20233", "20240", "20213", "20246", "20250", "20226", "20229", "20230", "20230", "20270", "20234", "20219", "20248", "20270", "20250", "20240", "20218", "20234", "20229", "20221", "20235", "20232", "20259", "20290", "20230", "20231", "20240", "20215", "20229", "20224", "20215", "20242", "20290", "20279", "20200", "20219", "20219", "20290", "20272", "20214", "20272"]
     );
-    if( $postalCode != null ) {
+    if ($postalCode != null) {
 
-        if( strlen($postalCode) == 4 ) {
+        if (strlen($postalCode) == 4) {
             $codePostal = "0" . $postalCode;
         } else {
             $codePostal = $postalCode;
         }
 
-        if( in_array($codePostal, $otherDepartments['2A']) ) {
+        if (in_array($codePostal, $otherDepartments['2A'])) {
             $numDepartement = "2A";
-        } else if(in_array($codePostal, $otherDepartments['2B'])) {
+        } else if (in_array($codePostal, $otherDepartments['2B'])) {
             $numDepartement = "2B";
-        } else if(substr($codePostal, 0, 2) ==  "97" ) {
+        } else if (substr($codePostal, 0, 2) == "97") {
             $numDepartement = substr($codePostal, 0, 3);
         } else {
             $numDepartement = substr($codePostal, 0, 2);
@@ -1454,23 +1669,45 @@ function convertPostalCodeToDepartment( $postalCode = null ) {
     }
 }
 
-function getLatLngResidencesByDepartment( $departementId ) {
+function getLatLngResidencesByDepartment($departementId)
+{
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
+    // $query->isNotNull('t.field_pr_prixmin_value');
+
+    $query->join('field_data_field_type', 'ty', 'ty.entity_id = n.nid', array());
+    $query->condition('ty.field_type_value', 'notEhpad', '=');
+
+    $query->join('field_data_field_isehpa', 'eh', 'eh.entity_id = n.nid', array());
+    $query->join('field_data_field_isra', 'er', 'er.entity_id = n.nid', array());
+    $query->leftJoin('field_data_field_isrs', 'rsm', 'rsm.entity_id = n.nid', array());
+
+    $db_or = db_or();
+
+
+    $db_or->condition('field_isehpa_value', 0, '<>');
+    $db_or->condition('field_isra_value', 0, '<>');
+    $db_or->condition('field_isrs_value', 0, '<>');
+    $query->condition($db_or);
+
+
     $query->join('field_data_field_finess', 'ff', 'ff.entity_id = n.nid', array());
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
     $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
-    $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array( ':departementId' => $departementId ));
+    $query->join('field_data_field_departement', 'd', 'd.entity_id = n.nid and d.field_departement_tid = :departementId', array(':departementId' => $departementId));
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
-    $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
+    $query->join('field_data_field_residence_id', 'rc', 'rc.field_residence_id_value = n.nid', array());
     $query->innerjoin('node', 'c', 'rc.entity_id = c.nid', array());
-    $query->join('field_data_field_tarif_chambre_simple', 't', 't.entity_id = c.nid and t.field_tarif_chambre_simple_value != :tarif', array( ':tarif' => 'NA' ));
+    $query->join('field_data_field_pr_prixmin', 't', 't.entity_id = c.nid ' /**/, array());
 
-    $query->leftjoin('field_data_field_capacite', 'cap', 'cap.entity_id = n.nid',[]);$query->fields('cap', ['field_capacite_value']);
-    $query->leftjoin('field_data_field_groupe', 'g', 'g.entity_id = n.nid',[]);
-    $query->leftjoin('taxonomy_term_data', 'grp', 'g.field_groupe_tid = grp.tid',[]);$query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid',[]);$query->fields('logo',['field_logo_fid']);
+    $query->leftjoin('field_data_field_capacite', 'cap', 'cap.entity_id = n.nid', []);
+    $query->fields('cap', ['field_capacite_value']);
+    $query->leftjoin('field_data_field_groupe', 'g', 'g.entity_id = n.nid', []);
+    $query->leftjoin('taxonomy_term_data', 'grp', 'g.field_groupe_tid = grp.tid', []);
+    $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid', []);
+    $query->fields('logo', ['field_logo_fid']);
 
     $query->fields('n', array('nid', 'title'));
     $query->fields('ff', array('field_finess_value'));
@@ -1478,10 +1715,13 @@ function getLatLngResidencesByDepartment( $departementId ) {
     $query->fields('lng', array('field_longitude_value'));
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
-    $query->fields('t', array('field_tarif_chambre_simple_value'));
+    $query->fields('er', array());
+    $query->fields('eh', array());
+    $query->fields('rsm', array());
 
 
     $residences = fetchAll($query);
+
 
     return $residences;
 
@@ -1490,14 +1730,15 @@ function getLatLngResidencesByDepartment( $departementId ) {
 /**
  * RESIDENCE PRICING UPDATES
  */
-function addResidencePricingUpdate( $nid, $oldPrice, $newPrice ) {
+function addResidencePricingUpdate($nid, $oldPrice, $newPrice)
+{
 
     // NEW, ARCHIVED
     $newPricingResidence = null;
 
     try {
 
-        $archivePricingResidence = archiveResidencePricingUpdate( $nid );
+        $archivePricingResidence = archiveResidencePricingUpdate($nid);
 
         $newPricingResidence = db_insert('residence_pricing_updates')
             ->fields(array('residence_nid', 'old_price', 'new_price', 'status', 'created_at'))
@@ -1510,14 +1751,15 @@ function addResidencePricingUpdate( $nid, $oldPrice, $newPrice ) {
             ))
             ->execute();
 
-    } catch( Exception $e ) {
+    } catch (Exception $e) {
         echo "Error : " . $e->getMessage() . "\n";
     }
 
     return $newPricingResidence;
 }
 
-function archiveResidencePricingUpdate( $nid ) {
+function archiveResidencePricingUpdate($nid)
+{
 
     $archivePricingResidence = null;
     try {
@@ -1531,7 +1773,7 @@ function archiveResidencePricingUpdate( $nid ) {
             ->condition('status', 'NEW', '=')
             ->execute();
 
-    } catch( Exception $e ) {
+    } catch (Exception $e) {
         echo "Error : " . $e->getMessage() . "\n";
     }
 
@@ -1541,7 +1783,8 @@ function archiveResidencePricingUpdate( $nid ) {
 /**
  * INDEXATION / SEARCH
  */
-function indexDistanceBetweenTwoPoints( $primaryNid, $secondaryNid ) {
+function indexDistanceBetweenTwoPoints($primaryNid, $secondaryNid)
+{
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
@@ -1551,7 +1794,7 @@ function indexDistanceBetweenTwoPoints( $primaryNid, $secondaryNid ) {
     $query->fields('n', array('nid', 'title'));
     $query->fields('lat', array('field_latitude_value'));
     $query->fields('lng', array('field_longitude_value'));
-    $residences = fetchAllAssoc($query,'nid');
+    $residences = fetchAllAssoc($query, 'nid');
 
     $distance = getDistance($residences[$primaryNid]->field_latitude_value, $residences[$primaryNid]->field_longitude_value, $residences[$secondaryNid]->field_latitude_value, $residences[$secondaryNid]->field_longitude_value);
 
@@ -1564,28 +1807,30 @@ function indexDistanceBetweenTwoPoints( $primaryNid, $secondaryNid ) {
                 'distance' => $distance
             ))
             ->execute();
-    } catch( Exception $e ) {
+    } catch (Exception $e) {
         echo "Error : " . $e->getMessage() . "\n";
     }
 
 }
 
-function indexationExist( $pnid, $snid ) {
+function indexationExist($pnid, $snid)
+{
 
     $indexationExist = db_query(
         "SELECT count(*) from {distance_indexation} WHERE primary_nid = :primary_nid and secondary_nid = :secondary_nid",
-        array( ":primary_nid" => $pnid, ":secondary_nid" => $snid )
+        array(":primary_nid" => $pnid, ":secondary_nid" => $snid)
     )->fetchField();
 
     return ($indexationExist >= 1) ? true : false;
 
 }
 
-function getResidencesByRadius( $residenceNid, $radius = 5) {
+function getResidencesByRadius($residenceNid, $radius = 5)
+{
 
     $query = db_select('node', 'n');
     $query->condition('n.type', "residence", '=');
-    $query->join('distance_indexation', 'di', 'di.secondary_nid = n.nid and di.primary_nid = :pnid and distance <= :radius', array( ':pnid' => $residenceNid, ':radius' => $radius ));
+    $query->join('distance_indexation', 'di', 'di.secondary_nid = n.nid and di.primary_nid = :pnid and distance <= :radius', array(':pnid' => $residenceNid, ':radius' => $radius));
     $query->join('field_data_field_statut', 's', 's.entity_id = n.nid', array());
     $query->join('field_data_field_location', 'l', 'l.entity_id = n.nid', array());
     $query->join('field_data_field_residence', 'rc', 'rc.field_residence_target_id = n.nid', array());
@@ -1606,24 +1851,26 @@ function getResidencesByRadius( $residenceNid, $radius = 5) {
 
 }
 
-function getClosests($residenceNid,$field='list'){
-    $x=Alptech\Wip\fun::sql("select list from z_geo where rid=".$residenceNid);#
+function getClosests($residenceNid, $field = 'list')
+{
+    $x = Alptech\Wip\fun::sql("select list from z_geo where rid=" . $residenceNid);#
 
-    return trim($x[0]['list'],',');
+    return trim($x[0]['list'], ',');
     #return explode(',',trim($x[0]['list'],','));
 }
 
 function getDistances($residenceNid)
 {
-    $x=Alptech\Wip\fun::sql("select closest from z_geo where rid=".$residenceNid);#
-    return json_decode($x[0]['closest'],1);
+    $x = Alptech\Wip\fun::sql("select closest from z_geo where rid=" . $residenceNid);#
+    return json_decode($x[0]['closest'], 1);
 }
+
 #getResidencesProchesByStatus(compact('residenceNid','clo','limit'));
-function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 10,$returnClo=0,$excludeNa=1,$clo=[],$__sup=null)
+function getResidencesProchesByStatus($residenceNid, $statuses = [], $limit = 10, $returnClo = 0, $excludeNa = 1, $clo = [], $__sup = null)
 {
 
-    if(0 and isset($_COOKIE['old']) and $_COOKIE['old']){#simple commutateur le piu simple ever !
-        if (empty($statuses))$statuses = array('isEhpa', 'isRa');#$query->join('field_data_field_statut', 's', 's.entity_id = n.nid and s.field_statut_value IN (:statuses)', array(':statuses' => $statuses));
+    if (0 and isset($_COOKIE['old']) and $_COOKIE['old']) {#simple commutateur le piu simple ever !
+        if (empty($statuses)) $statuses = array('isEhpa', 'isRa');#$query->join('field_data_field_statut', 's', 's.entity_id = n.nid and s.field_statut_value IN (:statuses)', array(':statuses' => $statuses));
         $query = db_select('node', 'n');
         $query->condition('n.type', "residence", '=');
         $query->join('distance_indexation', 'di', 'di.secondary_nid = n.nid and di.primary_nid = :pnid', array(':pnid' => $residenceNid));
@@ -1632,6 +1879,9 @@ function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 1
         $query->join('field_data_field_tarif_chambre_simple', 'cs', 'cs.entity_id = rc.entity_id and cs.field_tarif_chambre_simple_value <> :tarif', array(':tarif' => 'NA'));
         $query->join('field_data_field_latitude', 'lat', 'lat.entity_id = n.nid', array());
         $query->join('field_data_field_longitude', 'lng', 'lng.entity_id = n.nid', array());
+        $query->join('field_data_field_statut', 's', 's.entity_id = n.nid ', array());
+        $query->fields('s', array('field_statut_value'));
+
         $query->fields('n', array('nid', 'title'));
         $query->fields('di', array('primary_nid', 'distance'));
         $query->fields('l', array('field_location_locality', 'field_location_postal_code'));
@@ -1639,7 +1889,12 @@ function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 1
         $query->fields('lat', array('field_latitude_value'));
         $query->fields('lng', array('field_longitude_value'));
 
-        $query->leftjoin('field_data_field_capacite', 'cap', 'cap.entity_id = n.nid',[]);$query->fields('cap', ['field_capacite_value']);$query->leftjoin('field_data_field_groupe', 'g', 'g.entity_id = n.nid',[]);$query->leftjoin('taxonomy_term_data', 'grp', 'g.field_groupe_tid = grp.tid',[]);$query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid',[]);$query->fields('logo',['field_logo_fid']);
+        $query->leftjoin('field_data_field_capacite', 'cap', 'cap.entity_id = n.nid', []);
+        $query->fields('cap', ['field_capacite_value']);
+        $query->leftjoin('field_data_field_groupe', 'g', 'g.entity_id = n.nid', []);
+        $query->leftjoin('taxonomy_term_data', 'grp', 'g.field_groupe_tid = grp.tid', []);
+        $query->leftjoin('field_data_field_logo', 'logo', 'logo.entity_id = grp.tid', []);
+        $query->fields('logo', ['field_logo_fid']);
 
         $query->orderBy('di.distance', 'ASC');
         $query->range(0, $limit);
@@ -1647,80 +1902,77 @@ function getResidencesProchesByStatus( $residenceNid, $statuses = [], $limit = 1
         return $residences;
     }
 
-    if(is_array($residenceNid)){
+    if (is_array($residenceNid)) {
 
         extract($residenceNid);
-        $a=1;
+        $a = 1;
     }
-    if(!$residenceNid){
+    if (!$residenceNid) {
 
-        $a=1;
+        $a = 1;
     }
-    if($clo) {
+    if ($clo) {
 
-        if(!is_array($clo))$clo=explode(',',$clo);
+        if (!is_array($clo)) $clo = explode(',', $clo);
         #avec les listes fournies, il nous faut également les distances
-        $distances=getDistances($residenceNid);$r2dist=[];
+        $distances = getDistances($residenceNid);
+        $r2dist = [];
 
-        foreach($distances as $km=>$rids){foreach($rids as $rid){$r2dist[$rid]=$km;}}
-        $a=2;
-    }else{
+        foreach ($distances as $km => $rids) {
+            foreach ($rids as $rid) {
+                $r2dist[$rid] = $km;
+            }
+        }
+        $a = 2;
+    } else {
 
         #retrouver lequels sont les plus proches si non fournis
         $clo = getClosests($residenceNid);#sans limites, as a list
 
 
+        $distances = getDistances($residenceNid);
 
-
-        $distances=getDistances($residenceNid);
-
-        $r2dist=[];
-        foreach($distances as $km=>$rids){
-            foreach($rids as $rid){
-                $r2dist[$rid]=$km;
+        $r2dist = [];
+        foreach ($distances as $km => $rids) {
+            foreach ($rids as $rid) {
+                $r2dist[$rid] = $km;
             }
         }
 
-        $clo1=explode(',',$clo);
+        $clo1 = explode(',', $clo);
 
 
         $clo2 = array_slice($clo1, 0, $limit);
 
 
-
-
         if (!$statuses) {
 
 
-            $clo=explode(',',$clo);
+            $clo = explode(',', $clo);
 
 
-
-        }else{#filtrer
+        } else {#filtrer
 
 
             //ehpa
-               if($statuses[0] == "ISEHPA"){
+            if ($statuses[0] == "ISEHPA") {
 
 
-
-$s = "
+                $s = "
 select eh.entity_id
-from field_data_field_isehpa eh,field_data_field_isra ra 
+from field_data_field_isehpa eh,field_data_field_isra ra ,field_data_field_isrs rs 
 where eh.entity_id = ra.entity_id
 and eh.field_isehpa_value = 1
+
 and ra.field_isra_value = 0";
 
 
+            } //ra
+            else {
 
-
-               }
-               //ra
-               else{
-
-                   $s = "
+                $s = "
 select ra.entity_id 
-from field_data_field_isehpa eh,field_data_field_isra ra 
+from field_data_field_isehpa eh,field_data_field_isra ra ,field_data_field_isrs rs 
 where eh.entity_id = ra.entity_id
 and eh.field_isehpa_value = 0
 and ra.field_isra_value = 1
@@ -1729,74 +1981,87 @@ and ra.entity_id in($clo) ORDER BY FIELD(ra.entity_id,$clo)";
 
 //$s = "select entity_id from field_data_field_isra where field_isra_value = 1 and entity_id in($clo) ORDER BY FIELD(entity_id,$clo)";# limit $limit on limite ensuite
 
-               }
+            }
 
             //$s = "select entity_id from field_data_field_statut where  entity_id in($clo) ORDER BY FIELD(entity_id,$clo)";# limit $limit on limite ensuite
 
-        /*    $s = "
-select eh.entity_id as eh, ra.entity_id as ra ,pr.field_pr_prixmin_value as field_pr_prixmin_value
-from field_data_field_isehpa  eh , field_data_field_isra ra , field_data_field_pr_prixmin pr
-where eh.entity_id = ra.entity_id
-and pr.field_pr_prixmin_value IS NOT NULL
+            /*    $s = "
+    select eh.entity_id as eh, ra.entity_id as ra ,pr.field_pr_prixmin_value as field_pr_prixmin_value
+    from field_data_field_isehpa  eh , field_data_field_isra ra , field_data_field_pr_prixmin pr
+    where eh.entity_id = ra.entity_id
+    and pr.field_pr_prixmin_value IS NOT NULL
 
-and eh.entity_id in($clo)
-ORDER BY FIELD(eh.entity_id,$clo) limit 10";*/
+    and eh.entity_id in($clo)
+    ORDER BY FIELD(eh.entity_id,$clo) limit 10";*/
 
-            $dist=$clo=[];
+            $dist = $clo = [];
             $x = Alptech\Wip\fun::sql($s);
 
 
-
-            foreach ($x as $t) {$dist[$t['entity_id']]=$r2dist[$t['entity_id']];continue;$clo[] = $t['entity_id'];}
-            $a=1;
-            asort($dist);$clo=array_keys($dist);
+            foreach ($x as $t) {
+                $dist[$t['entity_id']] = $r2dist[$t['entity_id']];
+                continue;
+                $clo[] = $t['entity_id'];
+            }
+            $a = 1;
+            asort($dist);
+            $clo = array_keys($dist);
             #foreach($clo as $rid){$dist[$rid]=$r2dist[$rid];} #only for the
             $clo1 = array_slice($clo, 0, $limit);
-            $d=array_diff($clo1,$clo2);
-            $a='explain me that difference, please, based on status';
+            $d = array_diff($clo1, $clo2);
+            $a = 'explain me that difference, please, based on status';
             #red-bonobo<===
         }
 
 
-        if($returnClo){
+        if ($returnClo) {
 
             return $clo;
         }
 
-        if(!is_array($clo)){
+        if (!is_array($clo)) {
 
-            $a=2;
-            $clo=explode(',',$clo);
+            $a = 2;
+            $clo = explode(',', $clo);
         }
 
         $clo2 = array_slice($clo, 0, $limit);
         $clo3 = array_slice(array_keys($r2dist), 0, $limit);
 
-        if(isset($_SERVER['WINDIR'])){
+        if (isset($_SERVER['WINDIR'])) {
 
-            $d23=array_diff($clo2,$clo3);#ne doivent pas être différentes
-            $d12=array_diff($clo1,$clo2);$d13=array_diff($clo1,$clo3);#celles ci oui
-            $a='dans quel ordre sont-elles présentées ? vérifiers  !';
+            $d23 = array_diff($clo2, $clo3);#ne doivent pas être différentes
+            $d12 = array_diff($clo1, $clo2);
+            $d13 = array_diff($clo1, $clo3);#celles ci oui
+            $a = 'dans quel ordre sont-elles présentées ? vérifiers  !';
         }
-        if(!$clo1){
+        if (!$clo1) {
 
-            Alptech\Wip\fun::dbm($residenceNid,'noClosestPoints');#
+            Alptech\Wip\fun::dbm($residenceNid, 'noClosestPoints');#
             return [];
-            $err=1;
+            $err = 1;
         }
 
     }
 #dans quel ordre sont-elles présentées ?
 #$residenceConcurrent->field_capacite['und'][0]['value'];
+
+
+
+
+
     if (!$statuses) {
-        $sql="SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
+
+
+        $sql = "SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,s.field_statut_value AS field_statut_value,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
 FROM node n
 -- INNER JOIN distance_indexation di ON di.secondary_nid = n.nid and di.primary_nid = $residenceNid
 -- and s.field_statut_value IN ('') -- déjà triée sur le volet
+INNER JOIN field_data_field_statut s ON s.entity_id = n.nid
 INNER JOIN field_data_field_location l ON l.entity_id = n.nid
 INNER JOIN field_data_field_residence_id rc ON rc.field_residence_id_value = n.nid
-INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id ".
-            (($excludeNa)?"  and cs.field_pr_prixmin_value IS NOT NULL":'')
+INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id " .
+            (($excludeNa) ? "  and cs.field_pr_prixmin_value IS NOT NULL" : '')
             . "
 INNER JOIN field_data_field_isehpa eh ON eh.entity_id = n.nid
 INNER JOIN field_data_field_isra er ON er.entity_id = n.nid
@@ -1808,16 +2073,18 @@ left JOIN field_data_field_groupe g on g.entity_id = n.nid
 left JOIN taxonomy_term_data grp on g.field_groupe_tid = grp.tid
 left JOIN field_data_field_logo logo on logo.entity_id  = grp.tid
 
-WHERE n.type = 'residence' and (er.field_isra_value <> 0 OR eh.field_isehpa_value <> 0) and n.nid<>$residenceNid and n.nid in(".implode(',',$clo).") order by FIELD(n.nid,".implode(',',$clo).") limit $limit";
-    }else{
-        $sql="SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid,  eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
+WHERE n.type = 'residence' and (er.field_isra_value <> 0 OR eh.field_isehpa_value <> 0) and n.nid in(" . implode(',', $clo) . ") order by FIELD(n.nid,".implode(',',$clo).")  limit $limit";
+    } else {
+
+        $sql = "SELECT cs.entity_id as cid,n.nid AS nid, n.title AS title, $residenceNid AS primary_nid, s.field_statut_value AS field_statut_value, eh.field_isehpa_value AS field_isehpa_value, er.field_isra_value AS field_isra_value, l.field_location_locality AS field_location_locality, l.field_location_postal_code AS field_location_postal_code, cs.field_pr_prixmin_value AS field_pr_prixmin_value, lat.field_latitude_value AS field_latitude_value, lng.field_longitude_value AS field_longitude_value,field_capacite_value as cap,field_logo_fid
 FROM node n
 -- INNER JOIN distance_indexation di ON di.secondary_nid = n.nid and di.primary_nid = $residenceNid
 -- and s.field_statut_value IN ('') -- déjà triée sur le volet
+INNER JOIN field_data_field_statut s ON s.entity_id = n.nid
 INNER JOIN field_data_field_location l ON l.entity_id = n.nid
 INNER JOIN field_data_field_residence_id rc ON rc.field_residence_id_value = n.nid
-INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id ".
-            (($excludeNa)?"  and cs.field_pr_prixmin_value IS NOT NULL":'')
+INNER JOIN field_data_field_pr_prixmin cs ON cs.entity_id = rc.entity_id " .
+            (($excludeNa) ? "  and cs.field_pr_prixmin_value IS NOT NULL" : '')
             . "
 INNER JOIN field_data_field_isehpa eh ON eh.entity_id = n.nid
 INNER JOIN field_data_field_isra er ON er.entity_id = n.nid
@@ -1829,35 +2096,41 @@ left JOIN field_data_field_groupe g on g.entity_id = n.nid
 left JOIN taxonomy_term_data grp on g.field_groupe_tid = grp.tid
 left JOIN field_data_field_logo logo on logo.entity_id  = grp.tid
 
-WHERE n.type = 'residence' and n.nid<>$residenceNid and n.nid in(".implode(',',$clo).") order by FIELD(n.nid,".implode(',',$clo).") limit $limit";
+WHERE n.type = 'residence' and (er.field_isra_value <> 0 OR eh.field_isehpa_value <> 0)  and n.nid in(" . implode(',', $clo) . ") order by FIELD(n.nid,".implode(',',$clo).")  limit $limit";
     }
 
 
-    $_ENV['stop']=__line__.__file__;
+    $_ENV['stop'] = __line__ . __file__;
     $residences = Alptech\Wip\fun::sql($sql);#,'mysql','utf'
 
-    $id2tarif=[];
+    $id2tarif = [];
     foreach ($residences as &$t) {
 
-        $a=1;#$r2dist
-        if(isset($r2dist[$t['nid']])) {
+        $a = 1;#$r2dist
+        if (isset($r2dist[$t['nid']])) {
 
 
+            $t['distance'] = $r2dist[$t['nid']];
+        }#ici
+        $id2tarif[$t['nid']] = $t['field_pr_prixmin_value'];
 
-            $t['distance']=$r2dist[$t['nid']];}#ici
-        $id2tarif[$t['nid']]=$t['field_pr_prixmin_value'];
 
-
-
-        $t=(object)$t;
-    }unset($t);
+        $t = (object)$t;
+    }
+    unset($t);
     return $residences;
 }
 
-function distance($lat1,$lat2,$lng1,$lng2)
+function distance($lat1, $lat2, $lng1, $lng2)
 {
-    $r = 6372.797;$pi80 = M_PI / 180;/*1rad*/$lat1 *= $pi80;$lng1 *= $pi80;$lat2 *= $pi80;$lng2 *= $pi80;
-    $dlat = $lat2 - $lat1;$dlng = $lng2 - $lng1;
+    $r = 6372.797;
+    $pi80 = M_PI / 180;/*1rad*/
+    $lat1 *= $pi80;
+    $lng1 *= $pi80;
+    $lat2 *= $pi80;
+    $lng2 *= $pi80;
+    $dlat = $lat2 - $lat1;
+    $dlng = $lng2 - $lng1;
     $a = sin($dlat / 2) * sin($dlat / 2) + cos($lat1) * cos($lat2) * sin($dlng / 2) * sin($dlng / 2);
     $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
     $km = $r * $c;

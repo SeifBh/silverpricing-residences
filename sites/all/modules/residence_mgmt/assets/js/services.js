@@ -31,7 +31,7 @@ function getDepartmentDetail( currentDepartment ) {
             departmentInfo.querySelector('.departement-name').innerHTML = departementLink;
             departmentInfo.querySelector('.department-link').innerHTML =  "<i class='fas fa-link'></i> " + currentDepartment.name;
             departmentInfo.querySelector('.department-link').href= window.location.protocol + "//" + window.location.host + "/departement/" + currentDepartment.tid+'-'+currentDepartment.name.replace(/ /gi,'');
-            departmentInfo.querySelector('.dep-nbre-maisons').textContent = depInfo["Nbre de maisons"];
+            departmentInfo.querySelector('.dep-nbre-maisons').textContent = depInfo["Nbre de résidences"];
             departmentInfo.querySelector('.dep-tarif-min').textContent = depInfo["Tarif plus bas"] + " €";
             departmentInfo.querySelector('.dep-tarif-max').textContent = depInfo["Tarif plus haut"] + " €";
             departmentInfo.querySelector('.dep-tarif-moyen').textContent = depInfo["Tarif moyen"] + " €";

@@ -48,7 +48,7 @@
                         <td><a href="<?php echo '/residence/' . $residence->nid; ?>"><?php echo $residence->title ?></a></td>
                         <td><?php echo $residence->name; ?></td>
                         <td><?php echo $residence->field_location_locality; ?></td>
-                        <td><?php echo $residence->field_tarif_chambre_simple_value; ?> €</td>
+                        <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
                         <td><?php echo $residence->field_capacite_value; ?></td>
                     </tr>
                     <?php endforeach; ?>

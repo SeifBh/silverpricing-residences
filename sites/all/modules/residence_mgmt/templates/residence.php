@@ -1,4 +1,13 @@
-<?php /*
+<script>
+
+
+
+</script>
+<?php
+
+
+
+/*
  residence.silverpricing.fr
 
  Senioriales.xlsx => créer residence , dupliquer page import xls
@@ -44,7 +53,11 @@ if(!$residence->field_isehpa['und'][0]['value'] && $residence->field_isra['und']
     $defaultResType="ISRA";
 
 }
+if(!$residence->field_isehpa['und'][0]['value'] && !$residence->field_isra['und'][0]['value']) {
 
+    $defaultResType="ISRS";
+
+}
 
 if($images){?>
     <link rel="stylesheet" type="text/css" href="/z/glider.min.css">
@@ -80,13 +93,36 @@ if($images){?>
                     }
                     ?>
                     <?php echo $residence->title; ?>
-                    <?php  if ($defaultResType == "ISRA"){print " - RA";}else{print "- EHPA";} ?>
+                    <?php /*  if ($defaultResType == "ISRA"){print " - RA";}else{print "- EHPA";}*/ ?>
                 </h3>
 
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb breadcrumb-style1 mg-b-10">
                         <li class="breadcrumb-item"><a href="/departement/<?php echo $departement->tid; ?>-<?php echo str_replace(' ','',$departement->name); ?>"><?php echo $departement->name; ?></a></li>
-                        <li class="breadcrumb-item"><a href="#"><?php echo $residence->field_statut['und'][0]['value'] ?></a></li>
+                        <li class="breadcrumb-item"><a href="#">
+
+                                <?php
+
+
+                                       if ($residence->field_isra['und'][0]['value']  == 1 && $residence->field_isehpa['und'][0]['value'] == 0 && $residence->field_isrs['und'][0]['value'] == 0) {
+
+                                           print "Résidence autonomie";
+
+                                       }else if ($residence->field_isra['und'][0]['value']  == 0 && $residence->field_isehpa['und'][0]['value'] == 0 && $residence->field_isrs['und'][0]['value'] == 1){
+
+                                           print "Résidence Seniors";
+
+                                       }
+                                       else{
+
+                                           print "EHPA";
+
+                                       }
+
+
+                                ?>
+
+                            </a></li>
                         <?php if( $groupe != null ): ?>
                             <li class="breadcrumb-item"><a href="/groupe/<?php echo $groupe->tid; ?>"><?php echo $groupe->name; ?></a></li>
                         <?php endif; ?>
@@ -143,8 +179,8 @@ if($images){?>
   <?php echo ( isset($residence->field_location['und'][0]["thoroughfare"]) ) ? $residence->field_location['und'][0]["thoroughfare"]:""; ?>
   <?php echo ",<br> " . $residence->field_location['und'][0]['postal_code']; ?>
   <?php echo ", " . $residence->field_location['und'][0]['locality'];
-
-  echo $residence->field_capacite["und"][0]["value"]." nombre de lits";?>
+    echo "<br>";
+  echo "\n ".$residence->field_capacite["und"][0]["value"]." nombre de logements";?>
 </span>
 
             </td>
@@ -220,7 +256,7 @@ if($images){?>
                     <table class="table table-sm table-borderless">
                         <tr class="text-center tx-12">
                             <td class="tx-uppercase tx-bold">Tarifs</td>
-                            <td><?php echo $tmhOptimisation["tarif_min"]; ?>€</td>
+                            <td><?php echo round($tmhOptimisation["tarif_min"] , 2);  ?>€</td>
                             <td><?php echo round($tmhOptimisation["tarif_max"] * 0.9, 2); ?>€</td>
                             <td><?php echo round($tmhOptimisation["tarif_max"] * 0.95, 2); ?>€</td>
                             <td><?php echo round($tmhOptimisation["tarif_max"] * 0.97, 2); ?>€</td>
@@ -250,7 +286,7 @@ if($images){?>
     <div class="col-md-6">
         <div class="card mg-t-10 mg-b-10">
             <div class="card-header d-sm-flex align-items-start justify-content-between">
-                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">Situation concurrentielle a date</h6>
+                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">Les 10 résidences concurentes les plus proches</h6>
             </div>
             <div class="card-body pd-y-15 pd-x-10">
                 <div id="situation-concurrentielle" class="row pd-10">
@@ -457,61 +493,61 @@ if( residence_mgmt_user_plan_has_access('OPTIMISATION_RESIDENCE_TMH') ):
                                         <div class="col-md-9">
                                             <table class="table table-sm">
                                                 <tr>
-                                                    <th colspan="3">Chambres simples</th>
+                                                    <th colspan="3">Logements simples</th>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-entree-de-gamme">
-                                                    <td>Chambres
+                                                    <td>Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_entree_de_gamme)) ? $typesDeChambres->cs_entree_de_gamme : "entrée de gamme" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits">0</td>
                                                     <td class="tarif-de-chambre">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-standard">
-                                                    <td>Chambres
+                                                    <td>Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_standard)) ? $typesDeChambres->cs_standard : "standard" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits">0</td>
                                                     <td class="tarif-de-chambre">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-superieur">
-                                                    <td>Chambres
+                                                    <td>Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_superieur)) ? $typesDeChambres->cs_superieur : "supérieur" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits">0</td>
                                                     <td class="tarif-de-chambre">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-luxe">
-                                                    <td>Chambres
+                                                    <td>Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_luxe)) ? $typesDeChambres->cs_luxe : "luxe" ?>"</td>
                                                     <td class="nombre-de-lits">0</td>
                                                     <td class="tarif-de-chambre">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-alzheimer">
-                                                    <td>Chambres
+                                                    <td>Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_alzheimer)) ? $typesDeChambres->cs_alzheimer : "alzheimer" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits">0</td>
                                                     <td class="tarif-de-chambre">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-aide-sociale">
-                                                    <td>Chambres
+                                                    <td>Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_aide_sociale)) ? $typesDeChambres->cs_aide_sociale : "aide-sociale" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits">0</td>
                                                     <td class="tarif-de-chambre">0</td>
                                                 </tr>
                                                 <tr>
-                                                    <th colspan="3">Chambres doubles</th>
+                                                    <th colspan="3">Logements doubles</th>
                                                 </tr>
                                                 <tr class="chambres-doubles chambres-standard">
-                                                    <td>Chambres
+                                                    <td>Logements
                                                         "<?php echo (!empty($typesDeChambres->cd_standard)) ? $typesDeChambres->cd_standard : "standard" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits">0</td>
                                                     <td class="tarif-de-chambre">0</td>
                                                 </tr>
                                                 <tr class="chambres-doubles chambres-aide-sociale">
-                                                    <td>Chambres
+                                                    <td>Logements
                                                         "<?php echo (!empty($typesDeChambres->cd_aide_sociale)) ? $typesDeChambres->cd_aide_sociale : "aide-sociale" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits">0</td>
@@ -538,65 +574,65 @@ if( residence_mgmt_user_plan_has_access('OPTIMISATION_RESIDENCE_TMH') ):
                                         <div class="col-md-9">
                                             <table class="table table-sm">
                                                 <tr>
-                                                    <th colspan="2">Chambres simples</th>
+                                                    <th colspan="2">Logements simples</th>
                                                     <th class="text-right"><a href="#" class="edit-chambres-simples"><i class="fas fa-edit"></i></a>
                                                     </th>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-entree-de-gamme">
-                                                    <td class="align-middle">Chambres
+                                                    <td class="align-middle">Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_entree_de_gamme)) ? $typesDeChambres->cs_entree_de_gamme : "entrée de gamme" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits align-middle text-right">0</td>
                                                     <td class="tarif-de-chambre align-middle text-right">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-standard">
-                                                    <td class="align-middle">Chambres
+                                                    <td class="align-middle">Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_standard)) ? $typesDeChambres->cs_standard : "standard" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits align-middle text-right">0</td>
                                                     <td class="tarif-de-chambre align-middle text-right">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-superieur">
-                                                    <td class="align-middle">Chambres
+                                                    <td class="align-middle">Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_superieur)) ? $typesDeChambres->cs_superieur : "supérieur" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits align-middle text-right">0</td>
                                                     <td class="tarif-de-chambre align-middle text-right">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-luxe">
-                                                    <td class="align-middle">Chambres
+                                                    <td class="align-middle">Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_luxe)) ? $typesDeChambres->cs_luxe : "luxe" ?>"</td>
                                                     <td class="nombre-de-lits align-middle text-right">0</td>
                                                     <td class="tarif-de-chambre align-middle text-right">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-alzheimer">
-                                                    <td class="align-middle">Chambres
+                                                    <td class="align-middle">Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_alzheimer)) ? $typesDeChambres->cs_alzheimer : "alzheimer" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits align-middle text-right">0</td>
                                                     <td class="tarif-de-chambre align-middle text-right">0</td>
                                                 </tr>
                                                 <tr class="chambres-simples chambres-aide-sociale">
-                                                    <td class="align-middle">Chambres
+                                                    <td class="align-middle">Logements
                                                         "<?php echo (!empty($typesDeChambres->cs_aide_sociale)) ? $typesDeChambres->cs_aide_sociale : "aide-sociale" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits align-middle text-right">0</td>
                                                     <td class="tarif-de-chambre align-middle text-right">0</td>
                                                 </tr>
                                                 <tr>
-                                                    <th colspan="2">Chambres doubles</th>
+                                                    <th colspan="2">Logements doubles</th>
                                                     <th class="text-right"><a href="#" class="edit-chambres-doubles"><i class="fas fa-edit"></i></a>
                                                     </th>
                                                 </tr>
                                                 <tr class="chambres-doubles chambres-standard">
-                                                    <td class="align-middle">Chambres
+                                                    <td class="align-middle">Logements
                                                         "<?php echo (!empty($typesDeChambres->cd_standard)) ? $typesDeChambres->cd_standard : "standard" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits align-middle text-right">0</td>
                                                     <td class="tarif-de-chambre align-middle text-right">0</td>
                                                 </tr>
                                                 <tr class="chambres-doubles chambres-aide-sociale">
-                                                    <td class="align-middle">Chambres
+                                                    <td class="align-middle">Logements
                                                         "<?php echo (!empty($typesDeChambres->cd_aide_sociale)) ? $typesDeChambres->cd_aide_sociale : "aide-sociale" ?>"
                                                     </td>
                                                     <td class="nombre-de-lits align-middle text-right">0</td>
@@ -611,7 +647,7 @@ if( residence_mgmt_user_plan_has_access('OPTIMISATION_RESIDENCE_TMH') ):
                                                     + $chambre->field_nombre_cs_alzheimer['und'][0]['value'] + $chambre->field_nombre_cs_aide_sociale['und'][0]['value']
                                                     + $chambre->field_nombre_cd_standard['und'][0]['value'] + $chambre->field_nombre_cd_aide_sociale['und'][0]['value'];
                                                 ?>
-                                                <div class="nombre-de-chambre mg-b-15 tx-bold">Nombre de chambres : <span
+                                                <div class="nombre-de-chambre mg-b-15 tx-bold">Nombre de Logements : <span
                                                             class="badge badge-success"><?php echo $totalChambres; ?></span> </div>
                                                 <button class="btn btn-primary btn-100" id="calculer_maquette_modifiee">
                                                     Calculer
@@ -825,7 +861,7 @@ endif; ?>
 
         <div class="card mg-t-15 mg-b-15">
             <div class="card-header d-sm-flex align-items-start justify-content-between">
-                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences de même type</h6>
+                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences de même type les plus proches</h6>
             </div>
             <div class="card-body pd-y-15 pd-x-10">
 
@@ -889,15 +925,15 @@ endif; ?>
                 </div>
 
                 <div class="table-responsive">
-                    <table id="table-residences-direct" class="table table-sm text-center classement">
+                    <table id="table-residences-direct" class="table table-striped" style="width:100%">
                         <thead>
                         <tr>
-                            <th scope="col">résidence</th>
-                            <th scope="col">type</th>
-                            <th scope="col">ville</th>
-                            <th scope="col">KM</th>
-                            <th scope="col">€</th>
-                            <th scope="col">Lits</th>
+                            <th width="25%">résidence</th>
+                            <th  width="10%">type</th>
+                            <th width="10%">ville</th>
+                            <th width="5%">KM</th>
+                            <th width="5%">€</th>
+                            <th width="5%">Logements</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -917,7 +953,27 @@ endif; ?>
                             <td class="text-left">
                                 <?php echo create_link($residenceConcurrent->title, "/residence/$residenceConcurrent->nid" , residence_mgmt_user_plan_has_access("PAGE_DETAIL_RESIDENCE_CONCURRENTE")); ?>
                             </td>
-                            <td class="text-center"><?php  if ($defaultResType == "ISRA"){print "RA";}else{print "EHPA";}   ?></td>
+                            <td class="text-center"><?php
+
+
+
+
+                                if ($defaultResType == "ISRA") {
+
+                                    print "Résidence autonomie";
+
+                                }else if($defaultResType == "ISRS") {
+
+                                    print "Résidence Seniors";
+
+                                }
+                                else{
+
+                                    print "EHPA";
+
+                                }
+
+                                ?></td>
                             <td class="text-center"><?php print $residenceConcurrent->field_location_locality ?></td>
                             <td class="text-center"><?php print round($residenceConcurrent->distance) ?></td>
                             <td class="text-center"><?php print $residenceConcurrent->field_pr_prixmin_value ?></td>
@@ -960,7 +1016,7 @@ endif; ?>
 
         <div class="card mg-t-15 mg-b-15">
             <div class="card-header d-sm-flex align-items-start justify-content-between">
-                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences de type diff.</h6>
+                <h6 class="tx-8rem tx-uppercase tx-bold lh-5 mg-b-0">10 Résidences (tous types) les plus proches</h6>
             </div>
             <div class="card-body pd-y-15 pd-x-10">
                 <div class="row">
@@ -1023,15 +1079,15 @@ endif; ?>
                 </div>
 
                 <div class="table-responsive">
-                    <table id="table-residences-indirect" class="table table-sm text-center classement">
+                    <table id="table-residences-indirect" class="table table-striped">
                         <thead>
                         <tr>
-                            <th scope="col">résidence</th>
-                            <th scope="col">type</th>
-                            <th scope="col">ville</th>
-                            <th scope="col">KM</th>
-                            <th scope="col">€</th>
-                            <th scope="col">Lits</th>
+                            <th scope="col" width="25%">résidence</th>
+                            <th scope="col" width="10%">type</th>
+                            <th scope="col" width="10%">ville</th>
+                            <th scope="col" width="5%">KM</th>
+                            <th scope="col" width="5%">€</th>
+                            <th scope="col" width="5%">Logements</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -1055,14 +1111,39 @@ endif; ?>
                                 $defaultResTypeRes="ISRA";
 
                             }
+                            if(!$residenceConcurrent->field_isrs_value && !$residenceConcurrent->field_isra_value) {
 
+                                $defaultResTypeRes="ISRS";
+
+                            }
 
                             ?>
                             <tr class="_r<?php echo $i.$s?>">
                                 <td class="text-left">
                                     <?php echo create_link($residenceConcurrent->title, "/residence/$residenceConcurrent->nid" , residence_mgmt_user_plan_has_access("PAGE_DETAIL_RESIDENCE_CONCURRENTE")); ?>
                                 </td>
-                                <td class="text-center"><?php if ($defaultResTypeRes == "ISRA"){print "RA";}else{print "EHPA";}   ?></td>
+                                <td class="text-center"><?php
+
+
+
+
+                                    if ($defaultResTypeRes == "ISRA") {
+
+                                        print "Résidence autonomie";
+
+                                    }else if($defaultResTypeRes == "ISRS") {
+
+                                        print "Résidence Seniors";
+
+                                    }
+                                    else{
+
+                                        print "EHPA";
+
+                                    }
+
+
+                                    ?></td>
                                 <td class="text-center"><?php print $residenceConcurrent->field_location_locality ?></td>
                                 <td class="text-center"><?php print round($residenceConcurrent->distance) ?></td>
                                 <td class="text-center"><?php print $residenceConcurrent->field_pr_prixmin_value ?></td>

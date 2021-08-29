@@ -162,8 +162,8 @@ $f2e=[];
         <!-- <td><?php //echo $residence->field_gestionnaire_value; ?></td> -->
         <td><?php echo $residence->name; ?></td>
         <td><?php echo round($residence->distance, 2); ?> KM</td>
-        <td><?php echo $residence->field_statut_value; ?></td>
-        <td><?php echo $residence->field_tarif_chambre_simple_value; ?> €</td>
+        <td><?php if($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0) {echo "RA";} else {echo "EHPA";} ?></td>
+        <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
     </tr>
     <?php } ?>
 </tbody></table></div></div>

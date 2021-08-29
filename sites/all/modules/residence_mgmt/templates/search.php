@@ -62,7 +62,7 @@ function historyCheck(el){
                         </div>
 
                         <div class="form-group col-md-12">
-                            <?php $statuses = array('EHPA', 'RA'); ?>
+                            <?php $statuses = array('EHPA', 'Résidence autonomie','Résidence Seniors'); ?>
                             <select id="statut" name="statut" class="form-control form-control-sm">
                                 <option value="aucun">Statut</option>
                                 <?php foreach( $statuses as $status ): ?>
@@ -71,11 +71,18 @@ function historyCheck(el){
                             <select>
                         </div>
 
+
+
                         <div class="form-group col-md-12">
-                            <input type="number" class="form-control form-control-sm" id="perimetre" name="perimetre" placeholder="Périmetre" min="1" value="<?php echo (!empty($_POST['perimetre'])) ? $_POST['perimetre'] : 5 ?>"/>
+                            <div class="input-group mb-3">
+                                <input type="number" class="form-control form-control-sm" id="perimetre" name="perimetre" placeholder="Périmetre" min="1" value="<?php echo (!empty($_POST['perimetre'])) ? $_POST['perimetre'] : 5 ?>"/>
+
+                                <div class="input-group-append">
+                                    <span class="input-group-text" style="height: 90%;">km</span>
+                                </div>
+                            </div>
+
                         </div>
-
-
 
                         <div class="form-group col-md-12">
                             <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Rechercher</button>
@@ -126,7 +133,7 @@ function historyCheck(el){
                             <th scope="col">Ville</th>
                             <th scope="col">Département</th>
                             <th scope="col">Distance</th>
-                            <th scope="col">Status</th>
+                            <th scope="col">Type</th>
                             <th scope="col">Tarif</th>
                             </tr>
                         </thead>
@@ -147,7 +154,26 @@ function historyCheck(el){
                                 <td><?php echo $residence->field_location_locality; ?></td>
                                 <td><?php echo $residence->name; ?></td>
                                 <td><?php echo round($residence->distance, 2); ?> KM</td>
-                                <td><?php echo $residence->field_type_value; ?></td>
+                                <td><?php
+
+                                    if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 0) {
+
+                                        print "Résidence autonomie";
+
+                                    }else if($residence->field_isra_value == 0 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 1) {
+
+                                        print "Résidence Seniors";
+
+                                    }
+                                    else{
+
+                                        print "EHPA";
+
+                                    }
+
+
+
+                                    ?></td>
                                 <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
                             </tr>
                             <?php endforeach; ?>

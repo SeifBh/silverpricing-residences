@@ -12,11 +12,11 @@
                               <tr>
                                   <th scope="col"><input type="checkbox" class="all-residenceId"/></th>
                                   <th scope="col">Résidence</th>
-                                  <th scope="col">Ville</th>
-                                  <th scope="col">Gestionnaire</th>
-                                  <th scope="col">Status</th>
+                                  <th scope="col" width="10%">Ville</th>
+                                  <th scope="col" >Gestionnaire</th>
+                                  <th scope="col">Type</th>
                                   <th scope="col">Tarif</th>
-                                  <th scope="col">Nbre de lits</th>
+                                  <th scope="col">Nbre de logements</th>
                                   <th scope="col">Action</th>
                               </tr>
                           </thead>
@@ -28,8 +28,27 @@
                                   <td><a href="<?php echo '/residence/' . $residence->nid; ?>"><?php echo $residence->title ?></a></td>
                                   <td><?php echo $residence->field_location_locality; ?></td>
                                   <td><?php echo $residence->field_gestionnaire_value; ?></td>
-                                  <td><?php echo $residence->field_statut_value; ?></td>
-                                  <td><?php echo $residence->field_tarif_chambre_simple_value; ?> €</td>
+                                  <td><?php
+
+
+                                      if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 0) {
+
+                                          print "Résidence autonomie";
+
+                                      }else if($residence->field_isra_value == 0 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 1) {
+
+                                          print "Résidence Seniors";
+
+                                      }
+                                      else{
+
+                                          print "EHPA";
+
+                                      }
+
+
+                                      ?></td>
+                                  <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
                                   <td><?php echo $residence->field_capacite_value; ?></td>
                                   <td><a href="<?php echo "/edit-residence/$residence->nid"; ?>" class="btn btn-primary btn-sm btn-icon"><i data-feather="edit"></i></a></td>
                               </tr>

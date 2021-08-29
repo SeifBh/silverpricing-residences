@@ -10,9 +10,11 @@
     <?php echo $groupe->name ?>
 </h4>
 
+
 <section class="section-residences mg-t-5">
 
 <div class="row">
+
         <div class="col-md-4">
             <div class="card mg-t-10 mg-b-10">
                   <div class="card-body pd-y-15 pd-x-10">
@@ -58,7 +60,7 @@
 
           <div class="card">
               <div class="card-header d-sm-flex align-items-start justify-content-between">
-                  <h6 class="lh-5 mg-b-0 text-uppercase">Requête</h6>
+                  <h6 class="lh-5 mg-b-0 text-uppercase">Requête x2</h6>
               </div>
               <div class="card-body pd-y-15 pd-x-10">
                   <form method="POST" id="residence-filtre">
@@ -141,7 +143,7 @@
                             <th scope="col">Departement</th>
                             <th scope="col">Ville</th>
                             <th scope="col">Tarif</th>
-                            <th scope="col">Nombre de lits</th>
+                            <th scope="col">Nombre de logements</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -151,7 +153,7 @@
                                 <td><a href="<?php echo '/residence/' . $residence->nid; ?>"><?php echo $residence->title ?></a></td>
                                 <td><?php echo $residence->name; ?></td>
                                 <td><?php echo $residence->field_location_locality; ?></td>
-                                <td><?php echo $residence->field_tarif_chambre_simple_value; ?> €</td>
+                                <td><?php echo $residence->field_pr_prixmin_value; ?> €</td>
                                 <td><?php echo $residence->field_capacite_value; ?></td>
                             </tr>
                             <?php endforeach; ?>

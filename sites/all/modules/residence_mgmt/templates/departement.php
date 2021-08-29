@@ -119,6 +119,8 @@
         </div>
     </div>
 
+
+
     <div class="row">
         <div class="col-md-12">
 
@@ -161,7 +163,7 @@
                           </div>
 
                           <div class="form-group col-md-12">
-                              <?php $statuses = array('Privé', 'Public', 'Associatif'); ?>
+                              <?php $statuses = array('Résidence autonomie', 'Résidence Seniors', 'Ehpa'); ?>
                               <select id="statut" name="statut[]" class="form-control form-control-sm select2" multiple>
                                   <option value="">Statut</option>
                                   <?php foreach( $statuses as $status ): ?>
@@ -241,14 +243,14 @@
               <div class="row">
                     <div class="col-md-12">
 
-                        <table id="request-table" class="table table-hover table-sm no-footer">
+                        <table id="request-table" class="table table-striped no-footer">
                         <thead>
-                            <tr><th scope="col">Groupe</th>
-                            <th scope="col">Résidences</th>
-                            <th scope="col">Code Postal</th>
-                            <th scope="col">Villes</th>
-                            <th scope="col">Nombre de lits</th>
-                            <th scope="col">Status</th>
+                            <tr><th scope="col" width="6%">Groupe</th>
+                            <th scope="col" width="20%">Résidences</th>
+                            <th scope="col" width="10%">Code Postal</th>
+                            <th scope="col" width="10%">Villes</th>
+                            <th scope="col" width="12%">Nb. logements</th>
+                            <th scope="col" width="8%">Type</th>
                             <th scope="col">Tarifs</th>
                             <th scope="col">Dif tarifs moy dep</th>
                             <th scope="col">Dif tarifs moy requête</th>
@@ -257,8 +259,8 @@
                         <tbody>
                             <?php $rows = 0; foreach( $residences as $residence ):
                                 $a=1;
-                                $difTarifsMoyDep = round($residence->field_tarif_chambre_simple_value - $statistique_globale["Tarif moyen"], 2);
-                                $difTarifsMoyRequete = round($residence->field_tarif_chambre_simple_value - $requete_statistique["Tarif moyen"], 2);
+                                $difTarifsMoyDep = round($residence->field_pr_prixmin_value - $statistique_globale["Tarif moyen"], 2);
+                                $difTarifsMoyRequete = round($residence->field_pr_prixmin_value - $requete_statistique["Tarif moyen"], 2);
                             ?>
                             <tr>
                                 <td><?php if( isset($residence->field_logo_fid) ) {
@@ -269,8 +271,27 @@
                                 <td><?php echo $residence->field_location_postal_code;# ?></td>
                                 <td><?php echo $residence->field_location_locality; ?></td>
                                 <td><?php echo $residence->field_capacite_value; ?></td>
-                                <td><?php echo $residence->field_statut_value; ?></td>
-                                <td><?php echo $residence->field_tarif_chambre_simple_value; ?>€</td>
+
+                                <td><?php
+
+                                    if ($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 0) {
+
+                                        print "Résidence autonomie";
+
+                                    }else if($residence->field_isra_value == 0 && $residence->field_isehpa_value == 0 && $residence->field_isrs_value == 1) {
+
+                                        print "Résidence Seniors";
+
+                                    }
+                                    else{
+
+                                        print "EHPA";
+
+                                    }
+                                    ?>
+
+                                </td>
+                                <td><?php  if ($residence->field_pr_prixmin_value != null) {print $residence->field_pr_prixmin_value . "€";}else{print "NA";} ?></td>
                                 <td class="<?php echo ($difTarifsMoyDep > 0) ? "tx-success":" tx-danger"; ?>">
                                     <?php echo $difTarifsMoyDep; ?>€
                                 </td>

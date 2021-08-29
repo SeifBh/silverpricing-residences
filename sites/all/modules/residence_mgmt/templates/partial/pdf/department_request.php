@@ -49,15 +49,15 @@
                     <?php
                         $statistique_globale = json_decode( json_encode($historyResult->response->statistique_globale), true);
                         $requete_statistique = json_decode( json_encode($historyResult->response->requete_statistique), true);
-                        $difTarifsMoyDep = round($residence->field_tarif_chambre_simple_value - $statistique_globale["Tarif moyen"], 2);
-                        $difTarifsMoyRequete = round($residence->field_tarif_chambre_simple_value - $requete_statistique["Tarif moyen"], 2);
+                        $difTarifsMoyDep = round($residence->field_pr_prixmin_value - $statistique_globale["Tarif moyen"], 2);
+                        $difTarifsMoyRequete = round($residence->field_pr_prixmin_value - $requete_statistique["Tarif moyen"], 2);
                     ?>
                     <tr>
                         <td><?php echo $residence->title ?></td>
                         <td><?php echo $residence->field_location_locality; ?></td>
                         <td><img src="<?php echo file_create_url(file_load($residence->field_logo_fid)->uri); ?>" width="32" /></td>
                         <td><?php echo $residence->field_statut_value; ?></td>
-                        <td><?php echo $residence->field_tarif_chambre_simple_value; ?>€</td>
+                        <td><?php echo $residence->field_pr_prixmin_value; ?>€</td>
                         <td class="<?php echo ($difTarifsMoyDep > 0) ? "tx-success":" tx-danger"; ?>">
                             <?php echo $difTarifsMoyDep; ?>€
                         </td>

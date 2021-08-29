@@ -6,9 +6,9 @@ define("RESIDENCE_MGMT_DATA", "/sites/all/modules/residence_mgmt/data");
 define("RESIDENCE_MGMT_CNSA_API", "https://www.pour-les-personnes-agees.gouv.fr/api/v1");
 
 if( ENVIRONMENT == "PROD" ) {
-    define("BASE_URL", "http://ehpad.silverpricing.fr");
+    define("BASE_URL", "http://residences.silverpricing.fr");
     define("BASE_API_URL", "http://api.silverpricing.fr");
-    define("RESIDENCE_MGMT_PATH", "/home/ubuntu/SilverPricing/public_html/app.silverpricing.fr/sites/all/modules/residence_mgmt");
+    define("RESIDENCE_MGMT_PATH", "/home/ubuntu/SilverPricing/public_html/app2.silverpricing.fr/sites/all/modules/residence_mgmt");
     define("RESIDENCE_MGMT_WKHTMLTOPDF", "/home/ubuntu/SilverPricing/public_html/app.silverpricing.fr/sites/all/modules/residence_mgmt/wkhtmltox/bin/wkhtmltopdf");
 } else if( ENVIRONMENT == "DEV" ) {
     define("BASE_URL", "https://ehpad.home");

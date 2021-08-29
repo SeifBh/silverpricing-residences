@@ -53,7 +53,6 @@ th,td{padding:5px 0 5px 10px;}
             <div><p><b>Adresse : </b><?php echo $historyResult->request->adresse; ?></p></div>
             <div><p><b>Latitude : </b><?php echo $historyResult->request->latitude; ?></p></div>
             <div><p><b>Longitude : </b><?php echo $historyResult->request->longitude; ?></p></div>
-            <div><p><b>Statut : </b><?php echo $historyResult->request->statut; ?></p></div>
             <div><p><b>Périmetre : </b><?php echo $historyResult->request->perimetre; ?></p></div>
                     </td><td>
                         <?php
@@ -87,8 +86,8 @@ th,td{padding:5px 0 5px 10px;}
                         <td><?php echo $residence->field_location_locality; ?></td>
                         <td><?php echo $residence->name; ?></td>
                         <td><?php echo round($residence->distance, 2); ?> KM</td>
-                        <td><?php echo $residence->field_statut_value; ?></td>
-                        <td class="nowrap"> &nbsp; <?php echo $residence->field_tarif_chambre_simple_value; ?> €</td>
+                        <td><?php if($residence->field_isra_value == 1 && $residence->field_isehpa_value == 0) {echo "RA";} else {echo "EHPA";} ?></td>
+                        <td class="nowrap"> &nbsp; <?php echo $residence->field_pr_prixmin_value; ?> €</td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
